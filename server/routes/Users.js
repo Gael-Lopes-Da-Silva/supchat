@@ -17,6 +17,8 @@ const router = express.Router();
 //   username: string
 //   email: string
 //   password: string
+//   google: boolean
+//   facebook: boolean
 router.post("/create", (request, response) => {
     createUser(request).then(() => {
         response.status(201).json({
