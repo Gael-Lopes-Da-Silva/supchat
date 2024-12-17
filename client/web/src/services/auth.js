@@ -1,3 +1,6 @@
+
+import dotenv from "dotenv";
+
 export const loginUser = async (email, password) => {
   const response = await fetch(`${process.env.REACT_APP_API_URL}/login`, {
     method: 'POST',
