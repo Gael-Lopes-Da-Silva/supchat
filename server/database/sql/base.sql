@@ -5,7 +5,6 @@ CREATE TABLE users (
     email VARCHAR(100) NOT NULL UNIQUE,
     password TEXT NOT NULL,
     status VARCHAR(20) DEFAULT 'online',
-    theme VARCHAR(50) DEFAULT 'clair',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NULL,
     deleted_at TIMESTAMP NULL
@@ -109,7 +108,7 @@ CREATE TABLE permissions (
     id INT AUTO_INCREMENT PRIMARY KEY,
     channel_id INT NOT NULL,
     user_id INT,
-    group_name VARCHAR(50), -- Ex: "admin", "moderator"
+    group_name VARCHAR(50),
     can_post TINYINT(1) DEFAULT 1,
     can_moderate TINYINT(1) DEFAULT 0,
     can_manage_members TINYINT(1) DEFAULT 0,
