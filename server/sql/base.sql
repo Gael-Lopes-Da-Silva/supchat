@@ -1,16 +1,13 @@
--- Base of the database
-
 -- USERS
 CREATE TABLE users (
     id SERIAL PRIMARY KEY,
     username VARCHAR(50) NOT NULL UNIQUE,
     email VARCHAR(100) NOT NULL UNIQUE,
-    password_hash TEXT NOT NULL, -- Stockage sécurisé des mots de passe (ex: bcrypt)
-    oauth_provider VARCHAR(50), -- Exemple : "google", "facebook"
-    oauth_id VARCHAR(100), -- Identifiant utilisateur du fournisseur OAuth
-    status VARCHAR(20) DEFAULT 'online', -- en ligne, occupé, hors ligne
-    theme VARCHAR(10) DEFAULT 'light', -- clair/sombre
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    password TEXT NOT NULL,
+    status VARCHAR(20) DEFAULT 'online',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT NULL,
+    deleted_at TIMESTAMP DEFAULT NULL
 );
 
 -- WORKSPACES
@@ -20,7 +17,9 @@ CREATE TABLE workspaces (
     description TEXT,
     is_public BOOLEAN DEFAULT FALSE,
     creator_id INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT NULL,
+    deleted_at TIMESTAMP DEFAULT NULL
 );
 
 -- WORKSPACE MEMBERSHIPS
@@ -39,7 +38,9 @@ CREATE TABLE channels (
     name VARCHAR(100) NOT NULL,
     is_private BOOLEAN DEFAULT FALSE,
     creator_id INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT NULL,
+    deleted_at TIMESTAMP DEFAULT NULL
 );
 
 -- CHANNEL MEMBERSHIPS
@@ -56,7 +57,9 @@ CREATE TABLE messages (
     channel_id INT NOT NULL REFERENCES channels(id) ON DELETE CASCADE,
     sender_id INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     content TEXT,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT NULL,
+    deleted_at TIMESTAMP DEFAULT NULL
 );
 
 -- FILES
@@ -65,7 +68,9 @@ CREATE TABLE files (
     message_id INT REFERENCES messages(id) ON DELETE CASCADE,
     file_name VARCHAR(255) NOT NULL,
     file_path TEXT NOT NULL,
-    uploaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    uploaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT NULL,
+    deleted_at TIMESTAMP DEFAULT NULL
 );
 
 -- REACTIONS
@@ -90,9 +95,11 @@ CREATE TABLE notifications (
 CREATE TABLE integrations (
     id SERIAL PRIMARY KEY,
     workspace_id INT NOT NULL REFERENCES workspaces(id) ON DELETE CASCADE,
-    integration_name VARCHAR(100) NOT NULL, -- Ex: Google Drive, GitHub
-    integration_data JSONB, -- Stockage flexible pour les données spécifiques
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    integration_name VARCHAR(100) NOT NULL,
+    integration_data JSONB,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT NULL,
+    deleted_at TIMESTAMP DEFAULT NULL
 );
 
 -- PERMISSIONS
