@@ -40,6 +40,12 @@ export const getUser = async (request) => {
     ]);
 }
 
+export const getUserByEmail = async (request) => {
+    return pool.query("SELECT * FROM users WHERE email = ?", [
+        request.body.email,
+    ]);
+}
+
 export const getAllUser = async (request) => {
     return pool.query("SELECT * FROM users");
 }
