@@ -30,7 +30,7 @@ CREATE TABLE workspace_members (
     id INT AUTO_INCREMENT PRIMARY KEY,
     workspace_id INT NOT NULL,
     user_id INT NOT NULL,
-    role VARCHAR(20) DEFAULT 'member',
+    role VARCHAR(20) NOT NULL,
     added_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     UNIQUE (workspace_id, user_id),
     FOREIGN KEY (workspace_id) REFERENCES workspaces(id) ON DELETE CASCADE,
