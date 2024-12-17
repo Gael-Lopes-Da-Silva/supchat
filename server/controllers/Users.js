@@ -23,3 +23,10 @@ export const updateUser = async (request) => {
         request.body.id,
     ]);
 }
+
+export const loginUser = async (request) => {
+    return pool.query("SELECT users WHERE email = ? AND password = ?", [
+        request.body.email,
+        bcrypt.hashSync(request.body.password, 10),
+    ]);
+}
