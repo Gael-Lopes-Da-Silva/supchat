@@ -1,4 +1,7 @@
 import express from "express";
+import dotenv from "dotenv/config";
+
+dotenv.config();
 
 import {
     createUser,
@@ -36,8 +39,11 @@ router.post("/create", (request, response) => {
 router.get("/login", (request, response) => {
     loginUser(request).then((result) => {
         if (result !== "") {
+            const token = jsonwebtoken.sign({ id: result[0].id }, process.env.SECRET, { expiresIn: "24h" });
+
             response.status(202).json({
                 when: "Loging user",
+                token: token,
                 result: result,
                 error: 0,
             });
