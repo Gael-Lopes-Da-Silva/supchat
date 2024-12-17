@@ -29,10 +29,7 @@ export const loginUser = async (request) => {
         request.body.email
     ]);
     
-    const match = await bcrypt.compare(request.body.password, result[0].password);
-    if (!match) {
-        return "";
-    }
+    const match = result !== "" ? await bcrypt.compare(request.body.password, result[0].password) : false;
     
-    return result;
+    return match ? result : "";
 }

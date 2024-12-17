@@ -23,7 +23,7 @@ router.post("/create", (request, response) => {
         response.status(500).json({
             when: "Creating user",
             error: 1,
-            error_message: error,
+            error_message: error.message,
         });
     });
 });
@@ -36,7 +36,7 @@ router.get("/login", (request, response) => {
         if (result !== "") {
             response.status(202).json({
                 when: "Loging user",
-                result: user,
+                result: result,
                 error: 0,
             });
         } else {
@@ -50,7 +50,7 @@ router.get("/login", (request, response) => {
         response.status(500).json({
             when: "Loging user",
             error: 1,
-            error_message: error,
+            error_message: error.message,
         });
     });
 });
@@ -75,7 +75,7 @@ router.delete("/delete", (request, response) => {
         response.status(500).json({
             when: "Deleting user",
             error: 1,
-            error_message: error,
+            error_message: error.message,
         });
     });
 });
@@ -103,7 +103,7 @@ router.put("/update", (request, response) => {
         response.status(500).json({
             when: "Updating user",
             error: 1,
-            error_message: error,
+            error_message: error.message,
         });
     });
 });
