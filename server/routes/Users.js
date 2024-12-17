@@ -22,7 +22,7 @@ router.get("/create", (request, response) => {
     });
 });
 
-router.get("/delete/:id", (request, response) => {
+router.get("/delete", (request, response) => {
     deleteUser(request).then(() => {
         response.status(202).json({
             when: "Deleting user",

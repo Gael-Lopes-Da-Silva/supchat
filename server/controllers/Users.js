@@ -11,6 +11,6 @@ export const createUser = async (request) => {
 
 export const deleteUser = async (request) => {
     pool.query("UPDATE users SET created_at = NOW() WHERE id = ?", [
-        request.params.id,
+        request.body.id,
     ]);
 }
