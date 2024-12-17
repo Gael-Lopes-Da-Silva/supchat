@@ -14,9 +14,9 @@ export function authentification(request, response, next) {
 
     if (token == "" || token == null) {
         return response.status(401).json({
-            message: "Something went wrong while checking authorizations !",
+            when: "Checking token",
             error: 1,
-            error_message: "A token is needed !",
+            error_message: "A token is needed",
         });
     }
 
@@ -24,9 +24,9 @@ export function authentification(request, response, next) {
 
     jsonwebtoken.verify(token, secret, (error, user) => {
         if (error) return response.status(401).json({
-            message: "Something went wrong while checking authorizations !",
+            when: "Checking token",
             error: 1,
-            error_message: error,
+            error_message: error.message,
         });
 
         request.user = user;
