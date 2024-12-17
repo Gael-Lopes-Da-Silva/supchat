@@ -1,117 +1,133 @@
 -- USERS
 CREATE TABLE users (
-    id SERIAL PRIMARY KEY,
+    id INT AUTO_INCREMENT PRIMARY KEY,
     username VARCHAR(50) NOT NULL UNIQUE,
     email VARCHAR(100) NOT NULL UNIQUE,
     password TEXT NOT NULL,
     status VARCHAR(20) DEFAULT 'online',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT NULL,
-    deleted_at TIMESTAMP DEFAULT NULL
+    updated_at TIMESTAMP NULL,
+    deleted_at TIMESTAMP NULL
 );
 
 -- WORKSPACES
 CREATE TABLE workspaces (
-    id SERIAL PRIMARY KEY,
+    id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(100) NOT NULL,
     description TEXT,
-    is_public BOOLEAN DEFAULT FALSE,
-    creator_id INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    is_public TINYINT(1) DEFAULT 0,
+    creator_id INT NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT NULL,
-    deleted_at TIMESTAMP DEFAULT NULL
+    updated_at TIMESTAMP NULL,
+    deleted_at TIMESTAMP NULL,
+    FOREIGN KEY (creator_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
 -- WORKSPACE MEMBERSHIPS
 CREATE TABLE workspace_members (
-    id SERIAL PRIMARY KEY,
-    workspace_id INT NOT NULL REFERENCES workspaces(id) ON DELETE CASCADE,
-    user_id INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-    role VARCHAR(20) DEFAULT 'member', 
-    UNIQUE (workspace_id, user_id)
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    workspace_id INT NOT NULL,
+    user_id INT NOT NULL,
+    role VARCHAR(20) DEFAULT 'member',
+    UNIQUE (workspace_id, user_id),
+    FOREIGN KEY (workspace_id) REFERENCES workspaces(id) ON DELETE CASCADE,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
 -- CHANNELS
 CREATE TABLE channels (
-    id SERIAL PRIMARY KEY,
-    workspace_id INT NOT NULL REFERENCES workspaces(id) ON DELETE CASCADE,
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    workspace_id INT NOT NULL,
     name VARCHAR(100) NOT NULL,
-    is_private BOOLEAN DEFAULT FALSE,
-    creator_id INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    is_private TINYINT(1) DEFAULT 0,
+    creator_id INT NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT NULL,
-    deleted_at TIMESTAMP DEFAULT NULL
+    updated_at TIMESTAMP NULL,
+    deleted_at TIMESTAMP NULL,
+    FOREIGN KEY (workspace_id) REFERENCES workspaces(id) ON DELETE CASCADE,
+    FOREIGN KEY (creator_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
 -- CHANNEL MEMBERSHIPS
 CREATE TABLE channel_members (
-    id SERIAL PRIMARY KEY,
-    channel_id INT NOT NULL REFERENCES channels(id) ON DELETE CASCADE,
-    user_id INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-    UNIQUE (channel_id, user_id)
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    channel_id INT NOT NULL,
+    user_id INT NOT NULL,
+    UNIQUE (channel_id, user_id),
+    FOREIGN KEY (channel_id) REFERENCES channels(id) ON DELETE CASCADE,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
 -- MESSAGES
 CREATE TABLE messages (
-    id SERIAL PRIMARY KEY,
-    channel_id INT NOT NULL REFERENCES channels(id) ON DELETE CASCADE,
-    sender_id INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    channel_id INT NOT NULL,
+    sender_id INT NOT NULL,
     content TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT NULL,
-    deleted_at TIMESTAMP DEFAULT NULL
+    updated_at TIMESTAMP NULL,
+    deleted_at TIMESTAMP NULL,
+    FOREIGN KEY (channel_id) REFERENCES channels(id) ON DELETE CASCADE,
+    FOREIGN KEY (sender_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
 -- FILES
 CREATE TABLE files (
-    id SERIAL PRIMARY KEY,
-    message_id INT REFERENCES messages(id) ON DELETE CASCADE,
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    message_id INT,
     file_name VARCHAR(255) NOT NULL,
     file_path TEXT NOT NULL,
     uploaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT NULL,
-    deleted_at TIMESTAMP DEFAULT NULL
+    updated_at TIMESTAMP NULL,
+    deleted_at TIMESTAMP NULL,
+    FOREIGN KEY (message_id) REFERENCES messages(id) ON DELETE CASCADE
 );
 
 -- REACTIONS
 CREATE TABLE reactions (
-    id SERIAL PRIMARY KEY,
-    message_id INT NOT NULL REFERENCES messages(id) ON DELETE CASCADE,
-    user_id INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    message_id INT NOT NULL,
+    user_id INT NOT NULL,
     emoji VARCHAR(20) NOT NULL,
-    UNIQUE (message_id, user_id, emoji)
+    UNIQUE (message_id, user_id, emoji),
+    FOREIGN KEY (message_id) REFERENCES messages(id) ON DELETE CASCADE,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
 -- NOTIFICATIONS
 CREATE TABLE notifications (
-    id SERIAL PRIMARY KEY,
-    user_id INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
     message TEXT NOT NULL,
-    is_read BOOLEAN DEFAULT FALSE,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    is_read TINYINT(1) DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
 -- INTEGRATIONS
 CREATE TABLE integrations (
-    id SERIAL PRIMARY KEY,
-    workspace_id INT NOT NULL REFERENCES workspaces(id) ON DELETE CASCADE,
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    workspace_id INT NOT NULL,
     integration_name VARCHAR(100) NOT NULL,
-    integration_data JSONB,
+    integration_data JSON,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT NULL,
-    deleted_at TIMESTAMP DEFAULT NULL
+    updated_at TIMESTAMP NULL,
+    deleted_at TIMESTAMP NULL,
+    FOREIGN KEY (workspace_id) REFERENCES workspaces(id) ON DELETE CASCADE
 );
 
 -- PERMISSIONS
 CREATE TABLE permissions (
-    id SERIAL PRIMARY KEY,
-    channel_id INT NOT NULL REFERENCES channels(id) ON DELETE CASCADE,
-    user_id INT REFERENCES users(id) ON DELETE CASCADE,
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    channel_id INT NOT NULL,
+    user_id INT,
     group_name VARCHAR(50), -- Ex: "admin", "moderator"
-    can_post BOOLEAN DEFAULT TRUE,
-    can_moderate BOOLEAN DEFAULT FALSE,
-    can_manage_members BOOLEAN DEFAULT FALSE
+    can_post TINYINT(1) DEFAULT 1,
+    can_moderate TINYINT(1) DEFAULT 0,
+    can_manage_members TINYINT(1) DEFAULT 0,
+    FOREIGN KEY (channel_id) REFERENCES channels(id) ON DELETE CASCADE,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
--- SEARCH INDEX (Optional, for optimized searches)
-CREATE INDEX idx_messages_content ON messages USING gin(to_tsvector('english', content));
+-- FULLTEXT SEARCH INDEX (Optional)
+CREATE FULLTEXT INDEX idx_messages_content ON messages (content);
