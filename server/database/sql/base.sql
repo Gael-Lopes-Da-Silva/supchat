@@ -128,5 +128,5 @@ CREATE TABLE roles (
     can_manage_members TINYINT(1) DEFAULT 0
 );
 INSERT INTO `roles` (`name`, `can_post`, `can_moderate`, `can_manage_members`) VALUES ('admin', '1', '1', '1');
-INSERT INTO `roles` (`name`, `can_post`, `can_moderate`, `can_manage_members`) VALUES ('membre', '1', '0', '0');
+INSERT INTO `roles` (`name`, `can_post`, `can_moderate`, `can_manage_members`) VALUES ('member', '1', '0', '0');
 INSERT INTO `roles` (`name`, `can_post`, `can_moderate`, `can_manage_members`) VALUES ('guest', '0', '0', '0');
