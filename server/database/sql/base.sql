@@ -76,7 +76,7 @@ CREATE TABLE messages (
 CREATE TABLE files (
     id INT AUTO_INCREMENT PRIMARY KEY,
     message_id INT,
-    file BLOB NOT NULL;
+    file BLOB NOT NULL,
     uploaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NULL,
     deleted_at TIMESTAMP NULL,
