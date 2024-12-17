@@ -23,11 +23,19 @@ router.get("/create", (request, response) => {
 });
 
 router.get("/delete", (request, response) => {
-    deleteUser(request).then(() => {
-        response.status(202).json({
-            when: "Deleting user",
-            error: 0,
-        });
+    deleteUser(request).then((result) => {
+        if (result !== "") {
+            response.status(202).json({
+                when: "Deleting user",
+                error: 0,
+            });
+        } else {
+            response.status(404).json({
+                when: "Deleting user",
+                error: 1,
+                error_message: error,
+            });
+        }
     }).catch((error) => {
         response.status(500).json({
             when: "Deleting user",
