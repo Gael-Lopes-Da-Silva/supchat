@@ -4,7 +4,9 @@ import {
     createUser,
     deleteUser,
     updateUser,
-    loginUser
+    loginUser,
+    getUser,
+    getAllUser
 } from "../controllers/Users.js";
 
 const router = express.Router();
@@ -102,6 +104,58 @@ router.put("/update", (request, response) => {
     }).catch((error) => {
         response.status(500).json({
             when: "Updating user",
+            error: 1,
+            error_message: error.message,
+        });
+    });
+});
+
+// body:
+//   id: integer
+router.get("/get", (request, response) => {
+    getUser(request).then((result) => {
+        if (result !== "") {
+            response.status(202).json({
+                when: "Get user",
+                result: result,
+                error: 0,
+            });
+        } else {
+            response.status(404).json({
+                when: "Get user",
+                error: 1,
+                error_message: "User not found",
+            });
+        }
+    }).catch((error) => {
+        response.status(500).json({
+            when: "Get user",
+            error: 1,
+            error_message: error.message,
+        });
+    });
+});
+
+// body:
+//   ...
+router.get("/get_all", (request, response) => {
+    getAllUser(request).then((result) => {
+        if (result !== "") {
+            response.status(202).json({
+                when: "Get all user",
+                result: result,
+                error: 0,
+            });
+        } else {
+            response.status(404).json({
+                when: "Get all user",
+                error: 1,
+                error_message: "User not found",
+            });
+        }
+    }).catch((error) => {
+        response.status(500).json({
+            when: "Get all user",
             error: 1,
             error_message: error.message,
         });

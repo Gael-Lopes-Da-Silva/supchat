@@ -33,3 +33,13 @@ export const loginUser = async (request) => {
     
     return match ? result : "";
 }
+
+export const getUser = async (request) => {
+    return pool.query("SELECT * FROM users WHERE id = ?", [
+        request.body.id,
+    ]);
+}
+
+export const getAllUser = async (request) => {
+    return pool.query("SELECT * FROM users");
+}
