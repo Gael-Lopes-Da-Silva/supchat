@@ -27,7 +27,7 @@ CREATE TABLE workspace_members (
     id SERIAL PRIMARY KEY,
     workspace_id INT NOT NULL REFERENCES workspaces(id) ON DELETE CASCADE,
     user_id INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-    role VARCHAR(20) DEFAULT 'member', -- admin, member, guest
+    role VARCHAR(20) DEFAULT 'member', 
     UNIQUE (workspace_id, user_id)
 );
 
