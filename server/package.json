@@ -1,6 +1,6 @@
 {
     "name": "supchat_server",
     "version": "0.0.1",
-    "main": "",
+    "main": "src/main.js",
     "type": "module"
 }
