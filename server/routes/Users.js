@@ -43,7 +43,7 @@ router.get("/login", (request, response) => {
             response.status(404).json({
                 when: "Loging user",
                 error: 1,
-                error_message: error,
+                error_message: "Invalid email or password",
             });
         }
     }).catch((error) => {
@@ -68,7 +68,7 @@ router.delete("/delete", (request, response) => {
             response.status(404).json({
                 when: "Deleting user",
                 error: 1,
-                error_message: error,
+                error_message: "User not found",
             });
         }
     }).catch((error) => {
@@ -96,7 +96,7 @@ router.put("/update", (request, response) => {
             response.status(404).json({
                 when: "Updating user",
                 error: 1,
-                error_message: error,
+                error_message: "User not found",
             });
         }
     }).catch((error) => {

@@ -25,8 +25,14 @@ export const updateUser = async (request) => {
 }
 
 export const loginUser = async (request) => {
-    return pool.query("SELECT users WHERE email = ? AND password = ?", [
-        request.body.email,
-        bcrypt.hashSync(request.body.password, 10),
+    const result = await pool.query("SELECT * FROM users WHERE email = ?", [
+        request.body.email
     ]);
+    
+    const match = await bcrypt.compare(request.body.password, result[0].password);
+    if (!match) {
+        return "";
+    }
+    
+    return result;
 }
