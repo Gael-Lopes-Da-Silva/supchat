@@ -1,8 +1,6 @@
 import express from "express";
 import dotenv from "dotenv/config";
 
-dotenv.config();
-
 import {
     createUser,
     deleteUser,

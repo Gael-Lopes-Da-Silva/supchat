@@ -1,8 +1,6 @@
 import jsonwebtoken from "jsonwebtoken";
 import dotenv from "dotenv/config";
 
-dotenv.config();
-
 export function authentification(request, response, next) {
     let token = "";
     
