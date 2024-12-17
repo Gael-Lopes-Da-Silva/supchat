@@ -1,7 +1,8 @@
 import express from "express";
 
 import {
-    createUser
+    createUser,
+    deleteUser
 } from "../controllers/Users.js";
 
 const router = express.Router();
@@ -15,6 +16,21 @@ router.get("/create", (request, response) => {
     }).catch((error) => {
         response.status(500).json({
             when: "Creating user",
+            error: 1,
+            error_message: error,
+        });
+    });
+});
+
+router.get("/delete/:id", (request, response) => {
+    deleteUser(request).then(() => {
+        response.status(202).json({
+            when: "Deleting user",
+            error: 0,
+        });
+    }).catch((error) => {
+        response.status(500).json({
+            when: "Deleting user",
             error: 1,
             error_message: error,
         });

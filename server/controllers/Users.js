@@ -8,3 +8,9 @@ export const createUser = async (request) => {
         bcrypt.hashSync(request.body.password, 10)
     ]);
 }
+
+export const deleteUser = async (request) => {
+    pool.query("UPDATE users SET created_at = NOW() WHERE id = ?", [
+        request.params.id,
+    ]);
+}
