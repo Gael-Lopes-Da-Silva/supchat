@@ -125,5 +125,5 @@ CREATE TABLE roles (
     name VARCHAR(50) NOT NULL,
     can_post TINYINT(1) DEFAULT 0,
     can_moderate TINYINT(1) DEFAULT 0,
-    can_manage_members TINYINT(1) DEFAULT 0,
+    can_manage_members TINYINT(1) DEFAULT 0
 );
