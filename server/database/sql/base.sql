@@ -5,6 +5,7 @@ CREATE TABLE users (
     email VARCHAR(100) NOT NULL UNIQUE,
     password TEXT NOT NULL,
     status VARCHAR(20) DEFAULT 'online',
+    theme VARCHAR(50) DEFAULT 'clair',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NULL,
     deleted_at TIMESTAMP NULL
@@ -75,8 +76,7 @@ CREATE TABLE messages (
 CREATE TABLE files (
     id INT AUTO_INCREMENT PRIMARY KEY,
     message_id INT,
-    file_name VARCHAR(255) NOT NULL,
-    file_path TEXT NOT NULL,
+    file BLOB NOT NULL;
     uploaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NULL,
     deleted_at TIMESTAMP NULL,
@@ -104,18 +104,6 @@ CREATE TABLE notifications (
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
--- INTEGRATIONS
-CREATE TABLE integrations (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    workspace_id INT NOT NULL,
-    integration_name VARCHAR(100) NOT NULL,
-    integration_data JSON,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP NULL,
-    deleted_at TIMESTAMP NULL,
-    FOREIGN KEY (workspace_id) REFERENCES workspaces(id) ON DELETE CASCADE
-);
-
 -- PERMISSIONS
 CREATE TABLE permissions (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -128,6 +116,3 @@ CREATE TABLE permissions (
     FOREIGN KEY (channel_id) REFERENCES channels(id) ON DELETE CASCADE,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
-
--- FULLTEXT SEARCH INDEX (Optional)
-CREATE FULLTEXT INDEX idx_messages_content ON messages (content);
