@@ -27,6 +27,18 @@ export const loginUser = async (request) => {
     return match ? result : "";
 }
 
+export const loginUserWithoutPassword = async (request) => {
+    const result = await pool.query("SELECT * FROM users WHERE email = ? AND deleted_at = NULL", [
+        request.body.email
+    ]);
+    
+    if (result === "") return "";
+    
+    if (result[0].link_google == 1 || result[0].link_facebook == 1) return result;
+    
+    return "";
+}
+
 export const getUserById = async (request) => {
     return pool.query("SELECT * FROM users WHERE id = ? AND deleted_at = NULL", [
         request.body.id,

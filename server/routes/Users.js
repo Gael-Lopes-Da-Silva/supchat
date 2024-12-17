@@ -78,6 +78,38 @@ router.get("/login", (request, response) => {
 });
 
 // body:
+//   email: string
+// return:
+//   token: string
+//   result: [user]
+router.get("/loginWithoutPassword", (request, response) => {
+    loginUser(request).then((result) => {
+        if (result !== "") {
+            const token = jsonwebtoken.sign({ id: result[0].id }, process.env.SECRET, { expiresIn: "24h" });
+
+            response.status(202).json({
+                when: "Users > LoginWithoutPassword",
+                token: token,
+                result: result,
+                error: 0,
+            });
+        } else {
+            response.status(404).json({
+                when: "Users > LoginWithoutPassword",
+                error: 1,
+                error_message: "User not found",
+            });
+        }
+    }).catch((error) => {
+        response.status(500).json({
+            when: "Users > LoginWithoutPassword",
+            error: 1,
+            error_message: error.message,
+        });
+    });
+});
+
+// body:
 //   id: integer
 // return:
 //   result: [user]
