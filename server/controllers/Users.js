@@ -14,3 +14,12 @@ export const deleteUser = async (request) => {
         request.body.id,
     ]);
 }
+
+export const updateUser = async (request) => {
+    return pool.query("UPDATE users SET username = ?, email = ?, password = ?, updated_at = NOW() WHERE id = ?", [
+        request.body.username,
+        request.body.email,
+        bcrypt.hashSync(request.body.password, 10),
+        request.body.id,
+    ]);
+}
