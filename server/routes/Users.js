@@ -7,7 +7,7 @@ import {
 
 const router = express.Router();
 
-router.get("/create", (request, response) => {
+router.post("/create", (request, response) => {
     createUser(request).then(() => {
         response.status(201).json({
             when: "Creating user",
@@ -22,7 +22,7 @@ router.get("/create", (request, response) => {
     });
 });
 
-router.get("/delete", (request, response) => {
+router.delete("/delete", (request, response) => {
     deleteUser(request).then((result) => {
         if (result !== "") {
             response.status(202).json({
