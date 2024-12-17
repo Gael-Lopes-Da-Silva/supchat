@@ -31,6 +31,7 @@ CREATE TABLE workspace_members (
     workspace_id INT NOT NULL,
     user_id INT NOT NULL,
     role VARCHAR(20) DEFAULT 'member',
+    added_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     UNIQUE (workspace_id, user_id),
     FOREIGN KEY (workspace_id) REFERENCES workspaces(id) ON DELETE CASCADE,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
@@ -55,7 +56,20 @@ CREATE TABLE channel_members (
     id INT AUTO_INCREMENT PRIMARY KEY,
     channel_id INT NOT NULL,
     user_id INT NOT NULL,
+    added_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     UNIQUE (channel_id, user_id),
+    FOREIGN KEY (channel_id) REFERENCES channels(id) ON DELETE CASCADE,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+-- CHANNEL PERMISSIONS
+CREATE TABLE channel_permissions (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    channel_id INT NOT NULL,
+    user_id INT NOT NULL,
+    can_post TINYINT(1) DEFAULT 1,
+    can_moderate TINYINT(1) DEFAULT 0,
+    can_manage_members TINYINT(1) DEFAULT 0,
     FOREIGN KEY (channel_id) REFERENCES channels(id) ON DELETE CASCADE,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
@@ -105,15 +119,11 @@ CREATE TABLE notifications (
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
--- PERMISSIONS
-CREATE TABLE permissions (
+-- ROLES
+CREATE TABLE roles (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    channel_id INT NOT NULL,
-    user_id INT,
-    group_name VARCHAR(50),
-    can_post TINYINT(1) DEFAULT 1,
+    name VARCHAR(50) NOT NULL,
+    can_post TINYINT(1) DEFAULT 0,
     can_moderate TINYINT(1) DEFAULT 0,
     can_manage_members TINYINT(1) DEFAULT 0,
-    FOREIGN KEY (channel_id) REFERENCES channels(id) ON DELETE CASCADE,
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
