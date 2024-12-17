@@ -3,8 +3,8 @@ CREATE TABLE users (
     id INT AUTO_INCREMENT PRIMARY KEY,
     username VARCHAR(50) NOT NULL UNIQUE,
     email VARCHAR(100) NOT NULL UNIQUE,
-    link_google TINYINT(1) NOT NULL,
-    link_facebook TINYINT(1) NOT NULL,
+    link_google TINYINT(1) DEFAULT 0,
+    link_facebook TINYINT(1) DEFAULT 0,
     password TEXT NOT NULL,
     status VARCHAR(20) DEFAULT 'offline',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -18,11 +18,11 @@ CREATE TABLE workspaces (
     name VARCHAR(100) NOT NULL,
     description TEXT,
     is_private TINYINT(1) NOT NULL,
-    creator_id INT NOT NULL,
+    user_id INT NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NULL,
     deleted_at TIMESTAMP NULL,
-    FOREIGN KEY (creator_id) REFERENCES users(id) ON DELETE CASCADE
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
 -- WORKSPACE MEMBERSHIPS
@@ -32,6 +32,8 @@ CREATE TABLE workspace_members (
     user_id INT NOT NULL,
     role VARCHAR(20) NOT NULL,
     added_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NULL,
+    deleted_at TIMESTAMP NULL,
     UNIQUE (workspace_id, user_id),
     FOREIGN KEY (workspace_id) REFERENCES workspaces(id) ON DELETE CASCADE,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
@@ -43,12 +45,12 @@ CREATE TABLE channels (
     workspace_id INT NOT NULL,
     name VARCHAR(100) NOT NULL,
     is_private TINYINT(1) NOT NULL,
-    creator_id INT NOT NULL,
+    user_id INT NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NULL,
     deleted_at TIMESTAMP NULL,
     FOREIGN KEY (workspace_id) REFERENCES workspaces(id) ON DELETE CASCADE,
-    FOREIGN KEY (creator_id) REFERENCES users(id) ON DELETE CASCADE
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
 -- CHANNEL MEMBERSHIPS
@@ -57,6 +59,8 @@ CREATE TABLE channel_members (
     channel_id INT NOT NULL,
     user_id INT NOT NULL,
     added_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NULL,
+    deleted_at TIMESTAMP NULL,
     UNIQUE (channel_id, user_id),
     FOREIGN KEY (channel_id) REFERENCES channels(id) ON DELETE CASCADE,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
@@ -78,13 +82,13 @@ CREATE TABLE channel_permissions (
 CREATE TABLE messages (
     id INT AUTO_INCREMENT PRIMARY KEY,
     channel_id INT NOT NULL,
-    sender_id INT NOT NULL,
+    user_id INT NOT NULL,
     content TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NULL,
     deleted_at TIMESTAMP NULL,
     FOREIGN KEY (channel_id) REFERENCES channels(id) ON DELETE CASCADE,
-    FOREIGN KEY (sender_id) REFERENCES users(id) ON DELETE CASCADE
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
 -- FILES
@@ -104,6 +108,8 @@ CREATE TABLE reactions (
     message_id INT NOT NULL,
     user_id INT NOT NULL,
     emoji VARCHAR(20) NOT NULL,
+    added_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    removed_at TIMESTAMP NULL,
     UNIQUE (message_id, user_id, emoji),
     FOREIGN KEY (message_id) REFERENCES messages(id) ON DELETE CASCADE,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE

@@ -3,86 +3,74 @@ import dotenv from "dotenv/config";
 
 import {
     createUser,
-    deleteUser,
-    updateUser,
     loginUser,
-    getUser,
+    getUserById,
     getUserByEmail,
-    getAllUser
+    getAllUsers,
+    updateUser,
+    linkUserGoogle,
+    linkUserFacebook,
+    deleteUser
 } from "../controllers/Users.js";
 
 const router = express.Router();
+
+// --------------------
+// Create
+// --------------------
 
 // body:
 //   username: string
 //   email: string
 //   password: string
-//   google: boolean
-//   facebook: boolean
+// return:
+//   ...
 router.post("/create", (request, response) => {
-    createUser(request).then(() => {
+    createUser(request).then((result) => {
         response.status(201).json({
-            when: "Creating user",
+            when: "Users > Create",
             error: 0,
         });
     }).catch((error) => {
         response.status(500).json({
-            when: "Creating user",
+            when: "Users > Create",
             error: 1,
             error_message: error.message,
         });
     });
 });
 
+// --------------------
+// Read
+// --------------------
+
 // body:
 //   email: string
 //   password: string
+// return:
+//   token: string
+//   result: [user]
 router.get("/login", (request, response) => {
     loginUser(request).then((result) => {
         if (result !== "") {
             const token = jsonwebtoken.sign({ id: result[0].id }, process.env.SECRET, { expiresIn: "24h" });
 
             response.status(202).json({
-                when: "Loging user",
+                when: "Users > Login",
                 token: token,
                 result: result,
                 error: 0,
             });
         } else {
             response.status(404).json({
-                when: "Loging user",
-                error: 1,
-                error_message: "Invalid email or password",
-            });
-        }
-    }).catch((error) => {
-        response.status(500).json({
-            when: "Loging user",
-            error: 1,
-            error_message: error.message,
-        });
-    });
-});
-
-// body:
-//   id: integer
-router.delete("/delete", (request, response) => {
-    deleteUser(request).then((result) => {
-        if (result !== "") {
-            response.status(202).json({
-                when: "Deleting user",
-                error: 0,
-            });
-        } else {
-            response.status(404).json({
-                when: "Deleting user",
+                when: "Users > Login",
                 error: 1,
                 error_message: "User not found",
             });
         }
     }).catch((error) => {
         response.status(500).json({
-            when: "Deleting user",
+            when: "Users > Login",
             error: 1,
             error_message: error.message,
         });
@@ -91,52 +79,26 @@ router.delete("/delete", (request, response) => {
 
 // body:
 //   id: integer
-//   username: string
-//   email: string
-//   password: string
-router.put("/update", (request, response) => {
-    updateUser(request).then((result) => {
+// return:
+//   result: [user]
+router.get("/getById", (request, response) => {
+    getUserById(request).then((result) => {
         if (result !== "") {
             response.status(202).json({
-                when: "Updating user",
-                error: 0,
-            });
-        } else {
-            response.status(404).json({
-                when: "Updating user",
-                error: 1,
-                error_message: "User not found",
-            });
-        }
-    }).catch((error) => {
-        response.status(500).json({
-            when: "Updating user",
-            error: 1,
-            error_message: error.message,
-        });
-    });
-});
-
-// body:
-//   id: integer
-router.get("/get", (request, response) => {
-    getUser(request).then((result) => {
-        if (result !== "") {
-            response.status(202).json({
-                when: "Get user",
+                when: "Users > GetById",
                 result: result,
                 error: 0,
             });
         } else {
             response.status(404).json({
-                when: "Get user",
+                when: "Users > GetById",
                 error: 1,
                 error_message: "User not found",
             });
         }
     }).catch((error) => {
         response.status(500).json({
-            when: "Get user",
+            when: "Users > GetById",
             error: 1,
             error_message: error.message,
         });
@@ -144,25 +106,27 @@ router.get("/get", (request, response) => {
 });
 
 // body:
-//   id: integer
+//   email: string
+// return:
+//   result: [user]
 router.get("/getByEmail", (request, response) => {
     getUserByEmail(request).then((result) => {
         if (result !== "") {
             response.status(202).json({
-                when: "Get user by email",
+                when: "Users > GetByEmail",
                 result: result,
                 error: 0,
             });
         } else {
             response.status(404).json({
-                when: "Get user by email",
+                when: "Users > GetByEmail",
                 error: 1,
                 error_message: "User not found",
             });
         }
     }).catch((error) => {
         response.status(500).json({
-            when: "Get user by email",
+            when: "Users > GetByEmail",
             error: 1,
             error_message: error.message,
         });
@@ -171,24 +135,145 @@ router.get("/getByEmail", (request, response) => {
 
 // body:
 //   ...
-router.get("/get_all", (request, response) => {
-    getAllUser(request).then((result) => {
+// return:
+//   result: [user]
+router.get("/getAll", (request, response) => {
+    getAllUsers(request).then((result) => {
         if (result !== "") {
             response.status(202).json({
-                when: "Get all user",
+                when: "Users > GetAll",
                 result: result,
                 error: 0,
             });
         } else {
             response.status(404).json({
-                when: "Get all user",
+                when: "Users > GetAll",
                 error: 1,
                 error_message: "User not found",
             });
         }
     }).catch((error) => {
         response.status(500).json({
-            when: "Get all user",
+            when: "Users > GetAll",
+            error: 1,
+            error_message: error.message,
+        });
+    });
+});
+
+// --------------------
+// Update
+// --------------------
+
+// body:
+//   id: integer
+//   username: string
+//   email: string
+//   password: string
+// return:
+//   ...
+router.put("/update", (request, response) => {
+    updateUser(request).then((result) => {
+        if (result !== "") {
+            response.status(202).json({
+                when: "Users > Update",
+                error: 0,
+            });
+        } else {
+            response.status(404).json({
+                when: "Users > Update",
+                error: 1,
+                error_message: "User not found",
+            });
+        }
+    }).catch((error) => {
+        response.status(500).json({
+            when: "Users > Update",
+            error: 1,
+            error_message: error.message,
+        });
+    });
+});
+
+// body:
+//   id: integer
+// return:
+//   ...
+router.put("/linkGoogle", (request, response) => {
+    linkUserGoogle(request).then((result) => {
+        if (result !== "") {
+            response.status(202).json({
+                when: "Users > LinkGoogle",
+                error: 0,
+            });
+        } else {
+            response.status(404).json({
+                when: "Users > LinkGoogle",
+                error: 1,
+                error_message: "User not found",
+            });
+        }
+    }).catch((error) => {
+        response.status(500).json({
+            when: "Users > LinkGoogle",
+            error: 1,
+            error_message: error.message,
+        });
+    });
+});
+
+// body:
+//   id: integer
+// return:
+//   ...
+router.put("/linkFacebook", (request, response) => {
+    linkUserFacebook(request).then((result) => {
+        if (result !== "") {
+            response.status(202).json({
+                when: "Users > LinkFacebook",
+                error: 0,
+            });
+        } else {
+            response.status(404).json({
+                when: "Users > LinkFacebook",
+                error: 1,
+                error_message: "User not found",
+            });
+        }
+    }).catch((error) => {
+        response.status(500).json({
+            when: "Users > LinkFacebook",
+            error: 1,
+            error_message: error.message,
+        });
+    });
+});
+
+// --------------------
+// Delete
+// --------------------
+
+// body:
+//   id: integer
+// return:
+//   ...
+router.delete("/delete", (request, response) => {
+    deleteUser(request).then((result) => {
+        if (result !== "") {
+            response.status(202).json({
+                when: "Users > Delete",
+                error: 0,
+            });
+        } else {
+            response.status(404).json({
+                when: "Users > Delete",
+                error: 1,
+                error_message: "User not found",
+            });
+        }
+    }).catch((error) => {
+        response.status(500).json({
+            when: "Users > Delete",
             error: 1,
             error_message: error.message,
         });
