@@ -10,3 +10,17 @@ Description
 
 Usage
 ------------------------------------------------------------------
+
+
+Setup
+------------------------------------------------------------------
+
+An example of .env file:
+```
+DB_HOST=localhost
+DB_USER=root
+DB_PASSWORD=root
+DB_NAME=supchat
+PORT=5000
+SECRET=SOMESECRETKEY
+```
