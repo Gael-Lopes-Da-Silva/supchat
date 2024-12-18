@@ -30,7 +30,7 @@ const router = express.Router();
 //   ...
 router.post("/create", (request, response) => {
     createWorkspace(request).then((result) => {
-        if (result !== "") {
+        if (result !== null) {
             response.status(201).json({
                 when: "Workspaces > Create",
                 error: 0,

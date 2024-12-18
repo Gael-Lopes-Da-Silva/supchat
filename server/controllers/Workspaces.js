@@ -8,16 +8,16 @@ export const createWorkspace = async (request) => {
     const userResult = await pool.query("SELECT * FROM users WHERE id = ? AND deleted_at = NULL", [
         request.body.user_id
     ]);
-    
-    if (userResult === "") return "";
-    
+
+    if (userResult === "") return null;
+
     pool.query("INSERT INTO workspaces (name, description, is_private, user_id) VALUES (?, ?, ?, ?)", [
         request.body.name,
         request.body.description,
         request.body.is_private,
         request.body.user_id
     ]);
-    
+
     pool.query("INSERT INTO workspace_members (workspace_id, user_id, role) VALUES ((SELECT LAST_INSERT_ID()), ?, ?)", [
         request.body.user_id,
         "admin"
@@ -28,15 +28,15 @@ export const addWorkspaceMember = async (request) => {
     const userResult = await pool.query("SELECT * FROM users WHERE id = ? AND deleted_at = NULL", [
         request.body.user_id
     ]);
-    
+
     if (userResult === "") return "";
-    
+
     const workspaceResult = await pool.query("SELECT * FROM workspaces WHERE id = ? AND deleted_at = NULL", [
         request.body.workspace_id
     ]);
-    
+
     if (workspaceResult === "") return "";
-    
+
     pool.query("INSERT INTO workspace_members (workspace_id, user_id, role) VALUES (?, ?, role = 'membre')", [
         request.body.workspace_id,
         request.body.user_id
@@ -101,7 +101,7 @@ export const updateWorkspaceMember = async (request) => {
         request.body.workspace_id,
         request.body.user_id,
         request.body.role,
-        request.body.id,
+        request.body.id
     ]);
 };
 
