@@ -12,7 +12,7 @@ const app = express();
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
-const PORT = process.env.PORT || 8000;
+const PORT = process.env.PORT || 3000;
 
 pool.getConnection().then((connection) => {
     console.log("Connected to database!");

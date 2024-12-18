@@ -24,3 +24,9 @@ DB_NAME=supchat
 PORT=5000
 SECRET=SOMESECRETKEY
 ```
+
+Build docker file and run:
+```
+docker build -t supchat:v1 .
+docker run -p 8080:80 supchat:v1
+```
