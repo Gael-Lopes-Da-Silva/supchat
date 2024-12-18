@@ -2,13 +2,9 @@ import express from "express";
 
 import {
     createWorkspace,
-    addWorkspaceMember,
-    getWorkspaceById,
-    getAllWorkspaces,
-    getWorkspaceMemberById,
-    getWorkspaceMemberByUserIdAndWorkspaceId,
-    getAllWorkspaceMembersByUserId,
-    getAllWorkspaceMembersByWorkspaceId,
+    createWorkspaceMember,
+    readWorkspace,
+    readWorkspaceMember,
     updateWorkspace,
     updateWorkspaceMember,
     deleteWorkspace,
@@ -21,58 +17,65 @@ const router = express.Router();
 // Create
 // --------------------
 
+// POST /create
+//
 // body:
-//   name: string
-//   description: string
-//   is_private: boolean
-//   user_id: integer
+//   name: string (required)
+//   description: string (required)
+//   is_private: boolean (required)
+//   user_id: integer (required)
 // return:
-//   ...
+//   result: [workspace]
 router.post("/create", (request, response) => {
     createWorkspace(request).then((result) => {
-        if (result !== null) {
+        if (result !== "") {
             response.status(201).json({
-                when: "Workspaces > Create",
+                when: "Workspaces > CreateWorkspace",
+                result: result,
                 error: 0,
             });
         } else {
             response.status(500).json({
-                when: "Workspaces > Create",
+                when: "Workspaces > CreateWorkspace",
                 error: 1,
                 error_message: "User not found",
             });
         }
     }).catch((error) => {
         response.status(404).json({
-            when: "Workspaces > Create",
+            when: "Workspaces > CreateWorkspace",
             error: 1,
             error_message: error.message,
         });
     });
 });
 
+// POST /members/create
+//
 // body:
-//   workspace_id: integer
-//   user_id: integer
+//   workspace_id: integer (required)
+//   user_id: integer (required)
+//   role: string (required)
 // return:
-//   ...
-router.post("/addMember", (request, response) => {
-    addWorkspaceMember(request).then((result) => {
+//   result: [workspace_member]
+router.post("/members/create", (request, response) => {
+    createWorkspaceMember(request).then((result) => {
         if (result !== "") {
             response.status(201).json({
-                when: "Workspaces > AddMember",
+                when: "Workspaces > CreateWorkspaceMember",
+                result: result,
                 error: 0,
             });
         } else {
             response.status(404).json({
-                when: "Workspaces > AddMember",
+                when: "Workspaces > CreateWorkspaceMember",
                 error: 1,
                 error_message: "User or workspace not found",
             });
         }
     }).catch((error) => {
         response.status(500).json({
-            when: "Workspaces > AddMember",
+            when: "Workspaces > CreateWorkspaceMember",
             error: 1,
             error_message: error.message,
         });
@@ -83,161 +86,67 @@ router.post("/addMember", (request, response) => {
 // Read
 // --------------------
 
+// GET /read
+//
 // body:
-//   id: integer
+//   id: integer (optional)
+//   name: string (optional)
+//   description: string (optional)
+//   is_private: boolean (optional)
+//   user_id: integer (optional)
 // return:
 //   result: [workspace]
-router.get("/getById", (request, response) => {
-    getWorkspaceById().then((result) => {
+router.get("/read", (request, response) => {
+    readWorkspace().then((result) => {
         if (result !== "") {
             response.status(200).json({
-                when: "Workspaces > GetById",
+                when: "Workspaces > ReadWorkspace",
                 result: result,
                 error: 0,
             });
         } else {
             response.status(404).json({
-                when: "Workspaces > GetById",
+                when: "Workspaces > ReadWorkspace",
                 error: 1,
                 error_message: "Workspace not found",
             });
         }
     }).catch((error) => {
         response.status(500).json({
-            when: "Workspaces > GetById",
+            when: "Workspaces > ReadWorkspace",
             error: 1,
             error_message: error.message,
         });
     });
 });
 
+// GET /members/read
+//
 // body:
-//   ...
-// return:
-//   result: [workspace]
-router.get("/getAll", (request, response) => {
-    getAllWorkspaces().then((result) => {
-        response.status(200).json({
-            when: "Workspaces > GetAll",
-            result: result,
-            error: 0,
-        });
-    }).catch((error) => {
-        response.status(500).json({
-            when: "Workspaces > GetAll",
-            error: 1,
-            error_message: error.message,
-        });
-    });
-});
-
-// body:
-//   id: integer
+//   id: integer (optional)
+//   workspace_id: integer (optional)
+//   user_id: integer (optional)
+//   role: string (optional)
 // return:
 //   result: [workspace_member]
-router.get("/getMemberById", (request, response) => {
-    getWorkspaceMemberById().then((result) => {
+router.get("/members/read", (request, response) => {
+    readWorkspaceMember().then((result) => {
         if (result !== "") {
             response.status(200).json({
-                when: "Workspaces > GetMemberById",
+                when: "Workspaces > ReadWorkspaceMember",
                 result: result,
                 error: 0,
             });
         } else {
             response.status(404).json({
-                when: "Workspaces > GetMemberById",
-                error: 1,
-                error_message: "Workspace member not found",
-            });
-        }
-    }).catch((error) => {
-        response.status(500).json({
-            when: "Workspaces > GetMemberById",
-            error: 1,
-            error_message: error.message,
-        });
-    });
-});
-
-// body:
-//   user_id: integer
-//   workspace_id: integer
-// return:
-//   result: [workspace_member]
-router.get("/getMemberByUserIdAndWorkspaceId", (request, response) => {
-    getWorkspaceMemberByUserIdAndWorkspaceId().then((result) => {
-        if (result !== "") {
-            response.status(200).json({
-                when: "Workspaces > GetMemberByUserIdAndWorkspaceId",
-                result: result,
-                error: 0,
-            });
-        } else {
-            response.status(404).json({
-                when: "Workspaces > GetMemberByUserIdAndWorkspaceId",
+                when: "Workspaces > ReadWorkspaceMember",
                 error: 1,
                 error_message: "User or workspace not found",
             });
         }
     }).catch((error) => {
         response.status(500).json({
-            when: "Workspaces > GetMemberByUserIdAndWorkspaceId",
-            error: 1,
-            error_message: error.message,
-        });
-    });
-});
-
-// body:
-//   user_id: integer
-// return:
-//   result: [workspace_member]
-router.get("/getAllMembersByUserId", (request, response) => {
-    getAllWorkspaceMembersByUserId().then((result) => {
-        if (result !== "") {
-            response.status(200).json({
-                when: "Workspaces > GetAllWorkspaceMembersByUserId",
-                result: result,
-                error: 0,
-            });
-        } else {
-            response.status(404).json({
-                when: "Workspaces > GetAllWorkspaceMembersByUserId",
-                error: 1,
-                error_message: "User not found",
-            });
-        }
-    }).catch((error) => {
-        response.status(500).json({
-            when: "Workspaces > GetAllWorkspaceMembersByUserId",
-            error: 1,
-            error_message: error.message,
-        });
-    });
-});
-
-// body:
-//   workspace_id: integer
-// return:
-//   result: [workspace_member]
-router.get("/getAllMembersByWorkspaceId", (request, response) => {
-    getAllWorkspaceMembersByWorkspaceId().then((result) => {
-        if (result !== "") {
-            response.status(200).json({
-                when: "Workspaces > GetAllWorkspaceMembersByWorkspaceId",
-                result: result,
-                error: 0,
-            });
-        } else {
-            response.status(404).json({
-                when: "Workspaces > GetAllWorkspaceMembersByWorkspaceId",
-                error: 1,
-                error_message: "Workspace not found",
-            });
-        }
-    }).catch((error) => {
-        response.status(500).json({
-            when: "Workspaces > GetAllWorkspaceMembersByWorkspaceId",
+            when: "Workspaces > ReadWorkspaceMember",
             error: 1,
             error_message: error.message,
         });
@@ -248,61 +157,67 @@ router.get("/getAllMembersByWorkspaceId", (request, response) => {
 // Update
 // --------------------
 
+// PUT /update
+//
 // body:
-//   id: integer
-//   name: string
-//   description: string
-//   is_private: boolean
-//   user_id: integer
+//   id: integer (required)
+//   name: string (optional)
+//   description: string (optional)
+//   is_private: boolean (optional)
+//   user_id: integer (optional)
 // return:
-//   ...
+//   result: [workspace]
 router.put("/update", (request, response) => {
     updateWorkspace(request).then((result) => {
         if (result !== "") {
             response.status(200).json({
-                when: "Workspaces > Update",
+                when: "Workspaces > UpdateWorkspace",
+                result: result,
                 error: 0,
             });
         } else {
             response.status(404).json({
-                when: "Workspaces > Update",
+                when: "Workspaces > UpdateWorkspace",
                 error: 1,
                 error_message: "Workspace not found",
             });
         }
     }).catch((error) => {
         response.status(500).json({
-            when: "Workspaces > Update",
+            when: "Workspaces > UpdateWorkspace",
             error: 1,
             error_message: error.message,
         });
     });
 });
 
+// PUT /members/update
+//
 // body:
-//   id: integer
-//   user_id: integer
-//   workspace_id: integer
-//   role: string
+//   id: integer (required)
+//   user_id: integer (optional)
+//   workspace_id: integer (optional)
+//   role: string (optional)
 // return:
-//   ...
-router.put("/updateMember", (request, response) => {
-    updateWorkspace(request).then((result) => {
+//   result: [workspace_member]
+router.put("/members/update", (request, response) => {
+    updateWorkspaceMember(request).then((result) => {
         if (result !== "") {
             response.status(200).json({
-                when: "Workspaces > UpdateMember",
+                when: "Workspaces > UpdateWorkspaceMember",
+                result: result,
                 error: 0,
             });
         } else {
             response.status(404).json({
-                when: "Workspaces > UpdateMember",
+                when: "Workspaces > UpdateWorkspaceMember",
                 error: 1,
                 error_message: "Workspace member not found",
             });
         }
     }).catch((error) => {
         response.status(500).json({
-            when: "Workspaces > UpdateMember",
+            when: "Workspaces > UpdateWorkspaceMember",
             error: 1,
             error_message: error.message,
         });
@@ -313,54 +228,60 @@ router.put("/updateMember", (request, response) => {
 // Delete
 // --------------------
 
+// DELETE /delete
+//
 // body:
-//   id: integer
+//   id: integer (required)
 // return:
-//   ...
+//   result: [workspace]
 router.delete("/delete", (request, response) => {
     deleteWorkspace(request).then((result) => {
         if (result !== "") {
             response.status(200).json({
-                when: "Workspaces > Delete",
+                when: "Workspaces > DeleteWorkspace",
+                result: result,
                 error: 0,
             });
         } else {
             response.status(404).json({
-                when: "Workspaces > Delete",
+                when: "Workspaces > DeleteWorkspace",
                 error: 1,
                 error_message: "Workspace not found",
             });
         }
     }).catch((error) => {
         response.status(500).json({
-            when: "Workspaces > Delete",
+            when: "Workspaces > DeleteWorkspace",
             error: 1,
             error_message: error.message,
         });
     });
 });
 
+// DELETE /members/delete
+//
 // body:
-//   id: integer
+//   id: integer (required)
 // return:
-//   ...
-router.delete("/deleteMember", (request, response) => {
+//   result: [workspace_member]
+router.delete("/members/delete", (request, response) => {
     deleteWorkspaceMember(request).then((result) => {
         if (result !== "") {
             response.status(200).json({
-                when: "Workspaces > DeleteMember",
+                when: "Workspaces > DeleteWorkspaceMember",
+                result: result,
                 error: 0,
             });
         } else {
             response.status(404).json({
-                when: "Workspaces > DeleteMember",
+                when: "Workspaces > DeleteWorkspaceMember",
                 error: 1,
                 error_message: "Workspace member not found",
             });
         }
     }).catch((error) => {
         response.status(500).json({
-            when: "Workspaces > DeleteMember",
+            when: "Workspaces > DeleteWorkspaceMember",
             error: 1,
             error_message: error.message,
         });

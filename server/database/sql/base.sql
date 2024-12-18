@@ -6,7 +6,7 @@ CREATE TABLE users (
     link_google TINYINT(1) DEFAULT 0,
     link_facebook TINYINT(1) DEFAULT 0,
     password TEXT NOT NULL,
-    status VARCHAR(20) DEFAULT 'offline',
+    status VARCHAR(20) NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NULL,
     deleted_at TIMESTAMP NULL
@@ -39,6 +39,18 @@ CREATE TABLE workspace_members (
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
+DELIMITER $$
+
+CREATE TRIGGER add_workspace_creator_as_admin
+AFTER INSERT ON workspaces
+FOR EACH ROW
+BEGIN
+    INSERT INTO workspace_members (workspace_id, user_id, role, added_at)
+    VALUES (NEW.id, NEW.user_id, 'admin', NOW());
+END$$
+
+DELIMITER ;
+
 -- CHANNELS
 CREATE TABLE channels (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -65,6 +77,18 @@ CREATE TABLE channel_members (
     FOREIGN KEY (channel_id) REFERENCES channels(id) ON DELETE CASCADE,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
+
+DELIMITER $$
+
+CREATE TRIGGER add_channel_creator_as_admin
+AFTER INSERT ON channels
+FOR EACH ROW
+BEGIN
+    INSERT INTO channel_members (channel_id, user_id, added_at, role)
+    VALUES (NEW.id, NEW.user_id, NOW(), 'admin');
+END$$
+
+DELIMITER ;
 
 -- CHANNEL PERMISSIONS
 CREATE TABLE channel_permissions (
