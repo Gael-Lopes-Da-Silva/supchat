@@ -12,7 +12,7 @@ export function authentification(request, response, next) {
 
     if (token == "" || token == null) {
         return response.status(401).json({
-            when: "Checking token",
+            when: "Authentification > CheckToken",
             error: 1,
             error_message: "A token is needed",
         });
@@ -22,7 +22,7 @@ export function authentification(request, response, next) {
 
     jsonwebtoken.verify(token, secret, (error, user) => {
         if (error) return response.status(401).json({
-            when: "Checking token",
+            when: "Authentification > CheckToken",
             error: 1,
             error_message: error.message,
         });
