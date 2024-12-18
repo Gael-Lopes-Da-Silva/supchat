@@ -1,0 +1,26 @@
+services:
+    database:
+        image: mariadb:latest
+        container_name: supchat_db
+        environment:
+            MARIADB_ROOT_PASSWORD: root
+        volumes:
+            - ./database/sql:/docker-entrypoint-initdb.d
+        ports:
+            - "8000:8000"
+
+    app:
+        image: node:latest
+        container_name: supchat_app
+        working_dir: /app
+        volumes:
+            - .:/app
+        ports:
+            - "3000:3000"
+        depends_on:
+            - database
+        environment:
+            DB_HOST: database
+            DB_USER: root
+            DB_PASSWORD: root
+        command: ["node", "index.js"]

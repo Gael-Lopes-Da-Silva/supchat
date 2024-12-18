@@ -18,15 +18,9 @@ Setup
 An example of .env file:
 ```
 DB_HOST=localhost
-DB_USER=root
-DB_PASSWORD=root
+DB_USER=supchat
+DB_PASSWORD=supchat
 DB_NAME=supchat
-PORT=5000
+POST=3000
 SECRET=SOMESECRETKEY
-```
-
-Build docker file and run:
-```
-docker build -t supchat:v1 .
-docker run -p 8080:80 supchat:v1
 ```
