@@ -58,7 +58,7 @@ CREATE TABLE workspace_invitations (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NULL,
     deleted_at TIMESTAMP NULL,
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
     FOREIGN KEY (workspace_id) REFERENCES workspaces(id) ON DELETE CASCADE
 );
 
@@ -114,7 +114,7 @@ CREATE TABLE channel_invitations (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NULL,
     deleted_at TIMESTAMP NULL,
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
     FOREIGN KEY (channel_id) REFERENCES channels(id) ON DELETE CASCADE
 );
 
@@ -217,7 +217,7 @@ SELECT r.id AS role_id, p.id AS permission_id
 FROM roles r
 CROSS JOIN permissions p
 WHERE r.name = 'admin';
-    
+
 INSERT INTO role_permissions (role_id, permission_id)
 SELECT r.id AS role_id, p.id AS permission_id
 FROM roles r
