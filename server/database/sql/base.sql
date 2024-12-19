@@ -58,6 +58,22 @@ END$$
 
 DELIMITER ;
 
+-- WORKSPACE INVITATIONS
+CREATE TABLE workspace_invitations (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    workspace_id INT NOT NULL,
+    token VARCHAR(50) NOT NULL,
+    maximum_use INT NOT NULL,
+    used_by INT NOT NULL,
+    expire_at TIMESTAMP NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NULL,
+    deleted_at TIMESTAMP NULL,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+    FOREIGN KEY (workspace_id) REFERENCES workspaces(id) ON DELETE CASCADE
+);
+
 -- CHANNELS
 CREATE TABLE channels (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -96,6 +112,22 @@ BEGIN
 END$$
 
 DELIMITER ;
+
+-- CHANNEL INVITATIONS
+CREATE TABLE channel_invitations (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    channel_id INT NOT NULL,
+    token VARCHAR(50) NOT NULL,
+    maximum_use INT NOT NULL,
+    used_by INT NOT NULL,
+    expire_at TIMESTAMP NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NULL,
+    deleted_at TIMESTAMP NULL,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+    FOREIGN KEY (channel_id) REFERENCES channels(id) ON DELETE CASCADE
+);
 
 -- CHANNEL PERMISSIONS
 CREATE TABLE channel_permissions (
