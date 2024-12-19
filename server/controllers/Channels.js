@@ -16,6 +16,7 @@ import pool from "../database/db.js";
  * @param {number} request.body.user_id - The ID of the user creating the channel (required).
  * @param {number} request.body.workspace_id - The ID of the workspace where the channel will be created (required).
  * @param {string} request.body.name - The name of the new channel (required).
+ * @param {string} request.body.role - The role assigned to the channel (required).
  * @param {boolean} request.body.is_private - Indicates whether the channel is private or not (required).
  * @returns {Promise<Array|String>} A promise that resolves to the result of the insert query, or an empty string if the user or workspace does not exist.
  */
@@ -36,10 +37,11 @@ export const createChannel = async (request) => {
         return "";
     }
     
-    return pool.query("INSERT INTO channels (workspace_id, name, is_private, user_id) VALUES (?, ?, ?, ?)", [
+    return pool.query("INSERT INTO channels (workspace_id, name, is_private, role, user_id) VALUES (?, ?, ?, ?, ?)", [
         request.body.workspace_id,
         request.body.name,
         request.body.is_private,
+        request.body.role,
         request.body.user_id
     ]);
 }
@@ -60,6 +62,7 @@ export const createChannel = async (request) => {
  * @param {number} [request.body.id] - The ID of the channel to search for (optional).
  * @param {number} [request.body.workspace_id] - The workspace ID to search for channels within (optional).
  * @param {string} [request.body.name] - The name of the channel to search for (optional).
+ * @param {string} [request.body.role] - The role assigned to the channel (optional).
  * @param {boolean} [request.body.is_private] - Whether to filter by private status of the channel (optional).
  * @param {number} [request.body.user_id] - The ID of the user who created the channel to search for (optional).
  * @returns {Promise<Array>} A promise that resolves to an array of channels that match the search criteria, or an empty array if no matching channels are found.
@@ -81,6 +84,11 @@ export const readChannel = async (request) => {
     if (request.body.name) {
         query += " AND name = ?";
         params.push(request.body.name);
+    }
+    
+    if (request.body.role) {
+        query += " AND role = ?";
+        params.push(request.body.role);
     }
     
     if (request.body.is_private) {
@@ -112,6 +120,7 @@ export const readChannel = async (request) => {
  * @param {number} request.body.id - The ID of the channel to be updated (required).
  * @param {number} [request.body.workspace_id] - The new workspace ID to assign to the channel (optional).
  * @param {string} [request.body.name] - The new name for the channel (optional).
+ * @param {string} [request.body.role] - The role assigned to the channel (optional).
  * @param {boolean} [request.body.is_private] - The new private status of the channel (optional).
  * @param {number} [request.body.user_id] - The new user ID of the creator of the channel (optional).
  * @returns {Promise<Array|String>} A promise that resolves to the result of the update query, or an empty string if the channel does not exist or is already soft-deleted.
@@ -125,10 +134,11 @@ export const updateChannel = async (request) => {
         return "";
     }
     
-    return pool.query("UPDATE channels SET workspace_id = ?, name = ?, is_private = ?, user_id = ?, updated_at = NOW() WHERE id = ? AND deleted_at = NULL", [
+    return pool.query("UPDATE channels SET workspace_id = ?, name = ?, is_private = ?, role = ?, user_id = ?, updated_at = NOW() WHERE id = ? AND deleted_at = NULL", [
         request.body.workspace_id || channelQuery[0].workspace_id,
         request.body.name || channelQuery[0].name,
         request.body.is_private || channelQuery[0].is_private,
+        request.body.role || channelQuery[0].role,
         request.body.user_id || channelQuery[0].user_id,
         request.body.id
     ]);

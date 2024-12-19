@@ -19,6 +19,7 @@ const router = express.Router();
 //   user_id: integer (required)
 //   workspace_id: integer (required)
 //   name: string (required)
+//   role: string (required)
 //   is_private: boolean (required)
 // return:
 //   result: [channel]
@@ -48,6 +49,7 @@ router.post("/create", (request, response) => {
 //   id: integer (optional)
 //   workspace_id: integer (optional)
 //   name: string (optional)
+//   role: string (optional)
 //   is_private: boolean (optional)
 //   user_id: integer (optional)
 // return:
@@ -86,6 +88,7 @@ router.get("/read", (request, response) => {
 //   id: integer (required)
 //   workspace_id: integer (optional)
 //   name: string (optional)
+//   role: string (optional)
 //   is_private: boolean (optional)
 //   user_id: integer (optional)
 // return:
