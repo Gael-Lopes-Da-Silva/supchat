@@ -24,3 +24,8 @@ DB_NAME=supchat
 POST=3000
 SECRET=SOMESECRETKEY
 ```
+
+Run the docker container:
+```
+docker-compose up --build
+```
