@@ -1,15 +1,28 @@
-import { Text, View } from "react-native";
+import { Component } from "react";
+import { Text, View, StyleSheet } from "react-native";
 
-export default function Index() {
-    return (
-        <View
-            style={{
-                flex: 1,
-                justifyContent: "center",
-                alignItems: "center",
-            }}
-        >
-            <Text>Edit app/index.js to edit this screen.</Text>
-        </View>
-    );
+const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+    }
+});
+
+class App extends Component {
+    state = {
+        
+    };
+    
+    render() {
+        return (
+            <View style={styles.container}>
+                <View>
+                    <Text>Hellow World!</Text>
+                </View>
+            </View>
+        );
+    }
 }
+
+export default App;
