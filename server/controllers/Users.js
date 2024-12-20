@@ -9,18 +9,24 @@ import pool from "../database/db.js";
  * Creates a new user in the database.
  * 
  * This function inserts a new user record into the `users` table using the data provided in the request body.
- * The password is securely hashed using bcrypt before being stored. The function also allows setting optional 
- * fields like `status`, `link_google`, and `link_facebook`.
+ * The password is securely hashed using bcrypt before being stored. Optional fields like `status`, `link_google`, 
+ * and `link_facebook` can also be set during user creation. The function validates the provided `status` 
+ * (if specified) to ensure it exists in the database.
  * 
  * @param {Object} request - The HTTP request object containing user data.
  * @param {Object} request.body - The request body containing user information.
  * @param {string} request.body.username - The username of the new user (required).
  * @param {string} request.body.email - The email address of the new user (required).
  * @param {string} request.body.password - The plaintext password of the new user (required).
- * @param {number} [request.body.status] - The status of the user (optional).
- * @param {boolean} [request.body.link_google] - The link to Google account (optional).
- * @param {boolean} [request.body.link_facebook] - The link to Facebook account (optional).
- * @returns {Promise<Array>} A promise that resolves to the result of the database insert query.
+ * @param {number} [request.body.status] - The ID of the user's status (optional, defaults to 0). 
+ *                                         Must exist in the `status` table if provided.
+ * @param {boolean} [request.body.link_google] - Whether the user links a Google account (optional, defaults to `false`).
+ * @param {boolean} [request.body.link_facebook] - Whether the user links a Facebook account (optional, defaults to `false`).
+ * @returns {Promise<Array|Object>} A promise that resolves to the result of the database insert query if successful, 
+ *                                  or an error object with an error code and message if validation fails.
+ * 
+ * Error Responses:
+ * - `{ error: 1, error_message: "Status not found" }` if the specified status ID does not exist in the `status` table.
  */
 export const createUser = async (request) => {
     if (request.body.status) {
@@ -51,17 +57,25 @@ export const createUser = async (request) => {
 // --------------------
 
 /**
- * Retrieves a user from the database based on email and optionally validates the password.
+ * Authenticates a user based on email and optionally validates the password.
  * 
- * This function queries the database for a user with the specified email. If a password 
- * is provided in the request, it checks if the provided password matches the stored hashed password. 
- * Additionally, it handles linked accounts (e.g., Google or Facebook).
+ * This function queries the database for a user with the specified email. If the user exists, it optionally 
+ * validates the provided password against the stored hashed password. The function also handles scenarios 
+ * where the user is linked to external accounts (Google or Facebook). If no valid password or linked 
+ * account is found, an error response is returned.
  * 
  * @param {Object} request - The HTTP request object containing user login data.
  * @param {Object} request.body - The request body containing login credentials.
  * @param {string} request.body.email - The email address of the user to retrieve (required).
  * @param {string} [request.body.password] - The plaintext password to validate (optional).
- * @returns {Promise<Array|String>} An array containing user data if found and valid, or an empty string if not.
+ * @returns {Promise<Object|Array>} A promise that resolves to:
+ * - An array containing user data if authentication is successful.
+ * - An error object with an error code and message if authentication fails.
+ * 
+ * Error Responses:
+ * - `{ error: 1, error_message: "User not found" }` if no user with the specified email exists.
+ * - `{ error: 1, error_message: "Wrong password" }` if the provided password does not match the stored password.
+ * - `{ error: 1, error_message: "User not linked to any socials" }` if no password is provided and the user is not linked to Google or Facebook.
  */
 export const loginUser = async (request) => {
     const userQuery = await pool.query("SELECT * FROM users WHERE email = ? AND deleted_at = NULL", [
@@ -94,21 +108,28 @@ export const loginUser = async (request) => {
 }
 
 /**
- * Retrieves one or more users from the database based on specified parameters.
+ * Retrieves one or more users from the database based on specified filter criteria.
  * 
- * This function constructs a dynamic SQL query to fetch users from the `users` table. 
- * The query filters users based on the parameters provided in the request body. If no parameters 
- * are provided, all users (excluding soft-deleted ones) are returned.
+ * This function dynamically constructs and executes an SQL query to fetch user records 
+ * from the `users` table. It filters users based on the parameters provided in the request body. 
+ * If no parameters are provided, all users (excluding soft-deleted ones) are returned. 
+ * Validation is performed for specific filters such as `id` and `status` to ensure they exist in the database.
  * 
  * @param {Object} request - The HTTP request object containing filter criteria.
  * @param {Object} request.body - The request body containing optional filter parameters.
- * @param {number} [request.body.id] - Filter by the user's ID (optional).
+ * @param {number} [request.body.id] - Filter by the user's ID (optional). Must exist in the database if specified.
  * @param {string} [request.body.username] - Filter by the user's username (optional).
  * @param {string} [request.body.email] - Filter by the user's email address (optional).
- * @param {number} [request.body.status] - Filter by the user's status (optional).
- * @param {boolean} [request.body.link_google] - Filter by Google-linked accounts (optional).
- * @param {boolean} [request.body.link_facebook] - Filter by Facebook-linked accounts (optional).
- * @returns {Promise<Array>} A promise that resolves to an array of matching user records or an empty array if none match.
+ * @param {number} [request.body.status] - Filter by the user's status (optional). Must exist in the `status` table if specified.
+ * @param {boolean} [request.body.link_google] - Filter by whether the user has linked a Google account (optional).
+ * @param {boolean} [request.body.link_facebook] - Filter by whether the user has linked a Facebook account (optional).
+ * @returns {Promise<Array|Object>} A promise that resolves to:
+ * - An array of matching user records if successful.
+ * - An error object with an error code and message if validation fails for specific filters.
+ * 
+ * Error Responses:
+ * - `{ error: 1, error_message: "User not found" }` if no user with the specified `id` exists.
+ * - `{ error: 1, error_message: "Status not found" }` if the specified `status` does not exist in the `status` table.
  */
 export const readUser = async (request) => {
     let query = "SELECT * FROM users WHERE deleted_at = NULL"
@@ -176,21 +197,27 @@ export const readUser = async (request) => {
 /**
  * Updates a user's information in the database based on the provided ID and parameters.
  * 
- * This function retrieves a user by ID and updates their information with the data provided 
- * in the request body. Only the fields specified in the request body are updated; all others 
- * retain their current values.
+ * This function retrieves an existing user by their ID and updates their information using 
+ * the data provided in the request body. Only the fields specified in the request body are updated, 
+ * while all unspecified fields retain their current values. Validation is performed for the `status` 
+ * field to ensure it exists in the database if provided.
  * 
  * @param {Object} request - The HTTP request object containing user update data.
  * @param {Object} request.body - The request body containing user update parameters.
  * @param {number} request.body.id - The ID of the user to update (required).
- * @param {string} [request.body.username] - The new username (optional).
- * @param {string} [request.body.email] - The new email address (optional).
- * @param {string} [request.body.password] - The new plaintext password (optional; hashed before storage).
- * @param {number} [request.body.status] - The new user status (optional).
- * @param {boolean} [request.body.link_google] - Whether the account is linked to Google (optional).
- * @param {boolean} [request.body.link_facebook] - Whether the account is linked to Facebook (optional).
- * @returns {Promise<Array|String>} A promise resolving to the updated user record as an array, 
- * or an empty string if the user with the specified ID does not exist.
+ * @param {string} [request.body.username] - The new username (optional). Defaults to the current username if not provided.
+ * @param {string} [request.body.email] - The new email address (optional). Defaults to the current email if not provided.
+ * @param {string} [request.body.password] - The new plaintext password (optional). Defaults to the current password if not provided; securely hashed before storage.
+ * @param {number} [request.body.status] - The new user status (optional). Must exist in the `status` table if provided. Defaults to the current status.
+ * @param {boolean} [request.body.link_google] - Indicates whether the account is linked to Google (optional). Defaults to the current value if not provided.
+ * @param {boolean} [request.body.link_facebook] - Indicates whether the account is linked to Facebook (optional). Defaults to the current value if not provided.
+ * @returns {Promise<Array|Object>} A promise that resolves to:
+ * - An array containing the updated user record if the update is successful.
+ * - An error object with an error code and message if validation fails or the user does not exist.
+ * 
+ * Error Responses:
+ * - `{ error: 1, error_message: "User not found" }` if no user with the specified `id` exists.
+ * - `{ error: 1, error_message: "Status not found" }` if the specified `status` does not exist in the `status` table.
  */
 export const updateUser = async (request) => {
     const userQuery = await pool.query("SELECT * FROM users WHERE id = ? AND deleted_at = NULL", [
@@ -236,12 +263,18 @@ export const updateUser = async (request) => {
  * Soft deletes a user from the database based on the provided ID.
  * 
  * This function marks a user as deleted by setting the `deleted_at` timestamp 
- * to the current time. The user remains in the database but is treated as deleted.
+ * to the current time. The user remains in the database but is treated as deleted, 
+ * preventing it from being returned in future queries unless explicitly filtered.
  * 
  * @param {Object} request - The HTTP request object containing the user ID to delete.
  * @param {Object} request.body - The request body containing the deletion parameter.
  * @param {number} request.body.id - The ID of the user to delete (required).
- * @returns {Promise<Array>} A promise resolving to the result of the update query.
+ * @returns {Promise<Array|Object>} A promise that resolves to:
+ * - An array containing the updated user record if the update is successful.
+ * - An error object with an error code and message if validation fails or the user does not exist.
+ * 
+ * Error Responses:
+ * - `{ error: 1, error_message: "User not found" }` if no user with the specified `id` exists and is not marked as deleted.
  */
 export const deleteUser = async (request) => {
     const userQuery = await pool.query("SELECT * FROM users WHERE id = ? AND deleted_at = NULL", [

@@ -8,7 +8,7 @@ import pool from "../database/db.js";
  * Creates a new workspace in the database.
  * 
  * This function inserts a new workspace record into the `workspaces` table. 
- * The user specified by `user_id` must exist and not be soft-deleted (`deleted_at` is NULL). 
+ * The user specified by `user_id` must exist and not be soft-deleted (`deleted_at` is NULL).
  * The workspace's creator is automatically added to the `workspace_members` table as an admin, 
  * provided the database trigger is set up correctly.
  * 
@@ -18,8 +18,11 @@ import pool from "../database/db.js";
  * @param {string} request.body.description - A brief description of the workspace (required).
  * @param {boolean} request.body.is_private - Whether the workspace is private (required).
  * @param {number} request.body.user_id - The ID of the user creating the workspace (required).
- * @returns {Promise<Array|String>} A promise that resolves to the result of the workspace insertion query, 
- * or an empty string if the user does not exist or is soft-deleted.
+ * @returns {Promise<Array|Object>} A promise that resolves to the result of the workspace insertion query if successful,
+ *                                  or an error object with an error code and message if the user does not exist or is soft-deleted.
+ * 
+ * Error Responses:
+ * - `{ error: 1, error_message: "User not found" }` if the user specified by `user_id` does not exist or is soft-deleted.
  */
 export const createWorkspace = async (request) => {
     const userQuery = await pool.query("SELECT * FROM users WHERE id = ? AND deleted_at = NULL", [
@@ -46,15 +49,20 @@ export const createWorkspace = async (request) => {
  * 
  * This function inserts a new record into the `workspace_members` table to associate 
  * a user with a workspace and assign them a role. The user and workspace must both exist 
- * and not be soft-deleted (`deleted_at` is NULL).
+ * and not be soft-deleted (`deleted_at` is NULL). The role provided must also exist in the `roles` table.
  * 
  * @param {Object} request - The HTTP request object containing member data.
  * @param {Object} request.body - The request body containing the necessary parameters.
  * @param {number} request.body.user_id - The ID of the user to be added as a workspace member (required).
  * @param {number} request.body.workspace_id - The ID of the workspace to which the user is being added (required).
- * @param {number} request.body.role - The role to assign to the user in the workspace (required, e.g., "admin" or "member").
- * @returns {Promise<Array|String>} A promise that resolves to the result of the membership insertion query, 
- * or an empty string if the user or workspace does not exist or is soft-deleted.
+ * @param {number} request.body.role - The role to assign to the user in the workspace (required).
+ * @returns {Promise<Array|Object>} A promise that resolves to the result of the membership insertion query if successful,
+ *                                  or an error object with an error code and message if the user, workspace, or role does not exist or is soft-deleted.
+ * 
+ * Error Responses:
+ * - `{ error: 1, error_message: "User not found" }` if the specified user does not exist or is soft-deleted.
+ * - `{ error: 1, error_message: "Workspace not found" }` if the specified workspace does not exist or is soft-deleted.
+ * - `{ error: 1, error_message: "Role not found" }` if the specified role does not exist.
  */
 export const createWorkspaceMember = async (request) => {
     const userQuery = await pool.query("SELECT * FROM users WHERE id = ? AND deleted_at = NULL", [
@@ -115,7 +123,12 @@ export const createWorkspaceMember = async (request) => {
  * @param {string} [request.body.description] - Filter by workspace description (optional).
  * @param {boolean} [request.body.is_private] - Filter by privacy status (optional).
  * @param {number} [request.body.user_id] - Filter by the ID of the user who created the workspace (optional).
- * @returns {Promise<Array>} A promise that resolves to an array of matching workspace records or an empty array if none match.
+ * @returns {Promise<Array|Object>} A promise that resolves to an array of matching workspace records if found, 
+ *                                  or an error object with an error code and message if any filter criteria are invalid or not found.
+ * 
+ * Error Responses:
+ * - `{ error: 1, error_message: "Workspace not found" }` if the specified workspace ID does not exist or is soft-deleted.
+ * - `{ error: 1, error_message: "User not found" }` if the specified user ID does not exist or is soft-deleted.
  */
 export const readWorkspace = async () => {
     let query = "SELECT * FROM workspaces WHERE deleted_at = NULL"
@@ -184,7 +197,14 @@ export const readWorkspace = async () => {
  * @param {number} [request.body.workspace_id] - Filter by workspace ID (optional).
  * @param {number} [request.body.user_id] - Filter by user ID (optional).
  * @param {number} [request.body.role] - Filter by member role (optional, e.g., "admin" or "member").
- * @returns {Promise<Array>} A promise that resolves to an array of matching workspace member records or an empty array if none match.
+ * @returns {Promise<Array|Object>} A promise that resolves to an array of matching workspace member records if found, 
+ *                                  or an error object with an error code and message if any filter criteria are invalid or not found.
+ * 
+ * Error Responses:
+ * - `{ error: 1, error_message: "Workspace member not found" }` if the specified workspace member ID does not exist or is soft-deleted.
+ * - `{ error: 1, error_message: "Workspace not found" }` if the specified workspace ID does not exist or is soft-deleted.
+ * - `{ error: 1, error_message: "User not found" }` if the specified user ID does not exist or is soft-deleted.
+ * - `{ error: 1, error_message: "Role not found" }` if the specified role does not exist in the roles table.
  */
 export const readWorkspaceMember = async () => {
     let query = "SELECT * FROM workspace_members WHERE deleted_at = NULL"
@@ -276,7 +296,12 @@ export const readWorkspaceMember = async () => {
  * @param {string} [request.body.description] - The new description for the workspace (optional).
  * @param {boolean} [request.body.is_private] - The new privacy status for the workspace (optional).
  * @param {number} [request.body.user_id] - The new user ID for the workspace (optional).
- * @returns {Promise<Array|String>} A promise that resolves to the result of the update query, or an empty string if the workspace does not exist or is soft-deleted.
+ * @returns {Promise<Array|Object>} A promise that resolves to the result of the update query if the workspace exists and is not soft-deleted, 
+ *                                  or an error object with an error code and message if the workspace does not exist or is soft-deleted.
+ * 
+ * Error Responses:
+ * - `{ error: 1, error_message: "Workspace not found" }` if the specified workspace ID does not exist or is soft-deleted.
+ * - `{ error: 1, error_message: "User not found" }` if the specified user ID does not exist or is soft-deleted.
  */
 export const updateWorkspace = async (request) => {
     const workspaceQuery = await pool.query("SELECT * FROM workspaces WHERE id = ? AND deleted_at = NULL", [
@@ -326,7 +351,14 @@ export const updateWorkspace = async (request) => {
  * @param {number} [request.body.workspace_id] - The new workspace ID for the member (optional).
  * @param {number} [request.body.user_id] - The new user ID for the member (optional).
  * @param {number} [request.body.role] - The new role for the workspace member (optional, e.g., "admin" or "member").
- * @returns {Promise<Array|String>} A promise that resolves to the result of the update query, or an empty string if the workspace member does not exist or is soft-deleted.
+ * @returns {Promise<Array|Object>} A promise that resolves to the result of the update query if the workspace member exists and is not soft-deleted,
+ *                                  or an error object with an error code and message if the workspace member does not exist or is soft-deleted.
+ * 
+ * Error Responses:
+ * - `{ error: 1, error_message: "Workspace member not found" }` if the specified workspace member ID does not exist or is soft-deleted.
+ * - `{ error: 1, error_message: "User not found" }` if the specified user ID does not exist or is soft-deleted.
+ * - `{ error: 1, error_message: "Workspace not found" }` if the specified workspace ID does not exist or is soft-deleted.
+ * - `{ error: 1, error_message: "Role not found" }` if the specified role ID does not exist or is invalid.
  */
 export const updateWorkspaceMember = async (request) => {
     const workspaceMemberQuery = await pool.query("SELECT * FROM workspace_members WHERE id = ? AND deleted_at = NULL", [
@@ -400,7 +432,11 @@ export const updateWorkspaceMember = async (request) => {
  * @param {Object} request - The HTTP request object containing the workspace ID.
  * @param {Object} request.body - The request body containing the necessary parameter.
  * @param {number} request.body.id - The ID of the workspace to be deleted (required).
- * @returns {Promise<Array|String>} A promise that resolves to the result of the update query, or an empty string if the workspace does not exist or is already soft-deleted.
+ * @returns {Promise<Array|Object>} A promise that resolves to the result of the update query if the workspace exists and is not already soft-deleted,
+ *                                  or an error object with an error code and message if the workspace does not exist or is already soft-deleted.
+ * 
+ * Error Responses:
+ * - `{ error: 1, error_message: "Workspace not found" }` if the specified workspace ID does not exist or is already soft-deleted.
  */
 export const deleteWorkspace = async (request) => {
     const workspaceQuery = await pool.query("SELECT * FROM workspaces WHERE id = ? AND deleted_at = NULL", [
@@ -428,7 +464,11 @@ export const deleteWorkspace = async (request) => {
  * @param {Object} request - The HTTP request object containing the workspace member ID.
  * @param {Object} request.body - The request body containing the necessary parameter.
  * @param {number} request.body.id - The ID of the workspace member to be deleted (required).
- * @returns {Promise<Array|String>} A promise that resolves to the result of the update query, or an empty string if the workspace member does not exist or is already soft-deleted.
+ * @returns {Promise<Array|Object>} A promise that resolves to the result of the update query if the workspace member exists and is not already soft-deleted,
+ *                                  or an error object with an error code and message if the workspace member does not exist or is already soft-deleted.
+ * 
+ * Error Responses:
+ * - `{ error: 1, error_message: "Workspace member not found" }` if the specified workspace member ID does not exist or is already soft-deleted.
  */
 export const deleteWorkspaceMember = async (request) => {
     const workspaceMemberQuery = await pool.query("SELECT * FROM workspace_members WHERE id = ? AND deleted_at = NULL", [

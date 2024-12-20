@@ -9,7 +9,7 @@ import pool from "../database/db.js";
  * 
  * This function inserts a new channel record into the `channels` table based on the provided parameters.
  * The user and workspace specified by `user_id` and `workspace_id` respectively must exist and not be soft-deleted (`deleted_at` is NULL).
- * If either the user or workspace does not exist, the function returns an empty string.
+ * If either the user or workspace does not exist, the function returns an error object.
  * 
  * @param {Object} request - The HTTP request object containing the new channel data.
  * @param {Object} request.body - The request body containing the necessary parameters for creating the channel.
@@ -17,7 +17,12 @@ import pool from "../database/db.js";
  * @param {number} request.body.workspace_id - The ID of the workspace where the channel will be created (required).
  * @param {string} request.body.name - The name of the new channel (required).
  * @param {boolean} request.body.is_private - Indicates whether the channel is private or not (required).
- * @returns {Promise<Array|String>} A promise that resolves to the result of the insert query, or an empty string if the user or workspace does not exist.
+ * @returns {Promise<Array|Object>} A promise that resolves to the result of the insert query if the user and workspace exist and are not soft-deleted,
+ *                                  or an error object if the user or workspace does not exist.
+ * 
+ * Error Responses:
+ * - `{ error: 1, error_message: "User not found" }` if the specified user ID does not exist or is soft-deleted.
+ * - `{ error: 1, error_message: "Workspace not found" }` if the specified workspace ID does not exist or is soft-deleted.
  */
 export const createChannel = async (request) => {
     const userQuery = await pool.query("SELECT * FROM users WHERE id = ? AND deleted_at = NULL", [
@@ -53,7 +58,7 @@ export const createChannel = async (request) => {
 /**
  * Adds a new member to a channel in the database.
  * 
- * This function inserts a new record into the `channel_members` table to associate a user with a channel and a specific role. 
+ * This function inserts a new record into the `channel_members` table to associate a user with a channel and a specific role.
  * It ensures that the channel, user, and role exist in the database and are not soft-deleted (`deleted_at` is NULL) before performing the insertion.
  * 
  * @param {Object} request - The HTTP request object containing the necessary parameters for creating the channel member.
@@ -62,7 +67,12 @@ export const createChannel = async (request) => {
  * @param {number} request.body.user_id - The ID of the user being added to the channel (required).
  * @param {number} request.body.role - The role ID to assign to the user in the channel (required).
  * @returns {Promise<Object|Array>} A promise that resolves to the result of the insert query if successful, 
- * or an error object with an error code and message if the channel, user, or role does not exist.
+ *                                  or an error object with an error code and message if the channel, user, or role does not exist.
+ * 
+ * Error Responses:
+ * - `{ error: 1, error_message: "Channel not found" }` if the specified channel ID does not exist or is soft-deleted.
+ * - `{ error: 1, error_message: "User not found" }` if the specified user ID does not exist or is soft-deleted.
+ * - `{ error: 1, error_message: "Role not found" }` if the specified role ID does not exist or is invalid.
  */
 export const createChannelMember = async (request) => {
     const channelQuery = await pool.query("SELECT * FROM channels WHERE id = ? AND deleted_at = NULL", [
@@ -124,6 +134,11 @@ export const createChannelMember = async (request) => {
  * @param {boolean} [request.body.is_private] - Whether to filter by private status of the channel (optional).
  * @param {number} [request.body.user_id] - The ID of the user who created the channel to search for (optional).
  * @returns {Promise<Array>} A promise that resolves to an array of channels that match the search criteria, or an empty array if no matching channels are found.
+ * 
+ * Error Responses:
+ * - `{ error: 1, error_message: "Channel not found" }` if the specified channel ID does not exist or is soft-deleted.
+ * - `{ error: 1, error_message: "Workspace not found" }` if the specified workspace ID does not exist or is soft-deleted.
+ * - `{ error: 1, error_message: "User not found" }` if the specified user ID does not exist or is soft-deleted.
  */
 export const readChannel = async (request) => {
     let query = "SELECT * FROM channels WHERE deleted_at = NULL"
@@ -205,6 +220,12 @@ export const readChannel = async (request) => {
  * @param {number} [request.body.role] - The role ID to filter by (optional).
  * @returns {Promise<Array|Object>} A promise that resolves to the result of the query if successful, 
  * or an error object with an error code and message if any filter does not match a valid record.
+ * 
+ * Error Responses:
+ * - `{ error: 1, error_message: "Channel member not found" }` if the specified channel member ID does not exist or is soft-deleted.
+ * - `{ error: 1, error_message: "Channel not found" }` if the specified channel ID does not exist or is soft-deleted.
+ * - `{ error: 1, error_message: "User not found" }` if the specified user ID does not exist or is soft-deleted.
+ * - `{ error: 1, error_message: "Role not found" }` if the specified role ID does not exist or is invalid.
  */
 export const readChannelMember = async (request) => {
     let query = "SELECT * FROM channel_members WHERE deleted_at = NULL"
@@ -296,6 +317,11 @@ export const readChannelMember = async (request) => {
  * @param {boolean} [request.body.is_private] - The new private status of the channel (optional).
  * @param {number} [request.body.user_id] - The new user ID of the creator of the channel (optional).
  * @returns {Promise<Array|String>} A promise that resolves to the result of the update query, or an empty string if the channel does not exist or is already soft-deleted.
+ * 
+ * Error Responses:
+ * - `{ error: 1, error_message: "Channel not found" }` if the specified channel ID does not exist or is soft-deleted.
+ * - `{ error: 1, error_message: "Workspace not found" }` if the specified workspace ID does not exist or is soft-deleted.
+ * - `{ error: 1, error_message: "User not found" }` if the specified user ID does not exist or is soft-deleted.
  */
 export const updateChannel = async (request) => {
     const channelQuery = await pool.query("SELECT * FROM channels WHERE id = ? AND deleted_at = NULL", [
@@ -360,6 +386,12 @@ export const updateChannel = async (request) => {
  * @param {number} [request.body.role] - The new role ID to assign to the channel member (optional).
  * @returns {Promise<Array|Object>} A promise that resolves to the result of the update query if successful, 
  * or an error object with an error code and message if validation fails.
+ * 
+ * Error Responses:
+ * - `{ error: 1, error_message: "Channel member not found" }` if the specified channel member ID does not exist or is soft-deleted.
+ * - `{ error: 1, error_message: "Channel not found" }` if the specified channel ID does not exist or is soft-deleted.
+ * - `{ error: 1, error_message: "User not found" }` if the specified user ID does not exist or is soft-deleted.
+ * - `{ error: 1, error_message: "Role not found" }` if the specified role ID does not exist or is invalid.
  */
 
 export const updateChannelMember = async (request) => {
@@ -436,6 +468,9 @@ export const updateChannelMember = async (request) => {
  * @param {Object} request.body - The request body containing the ID of the channel to be deleted.
  * @param {number} request.body.id - The ID of the channel to be soft-deleted (required).
  * @returns {Promise<Array>} A promise that resolves to the result of the update query, or an empty array if the channel does not exist or is already soft-deleted.
+ * 
+ * Error Responses:
+ * - `{ error: 1, error_message: "Channel not found" }` if the specified channel ID does not exist or is soft-deleted.
  */
 export const deleteChannel = async (request) => {
     const channelQuery = await pool.query("SELECT * FROM channels WHERE id = ? AND deleted_at = NULL", [
@@ -465,6 +500,9 @@ export const deleteChannel = async (request) => {
  * @param {number} request.body.id - The ID of the channel member to delete (required).
  * @returns {Promise<Array|Object>} A promise that resolves to the result of the soft-delete query if successful, 
  * or an error object with an error code and message if the channel member does not exist.
+ * 
+ * Error Responses:
+ * - `{ error: 1, error_message: "Channel member not found" }` if the specified channel member ID does not exist or is soft-deleted.
  */
 
 export const deleteChannelMember = async (request) => {
