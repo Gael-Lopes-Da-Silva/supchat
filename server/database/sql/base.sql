@@ -1,3 +1,10 @@
+-- DATABASE
+CREATE DATABASE supchat;
+CREATE USER 'supchat'@'%' IDENTIFIED BY 'supchat';
+GRANT ALL PRIVILEGES ON supchat.* TO 'supchat'@'%';
+FLUSH PRIVILEGES;
+USE supchat;
+
 -- USERS
 CREATE TABLE users (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -9,8 +16,7 @@ CREATE TABLE users (
     link_facebook TINYINT(1) DEFAULT 0,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NULL,
-    deleted_at TIMESTAMP NULL,
-    FOREIGN KEY (status) REFERENCES status(id) ON DELETE CASCADE
+    deleted_at TIMESTAMP NULL
 );
 
 -- WORKSPACES
@@ -37,8 +43,7 @@ CREATE TABLE workspace_members (
     deleted_at TIMESTAMP NULL,
     UNIQUE (workspace_id, user_id),
     FOREIGN KEY (workspace_id) REFERENCES workspaces(id) ON DELETE CASCADE,
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-    FOREIGN KEY (role) REFERENCES roles(id) ON DELETE CASCADE
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
 -- WORKSPACE INVITATIONS
@@ -55,18 +60,6 @@ CREATE TABLE workspace_invitations (
     deleted_at TIMESTAMP NULL,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
     FOREIGN KEY (workspace_id) REFERENCES workspaces(id) ON DELETE CASCADE
-);
-
--- WORKSPACE PERMISSIONS
-CREATE TABLE workspace_permissions (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    user_id INT NULL,
-    workspace_id INT NOT NULL,
-    permission_id INT NOT NULL,
-    FOREIGN KEY (workspace_id) REFERENCES workspaces(id) ON DELETE CASCADE,
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-    FOREIGN KEY (permission_id) REFERENCES permissions(id) ON DELETE CASCADE,
-    UNIQUE (workspace_id, user_id, permission_id)
 );
 
 -- CHANNELS
@@ -94,20 +87,7 @@ CREATE TABLE channel_members (
     deleted_at TIMESTAMP NULL,
     UNIQUE (channel_id, user_id),
     FOREIGN KEY (channel_id) REFERENCES channels(id) ON DELETE CASCADE,
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-    FOREIGN KEY (role) REFERENCES roles(id) ON DELETE CASCADE
-);
-
--- CHANNEL PERMISSIONS
-CREATE TABLE channel_permissions (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    user_id INT NULL,
-    channel_id INT NOT NULL,
-    permission_id INT NOT NULL,
-    FOREIGN KEY (channel_id) REFERENCES channels(id) ON DELETE CASCADE,
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-    FOREIGN KEY (permission_id) REFERENCES permissions(id) ON DELETE CASCADE,
-    UNIQUE (channel_id, user_id, permission_id)
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
 -- MESSAGES
@@ -188,6 +168,30 @@ VALUES
     ('can_moderate'),
     ('can_manage_members');
 
+-- WORKSPACE PERMISSIONS
+CREATE TABLE workspace_permissions (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NULL,
+    workspace_id INT NOT NULL,
+    permission_id INT NOT NULL,
+    FOREIGN KEY (workspace_id) REFERENCES workspaces(id) ON DELETE CASCADE,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (permission_id) REFERENCES permissions(id) ON DELETE CASCADE,
+    UNIQUE (workspace_id, user_id, permission_id)
+);
+
+-- CHANNEL PERMISSIONS
+CREATE TABLE channel_permissions (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NULL,
+    channel_id INT NOT NULL,
+    permission_id INT NOT NULL,
+    FOREIGN KEY (channel_id) REFERENCES channels(id) ON DELETE CASCADE,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (permission_id) REFERENCES permissions(id) ON DELETE CASCADE,
+    UNIQUE (channel_id, user_id, permission_id)
+);
+    
 -- ROLES
 CREATE TABLE roles (
     id INT AUTO_INCREMENT PRIMARY KEY,

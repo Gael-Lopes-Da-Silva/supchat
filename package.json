@@ -1,5 +1,6 @@
 {
     "scripts": {
-        "start": "docker-compose up --build"
+        "start": "docker-compose up --build",
+        "clean": "docker-compose down"
     }
 }
