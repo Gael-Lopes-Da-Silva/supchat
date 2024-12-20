@@ -4,12 +4,13 @@ CREATE TABLE users (
     username VARCHAR(50) NOT NULL UNIQUE,
     email VARCHAR(100) NOT NULL UNIQUE,
     password TEXT NOT NULL,
-    status VARCHAR(20) NOT NULL,
+    status INT DEFAULT 0,
     link_google TINYINT(1) DEFAULT 0,
     link_facebook TINYINT(1) DEFAULT 0,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NULL,
-    deleted_at TIMESTAMP NULL
+    deleted_at TIMESTAMP NULL,
+    FOREIGN KEY (status) REFERENCES status(id) ON DELETE CASCADE
 );
 
 -- WORKSPACES
@@ -169,6 +170,23 @@ CREATE TABLE notifications (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
+
+-- STATUS
+CREATE TABLE status (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(50) NOT NULL UNIQUE
+);
+
+INSERT INTO status (name)
+VALUES
+    ('offline'),
+    ('online'),
+    ('inactive'),
+    ('do_not_disturb'),
+    ('mobile_offline'),
+    ('mobile_online'),
+    ('mobile_inactive'),
+    ('mobile_do_not_disturb');
 
 -- PERMISSIONS
 CREATE TABLE permissions (
