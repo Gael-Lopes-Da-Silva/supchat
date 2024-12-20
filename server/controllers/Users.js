@@ -23,6 +23,19 @@ import pool from "../database/db.js";
  * @returns {Promise<Array>} A promise that resolves to the result of the database insert query.
  */
 export const createUser = async (request) => {
+    if (request.body.status) {
+        const statusQuery = await pool.query("SELECT * FROM status WHERE id = ?", [
+            request.body.status
+        ]);
+
+        if (statusQuery == "") {
+            return {
+                error: 1,
+                error_message: "Status not found"
+            };
+        };
+    }
+
     return pool.query("INSERT INTO users (username, email, password, status, link_google, link_facebook) VALUES (?, ?, ?, ?, ?, ?)", [
         request.body.username,
         request.body.email,
@@ -54,21 +67,30 @@ export const loginUser = async (request) => {
     const userQuery = await pool.query("SELECT * FROM users WHERE email = ? AND deleted_at = NULL", [
         request.body.email
     ]);
-    
+
     if (userQuery == "") {
-        return "";
+        return {
+            error: 1,
+            error_message: "User not found"
+        };
     }
 
     if (request.body.password) {
         const match = await bcrypt.compare(request.body.password, userQuery[0].password);
-        return match ? userQuery : "";
+        return match ? userQuery : {
+            error: 1,
+            error_message: "Wrong password"
+        };
     }
 
     if (userQuery[0].link_google == 1 || userQuery[0].link_facebook == 1) {
         return userQuery;
     }
 
-    return "";
+    return {
+        error: 1,
+        error_message: "User not linked to any socials"
+    };
 }
 
 /**
@@ -91,8 +113,19 @@ export const loginUser = async (request) => {
 export const readUser = async (request) => {
     let query = "SELECT * FROM users WHERE deleted_at = NULL"
     let params = [];
-    
+
     if (request.body.id) {
+        const userQuery = await pool.query("SELECT * FROM users WHERE id = ? AND deleted_at = NULL", [
+            request.body.id
+        ]);
+
+        if (userQuery == "") {
+            return {
+                error: 1,
+                error_message: "User not found"
+            };
+        }
+
         query += " AND id = ?";
         params.push(request.body.id);
     }
@@ -108,6 +141,17 @@ export const readUser = async (request) => {
     }
 
     if (request.body.status) {
+        const statusQuery = await pool.query("SELECT * FROM status WHERE id = ?", [
+            request.body.status
+        ]);
+
+        if (statusQuery == "") {
+            return {
+                error: 1,
+                error_message: "Status not found"
+            };
+        };
+
         query += " AND status = ?";
         params.push(request.body.status);
     }
@@ -121,7 +165,7 @@ export const readUser = async (request) => {
         query += " AND link_facebook = ?";
         params.push(request.body.link_facebook);
     }
-    
+
     return pool.query(query, params);
 }
 
@@ -152,11 +196,27 @@ export const updateUser = async (request) => {
     const userQuery = await pool.query("SELECT * FROM users WHERE id = ? AND deleted_at = NULL", [
         request.body.id
     ]);
-    
+
     if (userQuery == "") {
-        return "";
+        return {
+            error: 1,
+            error_message: "User not found"
+        };
     }
-    
+
+    if (request.body.status) {
+        const statusQuery = await pool.query("SELECT * FROM status WHERE id = ?", [
+            request.body.status
+        ]);
+
+        if (statusQuery == "") {
+            return {
+                error: 1,
+                error_message: "Status not found"
+            };
+        };
+    }
+
     return pool.query("UPDATE users SET username = ?, email = ?, password = ?, status = ?, link_google = ?, link_facebook = ?, updated_at = NOW() WHERE id = ? AND deleted_at = NULL", [
         request.body.username || userQuery[0].username,
         request.body.email || userQuery[0].email,
@@ -184,6 +244,17 @@ export const updateUser = async (request) => {
  * @returns {Promise<Array>} A promise resolving to the result of the update query.
  */
 export const deleteUser = async (request) => {
+    const userQuery = await pool.query("SELECT * FROM users WHERE id = ? AND deleted_at = NULL", [
+        request.body.id
+    ]);
+
+    if (userQuery == "") {
+        return {
+            error: 1,
+            error_message: "User not found"
+        };
+    }
+
     return pool.query("UPDATE users SET deleted_at = NOW() WHERE id = ? AND deleted_at = NULL", [
         request.body.id
     ]);

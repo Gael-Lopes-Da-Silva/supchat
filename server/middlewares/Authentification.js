@@ -3,7 +3,7 @@ import dotenv from "dotenv/config";
 
 export function authentification(request, response, next) {
     let token = "";
-    
+
     if (request.headers.authorization && request.headers.authorization.split(' ')[0] === 'Bearer') {
         token = request.headers.authorization.split(' ')[1];
     } else {

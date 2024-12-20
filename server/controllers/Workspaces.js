@@ -27,7 +27,10 @@ export const createWorkspace = async (request) => {
     ]);
 
     if (userQuery == "") {
-        return "";
+        return {
+            error: 1,
+            error_message: "User not found"
+        };
     };
 
     return pool.query("INSERT INTO workspaces (name, description, is_private, user_id) VALUES (?, ?, ?, ?)", [
@@ -49,7 +52,7 @@ export const createWorkspace = async (request) => {
  * @param {Object} request.body - The request body containing the necessary parameters.
  * @param {number} request.body.user_id - The ID of the user to be added as a workspace member (required).
  * @param {number} request.body.workspace_id - The ID of the workspace to which the user is being added (required).
- * @param {string} request.body.role - The role to assign to the user in the workspace (required, e.g., "admin" or "member").
+ * @param {number} request.body.role - The role to assign to the user in the workspace (required, e.g., "admin" or "member").
  * @returns {Promise<Array|String>} A promise that resolves to the result of the membership insertion query, 
  * or an empty string if the user or workspace does not exist or is soft-deleted.
  */
@@ -59,7 +62,10 @@ export const createWorkspaceMember = async (request) => {
     ]);
 
     if (userQuery == "") {
-        return "";
+        return {
+            error: 1,
+            error_message: "User not found"
+        };
     }
 
     const workspaceQuery = await pool.query("SELECT * FROM workspaces WHERE id = ? AND deleted_at = NULL", [
@@ -67,7 +73,21 @@ export const createWorkspaceMember = async (request) => {
     ]);
 
     if (workspaceQuery == "") {
-        return "";
+        return {
+            error: 1,
+            error_message: "Workspace not found"
+        };
+    }
+
+    const roleQuery = await pool.query("SELECT * FROM roles WHERE id = ?", [
+        request.body.role
+    ]);
+
+    if (roleQuery == "") {
+        return {
+            error: 1,
+            error_message: "Role not found"
+        };
     }
 
     return pool.query("INSERT INTO workspace_members (workspace_id, user_id, role) VALUES (?, ?, ?)", [
@@ -100,32 +120,54 @@ export const createWorkspaceMember = async (request) => {
 export const readWorkspace = async () => {
     let query = "SELECT * FROM workspaces WHERE deleted_at = NULL"
     let params = [];
-    
+
     if (request.body.id) {
+        const workspaceQuery = await pool.query("SELECT * FROM workspaces WHERE id = ? AND deleted_at = NULL", [
+            request.body.id
+        ]);
+
+        if (workspaceQuery == "") {
+            return {
+                error: 1,
+                error_message: "Workspace not found"
+            };
+        }
+
         query += " AND id = ?";
         params.push(request.body.id);
     }
-    
+
     if (request.body.name) {
         query += " AND name = ?";
         params.push(request.body.name);
     }
-    
+
     if (request.body.description) {
         query += " AND description = ?";
         params.push(request.body.description);
     }
-    
+
     if (request.body.is_private) {
         query += " AND is_private = ?";
         params.push(request.body.is_private);
     }
-    
+
     if (request.body.user_id) {
+        const userQuery = await pool.query("SELECT * FROM users WHERE id = ? AND deleted_at = NULL", [
+            request.body.user_id
+        ]);
+
+        if (userQuery == "") {
+            return {
+                error: 1,
+                error_message: "User not found"
+            };
+        }
+
         query += " AND user_id = ?";
         params.push(request.body.user_id);
     }
-    
+
     return pool.query(query, params);
 };
 
@@ -141,33 +183,77 @@ export const readWorkspace = async () => {
  * @param {number} [request.body.id] - Filter by workspace member ID (optional).
  * @param {number} [request.body.workspace_id] - Filter by workspace ID (optional).
  * @param {number} [request.body.user_id] - Filter by user ID (optional).
- * @param {string} [request.body.role] - Filter by member role (optional, e.g., "admin" or "member").
+ * @param {number} [request.body.role] - Filter by member role (optional, e.g., "admin" or "member").
  * @returns {Promise<Array>} A promise that resolves to an array of matching workspace member records or an empty array if none match.
  */
 export const readWorkspaceMember = async () => {
     let query = "SELECT * FROM workspace_members WHERE deleted_at = NULL"
     let params = [];
-    
+
     if (request.body.id) {
+        const workspaceMemberQuery = await pool.query("SELECT * FROM workspace_members WHERE id = ? AND deleted_at = NULL", [
+            request.body.id
+        ]);
+
+        if (workspaceMemberQuery == "") {
+            return {
+                error: 1,
+                error_message: "Workspace member not found"
+            };
+        }
+
         query += " AND id = ?";
         params.push(request.body.id);
     }
-    
+
     if (request.body.workspace_id) {
+        const workspaceQuery = await pool.query("SELECT * FROM workspaces WHERE id = ? AND deleted_at = NULL", [
+            request.body.workspace_id
+        ]);
+
+        if (workspaceQuery == "") {
+            return {
+                error: 1,
+                error_message: "Workspace not found"
+            };
+        }
+
         query += " AND workspace_id = ?";
         params.push(request.body.workspace_id);
     }
-    
+
     if (request.body.user_id) {
+        const userQuery = await pool.query("SELECT * FROM users WHERE id = ? AND deleted_at = NULL", [
+            request.body.user_id
+        ]);
+
+        if (userQuery == "") {
+            return {
+                error: 1,
+                error_message: "User not found"
+            };
+        }
+
         query += " AND user_id = ?";
         params.push(request.body.user_id);
     }
-    
+
     if (request.body.role) {
+        const roleQuery = await pool.query("SELECT * FROM roles WHERE id = ?", [
+            request.body.workspace_id
+        ]);
+
+        if (roleQuery == "") {
+            return {
+                error: 1,
+                error_message: "Role not found"
+            };
+        }
+
         query += " AND role = ?";
         params.push(request.body.role);
     }
-    
+
     return pool.query(query, params);
 };
 
@@ -196,11 +282,27 @@ export const updateWorkspace = async (request) => {
     const workspaceQuery = await pool.query("SELECT * FROM workspaces WHERE id = ? AND deleted_at = NULL", [
         request.body.id
     ]);
-    
+
     if (workspaceQuery == "") {
-        return "";
+        return {
+            error: 1,
+            error_message: "Workspace not found"
+        };
     }
-    
+
+    if (request.body.user_id) {
+        const userQuery = await pool.query("SELECT * FROM users WHERE id = ? AND deleted_at = NULL", [
+            request.body.user_id
+        ]);
+
+        if (userQuery == "") {
+            return {
+                error: 1,
+                error_message: "User not found"
+            };
+        }
+    }
+
     return pool.query("UPDATE workspaces SET name = ?, description = ?, is_private = ?, user_id = ?, updated_at = NOW() WHERE id = ? AND deleted_at = NULL", [
         request.body.name || workspaceQuery[0].name,
         request.body.description || workspaceQuery[0].description,
@@ -223,18 +325,60 @@ export const updateWorkspace = async (request) => {
  * @param {number} request.body.id - The ID of the workspace member to update (required).
  * @param {number} [request.body.workspace_id] - The new workspace ID for the member (optional).
  * @param {number} [request.body.user_id] - The new user ID for the member (optional).
- * @param {string} [request.body.role] - The new role for the workspace member (optional, e.g., "admin" or "member").
+ * @param {number} [request.body.role] - The new role for the workspace member (optional, e.g., "admin" or "member").
  * @returns {Promise<Array|String>} A promise that resolves to the result of the update query, or an empty string if the workspace member does not exist or is soft-deleted.
  */
 export const updateWorkspaceMember = async (request) => {
-    const workspaceMemberQuery = await pool.query("SELECT * FROM workspaces WHERE id = ? AND deleted_at = NULL", [
+    const workspaceMemberQuery = await pool.query("SELECT * FROM workspace_members WHERE id = ? AND deleted_at = NULL", [
         request.body.id
     ]);
-    
+
     if (workspaceMemberQuery == "") {
-        return "";
+        return {
+            error: 1,
+            error_message: "Workspace member not found"
+        };
     }
-    
+
+    if (request.body.user_id) {
+        const userQuery = await pool.query("SELECT * FROM users WHERE id = ? AND deleted_at = NULL", [
+            request.body.user_id
+        ]);
+
+        if (userQuery == "") {
+            return {
+                error: 1,
+                error_message: "User not found"
+            };
+        }
+    }
+
+    if (request.body.workspace_id) {
+        const workspaceQuery = await pool.query("SELECT * FROM workspaces WHERE id = ? AND deleted_at = NULL", [
+            request.body.workspace_id
+        ]);
+
+        if (workspaceQuery == "") {
+            return {
+                error: 1,
+                error_message: "Workspace not found"
+            };
+        }
+    }
+
+    if (request.body.role) {
+        const roleQuery = await pool.query("SELECT * FROM roles WHERE id = ?", [
+            request.body.workspace_id
+        ]);
+
+        if (roleQuery == "") {
+            return {
+                error: 1,
+                error_message: "Role not found"
+            };
+        }
+    }
+
     return pool.query("UPDATE workspace_members SET workspace_id = ?, user_id = ?, role = ? WHERE id = ? AND deleted_at = NULL", [
         request.body.workspace_id || workspaceMemberQuery[0].workspace_id,
         request.body.user_id || workspaceMemberQuery[0].user_id,
@@ -259,6 +403,17 @@ export const updateWorkspaceMember = async (request) => {
  * @returns {Promise<Array|String>} A promise that resolves to the result of the update query, or an empty string if the workspace does not exist or is already soft-deleted.
  */
 export const deleteWorkspace = async (request) => {
+    const workspaceQuery = await pool.query("SELECT * FROM workspaces WHERE id = ? AND deleted_at = NULL", [
+        request.body.id
+    ]);
+
+    if (workspaceQuery == "") {
+        return {
+            error: 1,
+            error_message: "Workspace not found"
+        };
+    }
+
     return pool.query("UPDATE workspaces SET deleted_at = NOW() WHERE id = ? AND deleted_at = NULL", [
         request.body.id
     ]);
@@ -276,6 +431,17 @@ export const deleteWorkspace = async (request) => {
  * @returns {Promise<Array|String>} A promise that resolves to the result of the update query, or an empty string if the workspace member does not exist or is already soft-deleted.
  */
 export const deleteWorkspaceMember = async (request) => {
+    const workspaceMemberQuery = await pool.query("SELECT * FROM workspace_members WHERE id = ? AND deleted_at = NULL", [
+        request.body.id
+    ]);
+
+    if (workspaceMemberQuery == "") {
+        return {
+            error: 1,
+            error_message: "Workspace member not found"
+        };
+    }
+
     return pool.query("UPDATE workspace_members SET deleted_at = NOW() WHERE id = ? AND deleted_at = NULL", [
         request.body.id
     ]);

@@ -28,7 +28,7 @@ const router = express.Router();
 //   result: [workspace]
 router.post("/create", (request, response) => {
     createWorkspace(request).then((result) => {
-        if (result !== "") {
+        if (!result.error && result !== "") {
             response.status(201).json({
                 when: "Workspaces > CreateWorkspace",
                 result: result,
@@ -38,7 +38,7 @@ router.post("/create", (request, response) => {
             response.status(500).json({
                 when: "Workspaces > CreateWorkspace",
                 error: 1,
-                error_message: "User not found",
+                error_message: result.error_message ? result.error_message : "Could not create workspace",
             });
         }
     }).catch((error) => {
@@ -60,7 +60,7 @@ router.post("/create", (request, response) => {
 //   result: [workspace_member]
 router.post("/members/create", (request, response) => {
     createWorkspaceMember(request).then((result) => {
-        if (result !== "") {
+        if (!result.error && result !== "") {
             response.status(201).json({
                 when: "Workspaces > CreateWorkspaceMember",
                 result: result,
@@ -70,7 +70,7 @@ router.post("/members/create", (request, response) => {
             response.status(404).json({
                 when: "Workspaces > CreateWorkspaceMember",
                 error: 1,
-                error_message: "User or workspace not found",
+                error_message: result.error_message ? result.error_message : "Could not create workspace member",
             });
         }
     }).catch((error) => {
@@ -98,7 +98,7 @@ router.post("/members/create", (request, response) => {
 //   result: [workspace]
 router.get("/read", (request, response) => {
     readWorkspace().then((result) => {
-        if (result !== "") {
+        if (!result.error && result !== "") {
             response.status(200).json({
                 when: "Workspaces > ReadWorkspace",
                 result: result,
@@ -108,7 +108,7 @@ router.get("/read", (request, response) => {
             response.status(404).json({
                 when: "Workspaces > ReadWorkspace",
                 error: 1,
-                error_message: "Workspace not found",
+                error_message: result.error_message ? result.error_message : "Could not read workspace",
             });
         }
     }).catch((error) => {
@@ -131,7 +131,7 @@ router.get("/read", (request, response) => {
 //   result: [workspace_member]
 router.get("/members/read", (request, response) => {
     readWorkspaceMember().then((result) => {
-        if (result !== "") {
+        if (!result.error && result !== "") {
             response.status(200).json({
                 when: "Workspaces > ReadWorkspaceMember",
                 result: result,
@@ -141,7 +141,7 @@ router.get("/members/read", (request, response) => {
             response.status(404).json({
                 when: "Workspaces > ReadWorkspaceMember",
                 error: 1,
-                error_message: "User or workspace not found",
+                error_message: result.error_message ? result.error_message : "Could not read workspace member",
             });
         }
     }).catch((error) => {
@@ -169,7 +169,7 @@ router.get("/members/read", (request, response) => {
 //   result: [workspace]
 router.put("/update", (request, response) => {
     updateWorkspace(request).then((result) => {
-        if (result !== "") {
+        if (!result.error && result !== "") {
             response.status(200).json({
                 when: "Workspaces > UpdateWorkspace",
                 result: result,
@@ -179,7 +179,7 @@ router.put("/update", (request, response) => {
             response.status(404).json({
                 when: "Workspaces > UpdateWorkspace",
                 error: 1,
-                error_message: "Workspace not found",
+                error_message: result.error_message ? result.error_message : "Could not update workspace",
             });
         }
     }).catch((error) => {
@@ -202,7 +202,7 @@ router.put("/update", (request, response) => {
 //   result: [workspace_member]
 router.put("/members/update", (request, response) => {
     updateWorkspaceMember(request).then((result) => {
-        if (result !== "") {
+        if (!result.error && result !== "") {
             response.status(200).json({
                 when: "Workspaces > UpdateWorkspaceMember",
                 result: result,
@@ -212,7 +212,7 @@ router.put("/members/update", (request, response) => {
             response.status(404).json({
                 when: "Workspaces > UpdateWorkspaceMember",
                 error: 1,
-                error_message: "Workspace member not found",
+                error_message: result.error_message ? result.error_message : "Could not update workspace member",
             });
         }
     }).catch((error) => {
@@ -236,7 +236,7 @@ router.put("/members/update", (request, response) => {
 //   result: [workspace]
 router.delete("/delete", (request, response) => {
     deleteWorkspace(request).then((result) => {
-        if (result !== "") {
+        if (!result.error && result !== "") {
             response.status(200).json({
                 when: "Workspaces > DeleteWorkspace",
                 result: result,
@@ -246,7 +246,7 @@ router.delete("/delete", (request, response) => {
             response.status(404).json({
                 when: "Workspaces > DeleteWorkspace",
                 error: 1,
-                error_message: "Workspace not found",
+                error_message: result.error_message ? result.error_message : "Could not delete workspace",
             });
         }
     }).catch((error) => {
@@ -266,7 +266,7 @@ router.delete("/delete", (request, response) => {
 //   result: [workspace_member]
 router.delete("/members/delete", (request, response) => {
     deleteWorkspaceMember(request).then((result) => {
-        if (result !== "") {
+        if (!result.error && result !== "") {
             response.status(200).json({
                 when: "Workspaces > DeleteWorkspaceMember",
                 result: result,
@@ -276,7 +276,7 @@ router.delete("/members/delete", (request, response) => {
             response.status(404).json({
                 when: "Workspaces > DeleteWorkspaceMember",
                 error: 1,
-                error_message: "Workspace member not found",
+                error_message: result.error_message ? result.error_message : "Could not delete workspace member",
             });
         }
     }).catch((error) => {

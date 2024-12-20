@@ -28,11 +28,19 @@ import {
 //   result: [user]
 router.post("/create", (request, response) => {
     createUser(request).then((result) => {
-        response.status(201).json({
-            when: "Users > CreateUser",
-            result: result,
-            error: 0,
-        });
+        if (!result.error && result !== "") {
+            response.status(201).json({
+                when: "Users > CreateUser",
+                result: result,
+                error: 0,
+            });
+        } else {
+            response.status(404).json({
+                when: "Users > CreateUser",
+                error: 1,
+                error_message: result.error_message ? result.error_message : "Could not create user",
+            });
+        }
     }).catch((error) => {
         response.status(500).json({
             when: "Users > CreateUser",
@@ -56,7 +64,7 @@ router.post("/create", (request, response) => {
 //   result: [user]
 router.get("/login", (request, response) => {
     loginUser(request).then((result) => {
-        if (result !== "") {
+        if (!result.error && result !== "") {
             const token = jsonwebtoken.sign({ id: result[0].id }, process.env.SECRET, { expiresIn: "24h" });
 
             response.status(202).json({
@@ -69,7 +77,7 @@ router.get("/login", (request, response) => {
             response.status(404).json({
                 when: "Users > LoginUser",
                 error: 1,
-                error_message: "User not found",
+                error_message: result.error_message ? result.error_message : "Could not login user",
             });
         }
     }).catch((error) => {
@@ -95,7 +103,7 @@ router.get("/login", (request, response) => {
 //   result: [user]
 router.get("/read", (request, response) => {
     readUser(request).then((result) => {
-        if (result !== "") {
+        if (!result.error && result !== "") {
             response.status(202).json({
                 when: "Users > ReadUser",
                 result: result,
@@ -105,7 +113,7 @@ router.get("/read", (request, response) => {
             response.status(404).json({
                 when: "Users > ReadUser",
                 error: 1,
-                error_message: "User not found",
+                error_message: result.error_message ? result.error_message : "Could not read user",
             });
         }
     }).catch((error) => {
@@ -135,7 +143,7 @@ router.get("/read", (request, response) => {
 //   result: [user]
 router.put("/update", (request, response) => {
     updateUser(request).then((result) => {
-        if (result !== "") {
+        if (!result.error && result !== "") {
             response.status(202).json({
                 when: "Users > UpdateUser",
                 result: result,
@@ -145,7 +153,7 @@ router.put("/update", (request, response) => {
             response.status(404).json({
                 when: "Users > UpdateUser",
                 error: 1,
-                error_message: "User not found",
+                error_message: result.error_message ? result.error_message : "Could not update user",
             });
         }
     }).catch((error) => {
@@ -169,7 +177,7 @@ router.put("/update", (request, response) => {
 //   result: [user]
 router.delete("/delete", (request, response) => {
     deleteUser(request).then((result) => {
-        if (result !== "") {
+        if (!result.error && result !== "") {
             response.status(202).json({
                 when: "Users > DeleteUser",
                 result: result,
@@ -179,7 +187,7 @@ router.delete("/delete", (request, response) => {
             response.status(404).json({
                 when: "Users > DeleteUser",
                 error: 1,
-                error_message: "User not found",
+                error_message: result.error_message ? result.error_message : "Could not delete user",
             });
         }
     }).catch((error) => {

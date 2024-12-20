@@ -98,22 +98,6 @@ CREATE TABLE channel_members (
     FOREIGN KEY (role) REFERENCES roles(id) ON DELETE CASCADE
 );
 
--- CHANNEL INVITATIONS
-CREATE TABLE channel_invitations (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    user_id INT NOT NULL,
-    channel_id INT NOT NULL,
-    token VARCHAR(50) NOT NULL,
-    maximum_use INT NOT NULL,
-    used_by INT NOT NULL,
-    expire_at TIMESTAMP NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP NULL,
-    deleted_at TIMESTAMP NULL,
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-    FOREIGN KEY (channel_id) REFERENCES channels(id) ON DELETE CASCADE
-);
-
 -- CHANNEL PERMISSIONS
 CREATE TABLE channel_permissions (
     id INT AUTO_INCREMENT PRIMARY KEY,
