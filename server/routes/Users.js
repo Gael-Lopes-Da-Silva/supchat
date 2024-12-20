@@ -21,7 +21,7 @@ import {
 //   username: string (required)
 //   email: string (required)
 //   password: string (required)
-//   status: string (required)
+//   status: number (optional)
 //   link_google: boolean (optional)
 //   link_facebook: boolean (optional)
 // return:
@@ -84,11 +84,11 @@ router.get("/login", (request, response) => {
 // GET /read
 //
 // body:
-//   id: integer (optional)
+//   id: number (optional)
 //   username: string (optional)
 //   email: string (optional)
 //   password: string (optional)
-//   status: string (optional)
+//   status: number (optional)
 //   link_google: boolean (optional)
 //   link_facebook: boolean (optional)
 // return:
@@ -124,11 +124,11 @@ router.get("/read", (request, response) => {
 // PUT /update
 //
 // body:
-//   id: integer (required)
+//   id: number (required)
 //   username: string (optional)
 //   email: string (optional)
 //   password: string (optional)
-//   status: string (optional)
+//   status: number (optional)
 //   link_google: boolean (optional)
 //   link_facebook: boolean (optional)
 // return:
@@ -164,7 +164,7 @@ router.put("/update", (request, response) => {
 // DELETE /delete
 //
 // body:
-//   id: integer (required)
+//   id: number (required)
 // return:
 //   result: [user]
 router.delete("/delete", (request, response) => {

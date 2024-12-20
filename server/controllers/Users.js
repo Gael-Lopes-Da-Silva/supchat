@@ -17,9 +17,9 @@ import pool from "../database/db.js";
  * @param {string} request.body.username - The username of the new user (required).
  * @param {string} request.body.email - The email address of the new user (required).
  * @param {string} request.body.password - The plaintext password of the new user (required).
- * @param {string} request.body.status - The status of the user (optional).
- * @param {string} [request.body.link_google] - The link to Google account (optional).
- * @param {string} [request.body.link_facebook] - The link to Facebook account (optional).
+ * @param {number} [request.body.status] - The status of the user (optional).
+ * @param {boolean} [request.body.link_google] - The link to Google account (optional).
+ * @param {boolean} [request.body.link_facebook] - The link to Facebook account (optional).
  * @returns {Promise<Array>} A promise that resolves to the result of the database insert query.
  */
 export const createUser = async (request) => {
@@ -27,9 +27,9 @@ export const createUser = async (request) => {
         request.body.username,
         request.body.email,
         bcrypt.hashSync(request.body.password, 10),
-        request.body.status,
-        request.body.link_google || 0,
-        request.body.link_facebook || 0
+        request.body.status || 0,
+        request.body.link_google || false,
+        request.body.link_facebook || false
     ]);
 }
 
@@ -80,10 +80,10 @@ export const loginUser = async (request) => {
  * 
  * @param {Object} request - The HTTP request object containing filter criteria.
  * @param {Object} request.body - The request body containing optional filter parameters.
- * @param {string} [request.body.id] - Filter by the user's ID (optional).
+ * @param {number} [request.body.id] - Filter by the user's ID (optional).
  * @param {string} [request.body.username] - Filter by the user's username (optional).
  * @param {string} [request.body.email] - Filter by the user's email address (optional).
- * @param {string} [request.body.status] - Filter by the user's status (optional).
+ * @param {number} [request.body.status] - Filter by the user's status (optional).
  * @param {boolean} [request.body.link_google] - Filter by Google-linked accounts (optional).
  * @param {boolean} [request.body.link_facebook] - Filter by Facebook-linked accounts (optional).
  * @returns {Promise<Array>} A promise that resolves to an array of matching user records or an empty array if none match.
@@ -138,11 +138,11 @@ export const readUser = async (request) => {
  * 
  * @param {Object} request - The HTTP request object containing user update data.
  * @param {Object} request.body - The request body containing user update parameters.
- * @param {string} request.body.id - The ID of the user to update (required).
+ * @param {number} request.body.id - The ID of the user to update (required).
  * @param {string} [request.body.username] - The new username (optional).
  * @param {string} [request.body.email] - The new email address (optional).
  * @param {string} [request.body.password] - The new plaintext password (optional; hashed before storage).
- * @param {string} [request.body.status] - The new user status (optional).
+ * @param {number} [request.body.status] - The new user status (optional).
  * @param {boolean} [request.body.link_google] - Whether the account is linked to Google (optional).
  * @param {boolean} [request.body.link_facebook] - Whether the account is linked to Facebook (optional).
  * @returns {Promise<Array|String>} A promise resolving to the updated user record as an array, 
@@ -180,7 +180,7 @@ export const updateUser = async (request) => {
  * 
  * @param {Object} request - The HTTP request object containing the user ID to delete.
  * @param {Object} request.body - The request body containing the deletion parameter.
- * @param {string} request.body.id - The ID of the user to delete (required).
+ * @param {number} request.body.id - The ID of the user to delete (required).
  * @returns {Promise<Array>} A promise resolving to the result of the update query.
  */
 export const deleteUser = async (request) => {

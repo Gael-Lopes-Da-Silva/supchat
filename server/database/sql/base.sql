@@ -31,13 +31,14 @@ CREATE TABLE workspace_members (
     id INT AUTO_INCREMENT PRIMARY KEY,
     workspace_id INT NOT NULL,
     user_id INT NOT NULL,
-    role VARCHAR(20) NOT NULL,
+    role INT NOT NULL,
     added_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NULL,
     deleted_at TIMESTAMP NULL,
     UNIQUE (workspace_id, user_id),
     FOREIGN KEY (workspace_id) REFERENCES workspaces(id) ON DELETE CASCADE,
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (role) REFERENCES roles(id) ON DELETE CASCADE
 );
 
 -- WORKSPACE INVITATIONS
@@ -87,13 +88,14 @@ CREATE TABLE channel_members (
     id INT AUTO_INCREMENT PRIMARY KEY,
     channel_id INT NOT NULL,
     user_id INT NOT NULL,
-    role VARCHAR(20) NOT NULL,
+    role INT NOT NULL,
     added_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NULL,
     deleted_at TIMESTAMP NULL,
     UNIQUE (channel_id, user_id),
     FOREIGN KEY (channel_id) REFERENCES channels(id) ON DELETE CASCADE,
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (role) REFERENCES roles(id) ON DELETE CASCADE
 );
 
 -- CHANNEL INVITATIONS
