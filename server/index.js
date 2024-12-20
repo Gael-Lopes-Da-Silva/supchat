@@ -32,8 +32,9 @@ pool.getConnection().then((connection) => {
     connection.release();
 }).catch((error) => {
     console.error({
-        error: "Database Connection Error",
-        message: error.message,
+        when: "Index > ConnectDB",
+        error: 1,
+        error_message: error.message,
     });
 
     pool.end();
