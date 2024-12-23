@@ -191,15 +191,15 @@ CREATE TABLE channel_permissions (
     FOREIGN KEY (permission_id) REFERENCES permissions(id) ON DELETE CASCADE,
     UNIQUE (channel_id, user_id, permission_id)
 );
-    
+
 -- ROLES
 CREATE TABLE roles (
     id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(50) NOT NULL UNIQUE
 );
 
-INSERT INTO roles (name) 
-VALUES 
+INSERT INTO roles (name)
+VALUES
     ('admin'),
     ('member'),
     ('guest');
