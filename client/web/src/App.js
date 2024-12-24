@@ -4,14 +4,14 @@ import LoginPage from './pages/LoginPage/LoginPage';
 import DashboardPage from './pages/DashboardPage/DashboardPage';
 
 const App = () => {
-  return (
-    <Router>
-      <Routes>
-        <Route path="/" element={<LoginPage />} />
-        <Route path="/dashboard" element={<DashboardPage />} />
-      </Routes>
-    </Router>
-  );
+    return (
+        <Router>
+            <Routes>
+                <Route path="/" element={<LoginPage />} />
+                <Route path="/dashboard" element={<DashboardPage />} />
+            </Routes>
+        </Router>
+    );
 };
 
 export default App;
