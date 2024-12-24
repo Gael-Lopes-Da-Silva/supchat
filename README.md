@@ -15,12 +15,15 @@ Usage
 Setup
 ------------------------------------------------------------------
 
-An example of .env file:
+Example of .env file:
 ```
+DB_PORT=8000
 DB_HOST=localhost
 DB_USER=supchat
 DB_PASSWORD=supchat
 DB_NAME=supchat
-POST=3000
-SECRET=SOMESECRETKEY
+
+API_PORT=3000
+
+SECRET=YOURSECRETKEY
 ```
