@@ -8,6 +8,7 @@ import {
     StyleSheet,
     TextInput,
     TouchableOpacity,
+    BackHandler,
 } from "react-native";
 
 const styles = StyleSheet.create({
@@ -17,7 +18,7 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
     },
-    
+
     container: {
         backgroundColor: "#fffceb",
         padding: 20,
@@ -37,11 +38,11 @@ const styles = StyleSheet.create({
         marginBottom: 20,
         textDecorationLine: "underline"
     },
-    
+
     form: {
         gap: 30,
     },
-    
+
     input: {
         backgroundColor: "#fffceb",
         fontWeight: "bold",
@@ -52,11 +53,11 @@ const styles = StyleSheet.create({
         borderWidth: 3,
         boxShadow: "#333 5px 5px 0px",
     },
-    
+
     label: {
         fontWeight: "bold",
     },
-    
+
     button: {
         padding: 10,
         backgroundColor: "#fffceb",
@@ -66,7 +67,7 @@ const styles = StyleSheet.create({
         borderWidth: 3,
         boxShadow: "#333 5px 5px 0px",
     },
-    
+
     buttonText: {
         textAlign: "center",
         fontWeight: "bold",
@@ -74,10 +75,8 @@ const styles = StyleSheet.create({
 });
 
 class App extends React.Component {
-    login() {
-        
-    }
-    
+    login() { }
+
     render() {
         return (
             <View style={styles.main}>
