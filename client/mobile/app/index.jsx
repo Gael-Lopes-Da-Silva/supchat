@@ -1,5 +1,7 @@
 import * as React from "react";
 
+import { loginUser } from '../services/auth';
+
 import {
     Text,
     View,
@@ -24,8 +26,7 @@ const styles = StyleSheet.create({
         borderStyle: "solid",
         borderColor: '#333',
         borderWidth: 3,
-        borderBottomWidth: 5,
-        borderRightWidth: 5,
+        boxShadow: "#333 5px 5px 0px",
     },
 
     h1: {
@@ -38,33 +39,37 @@ const styles = StyleSheet.create({
     },
     
     form: {
-        gap: 10,
+        gap: 30,
     },
     
     input: {
         backgroundColor: "#fffceb",
+        fontWeight: "bold",
+        padding: 10,
         borderRadius: 15,
         borderStyle: "solid",
         borderColor: '#333',
         borderWidth: 3,
-        borderBottomWidth: 5,
-        borderRightWidth: 5,
+        boxShadow: "#333 5px 5px 0px",
+    },
+    
+    label: {
+        fontWeight: "bold",
     },
     
     button: {
+        padding: 10,
         backgroundColor: "#fffceb",
         borderRadius: 15,
         borderStyle: "solid",
         borderColor: '#333',
         borderWidth: 3,
-        borderBottomWidth: 5,
-        borderRightWidth: 5,
+        boxShadow: "#333 5px 5px 0px",
     },
     
     buttonText: {
         textAlign: "center",
         fontWeight: "bold",
-        margin: 5,
     }
 });
 
@@ -79,10 +84,16 @@ class App extends React.Component {
                 <View style={styles.container}>
                     <Text style={styles.h1}>Connexion</Text>
                     <View style={styles.form}>
-                        <TextInput style={styles.input} placeholder="Email" />
-                        <TextInput style={styles.input} placeholder="Password" secureTextEntry={true} />
+                        <View>
+                            <Text style={styles.label}>Email</Text>
+                            <TextInput style={styles.input} />
+                        </View>
+                        <View>
+                            <Text style={styles.label}>Mot de passe</Text>
+                            <TextInput style={styles.input} secureTextEntry={true} />
+                        </View>
                         <TouchableOpacity onPress={this.login} style={styles.button}>
-                            <Text style={styles.buttonText}>Connexion</Text>
+                            <Text style={styles.buttonText}>Se Connecter</Text>
                         </TouchableOpacity>
                     </View>
                 </View>
