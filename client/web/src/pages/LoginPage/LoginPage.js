@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
+
 import InputField from '../../components/InputField/InputField';
-import Button from '../../components/Button';
+import Button from '../../components/Button/Button';
+
 import { loginUser } from '../../services/auth';
 import './LoginPage.css';
 

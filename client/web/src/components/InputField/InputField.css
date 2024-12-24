@@ -15,15 +15,18 @@
 .input-box {
     width: 100%;
     padding: 0.8rem;
-    border: 1px solid #ccc;
-    border-radius: 6px;
+    background-color: #fffceb;
+    border: solid 3px #333;
+    box-shadow: #333 5px 5px 0px;
+    border-radius: 15px;
     font-size: 1rem;
+    font-weight: bold;
     box-sizing: border-box;
-    transition: border-color 0.3s ease;
+    transition: all 0.3s ease;
 }
 
 .input-box:focus {
-    border-color: #4e54c8;
+    border-color: #f77066;
+    box-shadow: #f77066 5px 5px 0px;
     outline: none;
-    box-shadow: 0 0 5px rgba(78, 84, 200, 0.5);
 }
