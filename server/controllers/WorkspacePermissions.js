@@ -25,7 +25,7 @@ export const createWorkspacePermission = async (request) => {
             request.body.user_id
         ]);
 
-        if (!user.length) return {
+        if (!user) return {
             error: 1,
             error_message: "User not found"
         };
@@ -41,7 +41,7 @@ export const createWorkspacePermission = async (request) => {
             request.body.workspace_id
         ]);
 
-        if (!workspace.length) return {
+        if (!workspace) return {
             error: 1,
             error_message: "Workspace not found"
         };
@@ -57,7 +57,7 @@ export const createWorkspacePermission = async (request) => {
             request.body.permission_id
         ]);
 
-        if (!permission.length) return {
+        if (!permission) return {
             error: 1,
             error_message: "Permission not found"
         };
@@ -84,7 +84,7 @@ export const readWorkspacePermission = async (request) => {
             request.body.user_id
         ]);
 
-        if (!user.length) return {
+        if (!user) return {
             error: 1,
             error_message: "User not found"
         };
@@ -103,7 +103,7 @@ export const readWorkspacePermission = async (request) => {
             request.body.workspace_id
         ]);
 
-        if (!workspace.length) return {
+        if (!workspace) return {
             error: 1,
             error_message: "Workspace not found"
         };
@@ -122,7 +122,7 @@ export const readWorkspacePermission = async (request) => {
             request.body.permission_id
         ]);
 
-        if (!permission.length) {
+        if (!permission) {
             return {
                 error: 1,
                 error_message: "Permission not found"
@@ -133,7 +133,7 @@ export const readWorkspacePermission = async (request) => {
         params.push(request.body.permission_id);
     }
 
-    if (where.length > 0) {
+    if (where > 0) {
         query += " WHERE " + where.join(" AND ");
     }
 
@@ -171,7 +171,7 @@ export const deleteWorkspacePermission = async (request) => {
             request.body.user_id
         ]);
 
-        if (!user.length) return {
+        if (!user) return {
             error: 1,
             error_message: "User not found"
         };
@@ -187,7 +187,7 @@ export const deleteWorkspacePermission = async (request) => {
             request.body.workspace_id
         ]);
 
-        if (!workspace.length) return {
+        if (!workspace) return {
             error: 1,
             error_message: "Workspace not found"
         };
@@ -203,7 +203,7 @@ export const deleteWorkspacePermission = async (request) => {
             request.body.permission_id
         ]);
 
-        if (!permission.length) return {
+        if (!permission) return {
             error: 1,
             error_message: "Permission not found"
         };

@@ -26,7 +26,7 @@ export const createUser = async (request) => {
             request.body.status_id
         ]);
 
-        if (!status.length) return {
+        if (!status) return {
             error: 1,
             error_message: "Status not found"
         };
@@ -66,7 +66,7 @@ export const loginUser = async (request) => {
         request.body.email
     ]);
 
-    if (!user.length) return {
+    if (!user) return {
         error: 1,
         error_message: "User not found"
     };
@@ -95,7 +95,7 @@ export const readUser = async (request) => {
             request.body.id
         ]);
 
-        if (!user.length) return {
+        if (!user) return {
             error: 1,
             error_message: "User not found"
         };
@@ -119,7 +119,7 @@ export const readUser = async (request) => {
             request.body.status_id
         ]);
 
-        if (!status.length) {
+        if (!status) {
             return {
                 error: 1,
                 error_message: "Status not found"
@@ -150,7 +150,7 @@ export const readUser = async (request) => {
         params.push(request.body.link_facebook === "true");
     }
 
-    if (where.length > 0) {
+    if (where > 0) {
         query += " WHERE " + where.join(" AND ");
     }
 
@@ -171,7 +171,7 @@ export const updateUser = async (request) => {
         request.body.id
     ]);
 
-    if (!user.length) return {
+    if (!user) return {
         error: 1,
         error_message: "User not found"
     };
@@ -186,7 +186,7 @@ export const updateUser = async (request) => {
             request.body.status_id
         ]);
 
-        if (!status.length) return {
+        if (!status) return {
             error: 1,
             error_message: "Status not found"
         };
@@ -227,7 +227,7 @@ export const deleteUser = async (request) => {
         request.body.id
     ]);
 
-    if (!user.length) return {
+    if (!user) return {
         error: 1,
         error_message: "User not found"
     };
@@ -252,7 +252,7 @@ export const restoreUser = async (request) => {
         request.body.id
     ]);
 
-    if (!user.length) return {
+    if (!user) return {
         error: 1,
         error_message: "User not found"
     };

@@ -1,24 +1,35 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import InputField from '../../components/InputField/InputField';
 import Button from '../../components/Button/Button';
 
-import { loginUser } from '../../services/auth';
+import {
+    loginUser,
+} from '../../controllers/Users';
+
 import './LoginPage.css';
 
 const LoginPage = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
+    
+    useEffect(() => {
+        const token = localStorage.getItem('token');
+        
+        if (token) {
+            window.location.href = '/dashboard';
+        }
+    }, []);
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
+    const handleSubmit = async (event) => {
+        event.preventDefault();
 
         try {
             const data = await loginUser(email, password);
             localStorage.setItem('token', data.token);
             window.location.href = '/dashboard';
-        } catch (err) {
+        } catch (error) {
             setError('Email ou mot de passe incorrect.');
         }
     };

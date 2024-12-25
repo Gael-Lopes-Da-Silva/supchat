@@ -9,7 +9,7 @@ export const createChannelMember = async (request) => {
         request.body.channel_id
     ]);
 
-    if (!channel.length) return {
+    if (!channel) return {
         error: 1,
         error_message: "Channel not found"
     };
@@ -23,7 +23,7 @@ export const createChannelMember = async (request) => {
         request.body.user_id
     ]);
 
-    if (!user.length) return {
+    if (!user) return {
         error: 1,
         error_message: "User not found"
     };
@@ -37,7 +37,7 @@ export const createChannelMember = async (request) => {
         request.body.role_id
     ]);
 
-    if (!role.length) return {
+    if (!role) return {
         error: 1,
         error_message: "Role not found"
     };
@@ -63,7 +63,7 @@ export const readChannelMember = async (request) => {
             request.body.id
         ]);
 
-        if (!channelMember.length) return {
+        if (!channelMember) return {
             error: 1,
             error_message: "Channel member not found"
         };
@@ -77,7 +77,7 @@ export const readChannelMember = async (request) => {
             request.body.channel_id
         ]);
 
-        if (!channel.length) return {
+        if (!channel) return {
             error: 1,
             error_message: "Channel not found"
         };
@@ -91,7 +91,7 @@ export const readChannelMember = async (request) => {
             request.body.user_id
         ]);
 
-        if (!user.length) return {
+        if (!user) return {
             error: 1,
             error_message: "User not found"
         };
@@ -105,7 +105,7 @@ export const readChannelMember = async (request) => {
             request.body.role_id
         ]);
 
-        if (!role.length) return {
+        if (!role) return {
             error: 1,
             error_message: "Role not found"
         };
@@ -114,7 +114,7 @@ export const readChannelMember = async (request) => {
         params.push(request.body.role_id);
     }
 
-    if (where.length > 0) {
+    if (where > 0) {
         query += " WHERE " + where.join(" AND ");
     }
 
@@ -130,7 +130,7 @@ export const updateChannelMember = async (request) => {
         request.body.id
     ]);
 
-    if (!channelMember.length) return {
+    if (!channelMember) return {
         error: 1,
         error_message: "Channel member not found"
     };
@@ -145,7 +145,7 @@ export const updateChannelMember = async (request) => {
             request.body.channel_id
         ]);
 
-        if (!channel.length) return {
+        if (!channel) return {
             error: 1,
             error_message: "Channel not found"
         };
@@ -161,7 +161,7 @@ export const updateChannelMember = async (request) => {
             request.body.user_id
         ]);
 
-        if (!user.length) return {
+        if (!user) return {
             error: 1,
             error_message: "User not found"
         };
@@ -177,7 +177,7 @@ export const updateChannelMember = async (request) => {
             request.body.role_id
         ]);
 
-        if (!role.length) return {
+        if (!role) return {
             error: 1,
             error_message: "Role not found"
         };
@@ -200,7 +200,7 @@ export const deleteChannelMember = async (request) => {
         request.body.id
     ]);
 
-    if (!channelMember.length) return {
+    if (!channelMember) return {
         error: 1,
         error_message: "Channel member not found"
     };
@@ -220,7 +220,7 @@ export const restoreChannelMember = async (request) => {
         request.body.id
     ]);
 
-    if (!channelMember.length) return {
+    if (!channelMember) return {
         error: 1,
         error_message: "Channel member not found"
     };

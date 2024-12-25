@@ -20,7 +20,7 @@ export const createRolePermission = async (request) => {
             request.body.role_id
         ]);
 
-        if (!role.length) return {
+        if (!role) return {
             error: 1,
             error_message: "Role not found"
         };
@@ -31,7 +31,7 @@ export const createRolePermission = async (request) => {
             request.body.permission_id
         ]);
 
-        if (!permission.length) return {
+        if (!permission) return {
             error: 1,
             error_message: "Permission not found"
         };
@@ -57,7 +57,7 @@ export const readRolePermission = async (request) => {
             request.body.role_id
         ]);
 
-        if (!role.length) {
+        if (!role) {
             return {
                 error: 1,
                 error_message: "Role not found"
@@ -73,7 +73,7 @@ export const readRolePermission = async (request) => {
             request.body.permission_id
         ]);
 
-        if (!permission.length) {
+        if (!permission) {
             return {
                 error: 1,
                 error_message: "Permission not found"
@@ -84,7 +84,7 @@ export const readRolePermission = async (request) => {
         params.push(request.body.permission_id);
     }
 
-    if (where.length > 0) {
+    if (where > 0) {
         query += " WHERE " + where.join(" AND ");
     }
 
@@ -117,7 +117,7 @@ export const deleteRolePermission = async (request) => {
             request.body.role_id
         ]);
 
-        if (!role.length) {
+        if (!role) {
             return {
                 error: 1,
                 error_message: "Role not found"
@@ -130,7 +130,7 @@ export const deleteRolePermission = async (request) => {
             request.body.permission_id
         ]);
 
-        if (!permission.length) {
+        if (!permission) {
             return {
                 error: 1,
                 error_message: "Permission not found"

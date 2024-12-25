@@ -24,7 +24,7 @@ export const createChannel = async (request) => {
         request.body.user_id
     ]);
 
-    if (!user.length) return {
+    if (!user) return {
         error: 1,
         error_message: "User not found"
     };
@@ -38,7 +38,7 @@ export const createChannel = async (request) => {
         request.body.workspace_id
     ]);
 
-    if (!workspace.length) return {
+    if (!workspace) return {
         error: 1,
         error_message: "Workspace not found"
     };
@@ -70,7 +70,7 @@ export const readChannel = async (request) => {
             request.body.id
         ]);
 
-        if (!channel.length) return {
+        if (!channel) return {
             error: 1,
             error_message: "Channel not found"
         };
@@ -84,7 +84,7 @@ export const readChannel = async (request) => {
             request.body.workspace_id
         ]);
 
-        if (!workspace.length) return {
+        if (!workspace) return {
             error: 1,
             error_message: "Workspace not found"
         };
@@ -108,7 +108,7 @@ export const readChannel = async (request) => {
             request.body.user_id
         ]);
 
-        if (!user.length) return {
+        if (!user) return {
             error: 1,
             error_message: "User not found"
         };
@@ -117,7 +117,7 @@ export const readChannel = async (request) => {
         params.push(request.body.user_id);
     }
 
-    if (where.length > 0) {
+    if (where > 0) {
         query += " WHERE " + where.join(" AND ");
     }
 
@@ -138,7 +138,7 @@ export const updateChannel = async (request) => {
         request.body.id
     ]);
 
-    if (!channel.length) return {
+    if (!channel) return {
         error: 1,
         error_message: "Channel not found"
     };
@@ -153,7 +153,7 @@ export const updateChannel = async (request) => {
             request.body.workspace_id
         ]);
 
-        if (!workspace.length) return {
+        if (!workspace) return {
             error: 1,
             error_message: "Workspace not found"
         };
@@ -169,7 +169,7 @@ export const updateChannel = async (request) => {
             request.body.user_id
         ]);
 
-        if (!user.length) return {
+        if (!user) return {
             error: 1,
             error_message: "User not found"
         };
@@ -204,7 +204,7 @@ export const deleteChannel = async (request) => {
         request.body.id
     ]);
 
-    if (!channel.length) return {
+    if (!channel) return {
         error: 1,
         error_message: "Channel not found"
     };
@@ -229,7 +229,7 @@ export const restoreChannel = async (request) => {
         request.body.id
     ]);
 
-    if (!channel.length) return {
+    if (!channel) return {
         error: 1,
         error_message: "Channel not found"
     };

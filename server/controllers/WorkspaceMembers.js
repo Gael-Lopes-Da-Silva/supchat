@@ -24,7 +24,7 @@ export const createWorkspaceMember = async (request) => {
         request.body.user_id
     ]);
 
-    if (!user.length) return {
+    if (!user) return {
         error: 1,
         error_message: "User not found"
     };
@@ -38,7 +38,7 @@ export const createWorkspaceMember = async (request) => {
         request.body.workspace_id
     ]);
 
-    if (!workspace.length) return {
+    if (!workspace) return {
         error: 1,
         error_message: "Workspace not found"
     };
@@ -52,7 +52,7 @@ export const createWorkspaceMember = async (request) => {
         request.body.role_id
     ]);
 
-    if (!role.length) return {
+    if (!role) return {
         error: 1,
         error_message: "Role not found"
     };
@@ -78,7 +78,7 @@ export const readWorkspaceMember = async (request) => {
             request.body.id
         ]);
 
-        if (!workspaceMember.length) return {
+        if (!workspaceMember) return {
             error: 1,
             error_message: "Workspace member not found"
         };
@@ -92,7 +92,7 @@ export const readWorkspaceMember = async (request) => {
             request.body.workspace_id
         ]);
 
-        if (!workspace.length) return {
+        if (!workspace) return {
             error: 1,
             error_message: "Workspace not found"
         };
@@ -106,7 +106,7 @@ export const readWorkspaceMember = async (request) => {
             request.body.user_id
         ]);
 
-        if (!user.length) return {
+        if (!user) return {
             error: 1,
             error_message: "User not found"
         };
@@ -120,7 +120,7 @@ export const readWorkspaceMember = async (request) => {
             request.body.role_id
         ]);
 
-        if (!role.length) return {
+        if (!role) return {
             error: 1,
             error_message: "Role not found"
         };
@@ -129,7 +129,7 @@ export const readWorkspaceMember = async (request) => {
         params.push(request.body.role_id);
     }
 
-    if (where.length > 0) {
+    if (where > 0) {
         query += " WHERE " + where.join(" AND ");
     }
 
@@ -150,7 +150,7 @@ export const updateWorkspaceMember = async (request) => {
         request.body.id
     ]);
 
-    if (!workspaceMember.length) return {
+    if (!workspaceMember) return {
         error: 1,
         error_message: "Workspace member not found"
     };
@@ -165,7 +165,7 @@ export const updateWorkspaceMember = async (request) => {
             request.body.user_id
         ]);
 
-        if (!user.length) return {
+        if (!user) return {
             error: 1,
             error_message: "User not found"
         };
@@ -181,7 +181,7 @@ export const updateWorkspaceMember = async (request) => {
             request.body.workspace_id
         ]);
 
-        if (!workspace.length) return {
+        if (!workspace) return {
             error: 1,
             error_message: "Workspace not found"
         };
@@ -197,7 +197,7 @@ export const updateWorkspaceMember = async (request) => {
             request.body.role_id
         ]);
 
-        if (!role.length) return {
+        if (!role) return {
             error: 1,
             error_message: "Role not found"
         };
@@ -225,7 +225,7 @@ export const deleteWorkspaceMember = async (request) => {
         request.body.id
     ]);
 
-    if (!workspaceMember.length) return {
+    if (!workspaceMember) return {
         error: 1,
         error_message: "Workspace member not found"
     };
@@ -250,7 +250,7 @@ export const restoreWorkspaceMember = async (request) => {
         request.body.id
     ]);
 
-    if (!workspaceMember.length) return {
+    if (!workspaceMember) return {
         error: 1,
         error_message: "Workspace member not found"
     };

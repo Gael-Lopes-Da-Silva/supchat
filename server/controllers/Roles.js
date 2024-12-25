@@ -20,7 +20,7 @@ export const readRole = async (request) => {
             request.body.id
         ]);
 
-        if (!status.length) return {
+        if (!status) return {
             error: 1,
             error_message: "Role not found"
         };
@@ -34,7 +34,7 @@ export const readRole = async (request) => {
         params.push(request.body.name);
     }
 
-    if (where.length > 0) {
+    if (where > 0) {
         query += " WHERE " + where.join(" AND ");
     }
 

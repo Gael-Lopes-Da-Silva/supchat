@@ -4,7 +4,11 @@ const DashboardPage = () => {
     const [workspaces, setWorkspaces] = useState([]);
 
     useEffect(() => {
-        // on foutra la logique pour fetch les workspaces ici
+        const token = localStorage.getItem('token');
+        
+        if (!token) {
+            window.location.href = '/';
+        }
     }, []);
 
     return (

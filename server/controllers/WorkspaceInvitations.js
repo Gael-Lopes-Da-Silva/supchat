@@ -24,7 +24,7 @@ export const createWorkspaceInvitation = async (request) => {
         request.body.user_id
     ]);
 
-    if (!user.length) return {
+    if (!user) return {
         error: 1,
         error_message: "User not found"
     };
@@ -38,7 +38,7 @@ export const createWorkspaceInvitation = async (request) => {
         request.body.workspace_id
     ]);
 
-    if (!workspace.length) return {
+    if (!workspace) return {
         error: 1,
         error_message: "Workspace not found"
     };
@@ -52,7 +52,7 @@ export const createWorkspaceInvitation = async (request) => {
         request.body.token
     ]);
 
-    if (token.length) return {
+    if (token) return {
         error: 1,
         error_message: "Token must be unique"
     };
@@ -81,7 +81,7 @@ export const readWorkspaceInvitation = async (request) => {
             request.body.id
         ]);
 
-        if (!workspaceInvitation.length) return {
+        if (!workspaceInvitation) return {
             error: 1,
             error_message: "Workspace invitation not found"
         };
@@ -95,7 +95,7 @@ export const readWorkspaceInvitation = async (request) => {
             request.body.user_id
         ]);
 
-        if (!user.length) return {
+        if (!user) return {
             error: 1,
             error_message: "User not found"
         };
@@ -109,7 +109,7 @@ export const readWorkspaceInvitation = async (request) => {
             request.body.workspace_id
         ]);
 
-        if (!workspace.length) return {
+        if (!workspace) return {
             error: 1,
             error_message: "Workspace not found"
         };
@@ -138,7 +138,7 @@ export const readWorkspaceInvitation = async (request) => {
         params.push(request.body.expire_at);
     }
 
-    if (where.length > 0) {
+    if (where > 0) {
         query += " WHERE " + where.join(" AND ");
     }
 
@@ -159,7 +159,7 @@ export const updateWorkspaceInvitation = async (request) => {
         request.body.id
     ]);
 
-    if (!workspaceInvitation.length) return {
+    if (!workspaceInvitation) return {
         error: 1,
         error_message: "Workspace invitation not found"
     };
@@ -174,7 +174,7 @@ export const updateWorkspaceInvitation = async (request) => {
             request.body.user_id
         ]);
 
-        if (!user.length) return {
+        if (!user) return {
             error: 1,
             error_message: "User not found"
         };
@@ -190,7 +190,7 @@ export const updateWorkspaceInvitation = async (request) => {
             request.body.workspace_id
         ]);
 
-        if (!workspace.length) return {
+        if (!workspace) return {
             error: 1,
             error_message: "Workspace not found"
         };
@@ -206,7 +206,7 @@ export const updateWorkspaceInvitation = async (request) => {
             request.body.token
         ]);
 
-        if (token.length) return {
+        if (token) return {
             error: 1,
             error_message: "Token must be unique"
         };
@@ -237,7 +237,7 @@ export const deleteWorkspaceInvitation = async (request) => {
         request.body.id
     ]);
 
-    if (!workspaceInvitation.length) return {
+    if (!workspaceInvitation) return {
         error: 1,
         error_message: "Workspace invitation not found"
     };
@@ -262,7 +262,7 @@ export const restoreWorkspaceInvitation = async (request) => {
         request.body.id
     ]);
 
-    if (!workspaceInvitation.length) return {
+    if (!workspaceInvitation) return {
         error: 1,
         error_message: "Workspace invitation not found"
     };
