@@ -5,7 +5,7 @@ import Button from '../../components/Button/Button';
 
 import {
     loginUser,
-} from '../../controllers/Users';
+} from '../../services/auth';
 
 import './LoginPage.css';
 
