@@ -3,8 +3,12 @@ import dotenv from "dotenv";
 import pool from "./database/db.js";
 
 import UsersRouter from "./routes/Users.js";
+import StatusRouter from "./routes/Status.js";
 import WorkspacesRouter from "./routes/Workspaces.js";
+import WorkspaceInvitationsRouter from "./routes/WorkspaceInvitations.js";
+import WorkspaceMembersRouter from "./routes/WorkspaceMembers.js";
 import ChannelsRouter from "./routes/Channels.js";
+import ChannelMembersRouter from "./routes/ChannelMembers.js";
 
 dotenv.config();
 
@@ -22,8 +26,12 @@ pool.getConnection().then((connection) => {
     });
 
     app.use("/users/", UsersRouter);
+    app.use("/status/", StatusRouter);
     app.use("/workspaces/", WorkspacesRouter);
+    app.use("/workspaces/invitations/", WorkspaceInvitationsRouter);
+    app.use("/workspaces/members/", WorkspaceMembersRouter);
     app.use("/channels/", ChannelsRouter);
+    app.use("/channels/members/", ChannelMembersRouter);
 
     app.listen(PORT, () =>
         console.log(`Server running on http://localhost:${PORT} !`)

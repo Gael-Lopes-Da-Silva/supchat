@@ -50,28 +50,14 @@ CREATE TABLE workspaces (
     FOREIGN KEY (user_id) REFERENCES users(id)
 );
 
--- WORKSPACE MEMBERSHIPS
-CREATE TABLE workspace_members (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    workspace_id INT NOT NULL,
-    user_id INT NOT NULL,
-    role INT NOT NULL,
-    added_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP NULL,
-    deleted_at TIMESTAMP NULL,
-    UNIQUE (workspace_id, user_id),
-    FOREIGN KEY (workspace_id) REFERENCES workspaces(id),
-    FOREIGN KEY (user_id) REFERENCES users(id)
-);
-
 -- WORKSPACE INVITATIONS
 CREATE TABLE workspace_invitations (
     id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT NOT NULL,
     workspace_id INT NOT NULL,
-    token VARCHAR(50) NOT NULL,
-    maximum_use INT NOT NULL,
-    used_by INT NOT NULL,
+    token VARCHAR(100) NOT NULL UNIQUE,
+    maximum_use INT DEFAULT NULL,
+    used_by INT DEFAULT 0,
     expire_at TIMESTAMP NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NULL,
@@ -91,20 +77,6 @@ CREATE TABLE channels (
     updated_at TIMESTAMP NULL,
     deleted_at TIMESTAMP NULL,
     FOREIGN KEY (workspace_id) REFERENCES workspaces(id),
-    FOREIGN KEY (user_id) REFERENCES users(id)
-);
-
--- CHANNEL MEMBERSHIPS
-CREATE TABLE channel_members (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    channel_id INT NOT NULL,
-    user_id INT NOT NULL,
-    role INT NOT NULL,
-    added_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP NULL,
-    deleted_at TIMESTAMP NULL,
-    UNIQUE (channel_id, user_id),
-    FOREIGN KEY (channel_id) REFERENCES channels(id),
     FOREIGN KEY (user_id) REFERENCES users(id)
 );
 
@@ -205,6 +177,36 @@ VALUES
     ('member'),
     ('guest');
 
+-- WORKSPACE MEMBERSHIPS
+CREATE TABLE workspace_members (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    workspace_id INT NOT NULL,
+    user_id INT NOT NULL,
+    role_id INT NOT NULL,
+    added_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NULL,
+    deleted_at TIMESTAMP NULL,
+    UNIQUE (workspace_id, user_id),
+    FOREIGN KEY (workspace_id) REFERENCES workspaces(id),
+    FOREIGN KEY (user_id) REFERENCES users(id),
+    FOREIGN KEY (role_id) REFERENCES roles(id)
+);
+
+-- CHANNEL MEMBERSHIPS
+CREATE TABLE channel_members (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    channel_id INT NOT NULL,
+    user_id INT NOT NULL,
+    role_id INT NOT NULL,
+    added_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NULL,
+    deleted_at TIMESTAMP NULL,
+    UNIQUE (channel_id, user_id),
+    FOREIGN KEY (channel_id) REFERENCES channels(id),
+    FOREIGN KEY (user_id) REFERENCES users(id),
+    FOREIGN KEY (role_id) REFERENCES roles(id)
+);
+
 -- ROLES PERMISSIONS
 CREATE TABLE role_permissions (
     role_id INT NOT NULL,
@@ -234,7 +236,7 @@ CREATE TRIGGER add_workspace_creator_as_admin
 AFTER INSERT ON workspaces
 FOR EACH ROW
 BEGIN
-    INSERT INTO workspace_members (workspace_id, user_id, role, added_at)
+    INSERT INTO workspace_members (workspace_id, user_id, role_id, added_at)
     VALUES (NEW.id, NEW.user_id, 'admin', NOW());
 END$$
 
@@ -245,8 +247,8 @@ CREATE TRIGGER add_channel_creator_as_admin
 AFTER INSERT ON channels
 FOR EACH ROW
 BEGIN
-    INSERT INTO channel_members (channel_id, user_id, added_at, role)
-    VALUES (NEW.id, NEW.user_id, NOW(), 'admin');
+    INSERT INTO channel_members (channel_id, user_id, role_id, added_at)
+    VALUES (NEW.id, NEW.user_id, 'admin', NOW());
 END$$
 
 DELIMITER ;

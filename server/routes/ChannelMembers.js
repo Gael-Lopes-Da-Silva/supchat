@@ -1,12 +1,12 @@
 import express from "express";
 
 import {
-    createWorkspace,
-    readWorkspace,
-    updateWorkspace,
-    deleteWorkspace,
-    restoreWorkspace,
-} from "../controllers/Workspaces.js";
+    createChannelMember,
+    readChannelMember,
+    updateChannelMember,
+    deleteChannelMember,
+    restoreChannelMember,
+} from "../controllers/ChannelMembers.js";
 
 const router = express.Router();
 
@@ -14,33 +14,32 @@ const router = express.Router();
 // Create
 // --------------------
 
-// POST /workspaces/create
+// POST /channels/members/create
 //
 // body:
-//   name: string (required)
-//   description: string (required)
-//   is_private: boolean (required)
 //   user_id: number (required)
+//   channel_id: number (required)
+//   role_id: number (required)
 // return:
-//   result: [workspace]
+//   result: [channel_member]
 router.post("/create", (request, response) => {
-    createWorkspace(request).then((result) => {
+    createChannelMember(request).then((result) => {
         if (!result.error && result !== "") {
             response.status(201).json({
-                when: "Workspaces > CreateWorkspace",
+                when: "ChannelMembers > CreateChannelMember",
                 result: result,
                 error: 0,
             });
         } else {
-            response.status(500).json({
-                when: "Workspaces > CreateWorkspace",
+            response.status(404).json({
+                when: "ChannelMembers > CreateChannelMember",
                 error: 1,
-                error_message: result.error_message ? result.error_message : "Could not create workspace",
+                error_message: result.error_message ? result.error_message : "Could not create channel member",
             });
         }
     }).catch((error) => {
-        response.status(404).json({
-            when: "Workspaces > CreateWorkspace",
+        response.status(500).json({
+            when: "ChannelMembers > CreateChannelMember",
             error: 1,
             error_message: error.message,
         });
@@ -51,34 +50,33 @@ router.post("/create", (request, response) => {
 // Read
 // --------------------
 
-// GET /workspaces/read
+// GET /channels/members/read
 //
 // body:
 //   id: number (optional)
-//   name: string (optional)
-//   description: string (optional)
-//   is_private: boolean (optional)
 //   user_id: number (optional)
+//   channel_id: number (optional)
+//   role_id: number (optional)
 // return:
-//   result: [workspace]
+//   result: [channel_member]
 router.get("/read", (request, response) => {
-    readWorkspace().then((result) => {
+    readChannelMember(request).then((result) => {
         if (!result.error && result !== "") {
-            response.status(200).json({
-                when: "Workspaces > ReadWorkspace",
+            response.status(202).json({
+                when: "ChannelMembers > ReadChannelMember",
                 result: result,
                 error: 0,
             });
         } else {
             response.status(404).json({
-                when: "Workspaces > ReadWorkspace",
+                when: "ChannelMembers > ReadChannelMember",
                 error: 1,
-                error_message: result.error_message ? result.error_message : "Could not read workspace",
+                error_message: result.error_message ? result.error_message : "Could not read channel member",
             });
         }
     }).catch((error) => {
         response.status(500).json({
-            when: "Workspaces > ReadWorkspace",
+            when: "ChannelMembers > ReadChannelMember",
             error: 1,
             error_message: error.message,
         });
@@ -89,34 +87,33 @@ router.get("/read", (request, response) => {
 // Update
 // --------------------
 
-// PUT /workspaces/update
+// PUT /channels/members/update
 //
 // body:
 //   id: number (required)
-//   name: string (optional)
-//   description: string (optional)
-//   is_private: boolean (optional)
+//   channel_id: number (optional)
 //   user_id: number (optional)
+//   role_id: number (optional)
 // return:
-//   result: [workspace]
+//   result: [channel_member]
 router.put("/update", (request, response) => {
-    updateWorkspace(request).then((result) => {
+    updateChannelMember(request).then((result) => {
         if (!result.error && result !== "") {
-            response.status(200).json({
-                when: "Workspaces > UpdateWorkspace",
+            response.status(202).json({
+                when: "ChannelMembers > UpdateChannelMember",
                 result: result,
                 error: 0,
             });
         } else {
             response.status(404).json({
-                when: "Workspaces > UpdateWorkspace",
+                when: "ChannelMembers > UpdateChannelMember",
                 error: 1,
-                error_message: result.error_message ? result.error_message : "Could not update workspace",
+                error_message: result.error_message ? result.error_message : "Could not update channel member",
             });
         }
     }).catch((error) => {
         response.status(500).json({
-            when: "Workspaces > UpdateWorkspace",
+            when: "ChannelMembers > UpdateChannelMember",
             error: 1,
             error_message: error.message,
         });
@@ -127,60 +124,60 @@ router.put("/update", (request, response) => {
 // Delete
 // --------------------
 
-// DELETE /workspaces/delete
+// DELETE /channels/members/delete
 //
 // body:
 //   id: number (required)
 // return:
-//   result: [workspace]
+//   result: [channel_member]
 router.delete("/delete", (request, response) => {
-    deleteWorkspace(request).then((result) => {
+    deleteChannelMember(request).then((result) => {
         if (!result.error && result !== "") {
-            response.status(200).json({
-                when: "Workspaces > DeleteWorkspace",
+            response.status(202).json({
+                when: "ChannelMembers > DeleteChannelMember",
                 result: result,
                 error: 0,
             });
         } else {
             response.status(404).json({
-                when: "Workspaces > DeleteWorkspace",
+                when: "ChannelMembers > DeleteChannelMember",
                 error: 1,
-                error_message: result.error_message ? result.error_message : "Could not delete workspace",
+                error_message: result.error_message ? result.error_message : "Could not delete channel member",
             });
         }
     }).catch((error) => {
         response.status(500).json({
-            when: "Workspaces > DeleteWorkspace",
+            when: "ChannelMembers > DeleteChannelMember",
             error: 1,
             error_message: error.message,
         });
     });
 });
 
-// DELETE /workspaces/restore
+// DELETE /channels/members/restore
 //
 // body:
 //   id: number (required)
 // return:
-//   result: [workspace]
+//   result: [channel_member]
 router.delete("/restore", (request, response) => {
-    restoreWorkspace(request).then((result) => {
+    restoreChannelMember(request).then((result) => {
         if (!result.error && result !== "") {
-            response.status(200).json({
-                when: "Workspaces > RestoreWorkspace",
+            response.status(202).json({
+                when: "ChannelMembers > RestoreChannelMember",
                 result: result,
                 error: 0,
             });
         } else {
             response.status(404).json({
-                when: "Workspaces > RestoreWorkspace",
+                when: "ChannelMembers > RestoreChannelMember",
                 error: 1,
-                error_message: result.error_message ? result.error_message : "Could not restore workspace",
+                error_message: result.error_message ? result.error_message : "Could not restore channel member",
             });
         }
     }).catch((error) => {
         response.status(500).json({
-            when: "Workspaces > RestoreWorkspace",
+            when: "ChannelMembers > RestoreChannelMember",
             error: 1,
             error_message: error.message,
         });

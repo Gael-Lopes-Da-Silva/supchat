@@ -2,13 +2,10 @@ import express from "express";
 
 import {
     createChannel,
-    createChannelMember,
     readChannel,
-    readChannelMember,
     updateChannel,
-    updateChannelMember,
     deleteChannel,
-    deleteChannelMember
+    restoreChannel,
 } from "../controllers/Channels.js";
 
 const router = express.Router();
@@ -17,7 +14,7 @@ const router = express.Router();
 // Create
 // --------------------
 
-// POST /create
+// POST /channels/create
 //
 // body:
 //   user_id: number (required)
@@ -50,50 +47,18 @@ router.post("/create", (request, response) => {
     });
 });
 
-// POST /members/create
-//
-// body:
-//   user_id: number (required)
-//   channel_id: number (required)
-//   role: number (required)
-// return:
-//   result: [channel_member]
-router.post("/members/create", (request, response) => {
-    createChannelMember(request).then((result) => {
-        if (!result.error && result !== "") {
-            response.status(201).json({
-                when: "Channels > CreateChannelMember",
-                result: result,
-                error: 0,
-            });
-        } else {
-            response.status(404).json({
-                when: "Channels > CreateChannelMember",
-                error: 1,
-                error_message: result.error_message ? result.error_message : "Could not create channel member",
-            });
-        }
-    }).catch((error) => {
-        response.status(500).json({
-            when: "Channels > CreateChannelMember",
-            error: 1,
-            error_message: error.message,
-        });
-    });
-});
-
 // --------------------
 // Read
 // --------------------
 
-// GET /read
+// GET /channels/read
 //
 // body:
-//   id: integer (optional)
-//   workspace_id: integer (optional)
+//   id: number (optional)
+//   workspace_id: number (optional)
 //   name: string (optional)
 //   is_private: boolean (optional)
-//   user_id: integer (optional)
+//   user_id: number (optional)
 // return:
 //   result: [channel]
 router.get("/read", (request, response) => {
@@ -120,51 +85,18 @@ router.get("/read", (request, response) => {
     });
 });
 
-// GET /members/read
-//
-// body:
-//   id: number (optional)
-//   user_id: number (optional)
-//   channel_id: number (optional)
-//   role: number (optional)
-// return:
-//   result: [channel_member]
-router.get("/members/read", (request, response) => {
-    readChannelMember(request).then((result) => {
-        if (!result.error && result !== "") {
-            response.status(202).json({
-                when: "Channels > ReadChannelMember",
-                result: result,
-                error: 0,
-            });
-        } else {
-            response.status(404).json({
-                when: "Channels > ReadChannelMember",
-                error: 1,
-                error_message: result.error_message ? result.error_message : "Could not read channel member",
-            });
-        }
-    }).catch((error) => {
-        response.status(500).json({
-            when: "Channels > ReadChannelMember",
-            error: 1,
-            error_message: error.message,
-        });
-    });
-});
-
 // --------------------
 // Update
 // --------------------
 
-// PUT /update
+// PUT /channels/update
 //
 // body:
-//   id: integer (required)
-//   workspace_id: integer (optional)
+//   id: number (required)
+//   workspace_id: number (optional)
 //   name: string (optional)
 //   is_private: boolean (optional)
-//   user_id: integer (optional)
+//   user_id: number (optional)
 // return:
 //   result: [channel]
 router.put("/update", (request, response) => {
@@ -191,47 +123,14 @@ router.put("/update", (request, response) => {
     });
 });
 
-// PUT /members/update
-//
-// body:
-//   id: number (required)
-//   channel_id: number (optional)
-//   user_id: number (optional)
-//   role_id: number (optional)
-// return:
-//   result: [channel_member]
-router.put("/members/update", (request, response) => {
-    updateChannelMember(request).then((result) => {
-        if (!result.error && result !== "") {
-            response.status(202).json({
-                when: "Channels > UpdateChannelMember",
-                result: result,
-                error: 0,
-            });
-        } else {
-            response.status(404).json({
-                when: "Channels > UpdateChannelMember",
-                error: 1,
-                error_message: result.error_message ? result.error_message : "Could not update channel member",
-            });
-        }
-    }).catch((error) => {
-        response.status(500).json({
-            when: "Channels > UpdateChannelMember",
-            error: 1,
-            error_message: error.message,
-        });
-    });
-});
-
 // --------------------
 // Delete
 // --------------------
 
-// DELETE /delete
+// DELETE /channels/delete
 //
 // body:
-//   id: integer (required)
+//   id: number (required)
 // return:
 //   result: [channel]
 router.delete("/delete", (request, response) => {
@@ -258,30 +157,30 @@ router.delete("/delete", (request, response) => {
     });
 });
 
-// DELETE /members/delete
+// DELETE /channels/restore
 //
 // body:
 //   id: number (required)
 // return:
-//   result: [channel_member]
-router.delete("/members/delete", (request, response) => {
-    deleteChannelMember(request).then((result) => {
+//   result: [channel]
+router.delete("/restore", (request, response) => {
+    restoreChannel(request).then((result) => {
         if (!result.error && result !== "") {
             response.status(202).json({
-                when: "Channels > DeleteChannelMember",
+                when: "Channels > RestoreChannel",
                 result: result,
                 error: 0,
             });
         } else {
             response.status(404).json({
-                when: "Channels > DeleteChannelMember",
+                when: "Channels > RestoreChannel",
                 error: 1,
-                error_message: result.error_message ? result.error_message : "Could not delete channel member",
+                error_message: result.error_message ? result.error_message : "Could not restore channel",
             });
         }
     }).catch((error) => {
         response.status(500).json({
-            when: "Channels > DeleteChannelMember",
+            when: "Channels > RestoreChannel",
             error: 1,
             error_message: error.message,
         });

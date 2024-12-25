@@ -8,20 +8,21 @@ import {
     loginUser,
     readUser,
     updateUser,
-    deleteUser
+    deleteUser,
+    restoreUser,
 } from "../controllers/Users.js";
 
 // --------------------
 // Create
 // --------------------
 
-// POST /create
+// POST /users/create
 //
 // body:
 //   username: string (required)
 //   email: string (required)
 //   password: string (required)
-//   status: number (optional)
+//   status_id: number (optional)
 //   link_google: boolean (optional)
 //   link_facebook: boolean (optional)
 // return:
@@ -54,7 +55,7 @@ router.post("/create", (request, response) => {
 // Read
 // --------------------
 
-// GET /login
+// GET /users/login
 //
 // body:
 //   email: string (required)
@@ -89,14 +90,14 @@ router.get("/login", (request, response) => {
     });
 });
 
-// GET /read
+// GET /users/read
 //
 // body:
 //   id: number (optional)
 //   username: string (optional)
 //   email: string (optional)
 //   password: string (optional)
-//   status: number (optional)
+//   status_id: number (optional)
 //   link_google: boolean (optional)
 //   link_facebook: boolean (optional)
 // return:
@@ -129,14 +130,14 @@ router.get("/read", (request, response) => {
 // Update
 // --------------------
 
-// PUT /update
+// PUT /users/update
 //
 // body:
 //   id: number (required)
 //   username: string (optional)
 //   email: string (optional)
 //   password: string (optional)
-//   status: number (optional)
+//   status_id: number (optional)
 //   link_google: boolean (optional)
 //   link_facebook: boolean (optional)
 // return:
@@ -169,7 +170,7 @@ router.put("/update", (request, response) => {
 // Delete
 // --------------------
 
-// DELETE /delete
+// DELETE /users/delete
 //
 // body:
 //   id: number (required)
@@ -193,6 +194,36 @@ router.delete("/delete", (request, response) => {
     }).catch((error) => {
         response.status(500).json({
             when: "Users > DeleteUser",
+            error: 1,
+            error_message: error.message,
+        });
+    });
+});
+
+// DELETE /users/restore
+//
+// body:
+//   id: number (required)
+// return:
+//   result: [user]
+router.delete("/restore", (request, response) => {
+    restoreUser(request).then((result) => {
+        if (!result.error && result !== "") {
+            response.status(202).json({
+                when: "Users > RestoreUser",
+                result: result,
+                error: 0,
+            });
+        } else {
+            response.status(404).json({
+                when: "Users > RestoreUser",
+                error: 1,
+                error_message: result.error_message ? result.error_message : "Could not restore user",
+            });
+        }
+    }).catch((error) => {
+        response.status(500).json({
+            when: "Users > RestoreUser",
             error: 1,
             error_message: error.message,
         });
