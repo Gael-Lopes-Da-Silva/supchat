@@ -143,26 +143,24 @@ VALUES
 
 -- WORKSPACE PERMISSIONS
 CREATE TABLE workspace_permissions (
-    id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT NULL,
     workspace_id INT NOT NULL,
     permission_id INT NOT NULL,
+    PRIMARY KEY (workspace_id, user_id, permission_id),
     FOREIGN KEY (workspace_id) REFERENCES workspaces(id),
     FOREIGN KEY (user_id) REFERENCES users(id),
-    FOREIGN KEY (permission_id) REFERENCES permissions(id),
-    UNIQUE (workspace_id, user_id, permission_id)
+    FOREIGN KEY (permission_id) REFERENCES permissions(id)
 );
 
 -- CHANNEL PERMISSIONS
 CREATE TABLE channel_permissions (
-    id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT NULL,
     channel_id INT NOT NULL,
     permission_id INT NOT NULL,
+    PRIMARY KEY (channel_id, user_id, permission_id),
     FOREIGN KEY (channel_id) REFERENCES channels(id),
     FOREIGN KEY (user_id) REFERENCES users(id),
-    FOREIGN KEY (permission_id) REFERENCES permissions(id),
-    UNIQUE (channel_id, user_id, permission_id)
+    FOREIGN KEY (permission_id) REFERENCES permissions(id)
 );
 
 -- ROLES
@@ -219,14 +217,15 @@ CREATE TABLE role_permissions (
 INSERT INTO role_permissions (role_id, permission_id)
 SELECT r.id AS role_id, p.id AS permission_id
 FROM roles r
-CROSS JOIN permissions p
+JOIN permissions p
+ON p.name IN ('can_assign_roles', 'can_set_permissions', 'can_post', 'can_moderate', 'can_manage_members')
 WHERE r.name = 'admin';
 
 INSERT INTO role_permissions (role_id, permission_id)
 SELECT r.id AS role_id, p.id AS permission_id
 FROM roles r
 JOIN permissions p
-ON p.name IN ('can_post', 'can_moderate')
+ON p.name IN ('can_post')
 WHERE r.name = 'member';
 
 -- TRIGGERS
