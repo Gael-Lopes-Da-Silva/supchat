@@ -1,7 +1,7 @@
 import dotenv from "dotenv";
 
 export const loginUser = async (email, password) => {
-    const response = await fetch(`${process.env.API_URL}/users/login`, {
+    const response = await fetch("http://localhost:3000/users/login", {
         method: 'GET',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -9,8 +9,8 @@ export const loginUser = async (email, password) => {
             password
         }),
     });
-
-    if (!response.ok) throw new Error('Connexion échouée');
+    
+    if (!response.ok) throw Error("Connexion impossible");
 
     return await response.json();
 };

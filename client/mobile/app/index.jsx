@@ -75,7 +75,7 @@ const styles = StyleSheet.create({
 });
 
 class App extends React.Component {
-    login() { }
+    handleSubmit() { }
 
     render() {
         return (
@@ -91,7 +91,7 @@ class App extends React.Component {
                             <Text style={styles.label}>Mot de passe</Text>
                             <TextInput style={styles.input} secureTextEntry={true} />
                         </View>
-                        <TouchableOpacity onPress={this.login} style={styles.button}>
+                        <TouchableOpacity onPress={this.handleSubmit} style={styles.button}>
                             <Text style={styles.buttonText}>Se Connecter</Text>
                         </TouchableOpacity>
                     </View>
