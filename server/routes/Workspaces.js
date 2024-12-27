@@ -10,11 +10,7 @@ import {
 
 const router = express.Router();
 
-// --------------------
-// Create
-// --------------------
-
-// POST /workspaces/create
+// POST /workspaces
 //
 // body:
 //   name: string (required)
@@ -23,7 +19,7 @@ const router = express.Router();
 //   user_id: number (required)
 // return:
 //   result: [workspace]
-router.post("/create", (request, response) => {
+router.post("/", (request, response) => {
     createWorkspace(request).then((result) => {
         if (!result.error && result !== "") {
             response.status(201).json({
@@ -47,21 +43,16 @@ router.post("/create", (request, response) => {
     });
 });
 
-// --------------------
-// Read
-// --------------------
-
-// GET /workspaces/read
+// GET /workspaces
 //
-// body:
-//   id: number (optional)
+// query:
 //   name: string (optional)
 //   description: string (optional)
 //   is_private: boolean (optional)
 //   user_id: number (optional)
 // return:
 //   result: [workspace]
-router.get("/read", (request, response) => {
+router.get("/", (request, response) => {
     readWorkspace().then((result) => {
         if (!result.error && result !== "") {
             response.status(200).json({
@@ -85,21 +76,48 @@ router.get("/read", (request, response) => {
     });
 });
 
-// --------------------
-// Update
-// --------------------
-
-// PUT /workspaces/update
+// GET /workspaces/:id
 //
-// body:
+// param:
 //   id: number (required)
+// return:
+//   result: [workspace]
+router.get("/:id", (request, response) => {
+    readWorkspace().then((result) => {
+        if (!result.error && result !== "") {
+            response.status(200).json({
+                when: "Workspaces > ReadWorkspace",
+                result: result,
+                error: 0,
+            });
+        } else {
+            response.status(404).json({
+                when: "Workspaces > ReadWorkspace",
+                error: 1,
+                error_message: result.error_message ? result.error_message : "Could not read workspace",
+            });
+        }
+    }).catch((error) => {
+        response.status(500).json({
+            when: "Workspaces > ReadWorkspace",
+            error: 1,
+            error_message: error.message,
+        });
+    });
+});
+
+// PUT /workspaces/:id
+//
+// param:
+//   id: number (required)
+// body:
 //   name: string (optional)
 //   description: string (optional)
 //   is_private: boolean (optional)
 //   user_id: number (optional)
 // return:
 //   result: [workspace]
-router.put("/update", (request, response) => {
+router.put("/:id", (request, response) => {
     updateWorkspace(request).then((result) => {
         if (!result.error && result !== "") {
             response.status(200).json({
@@ -123,17 +141,13 @@ router.put("/update", (request, response) => {
     });
 });
 
-// --------------------
-// Delete
-// --------------------
-
-// DELETE /workspaces/delete
+// DELETE /workspaces/:id
 //
-// body:
+// param:
 //   id: number (required)
 // return:
 //   result: [workspace]
-router.delete("/delete", (request, response) => {
+router.delete("/:id", (request, response) => {
     deleteWorkspace(request).then((result) => {
         if (!result.error && result !== "") {
             response.status(200).json({
@@ -157,13 +171,13 @@ router.delete("/delete", (request, response) => {
     });
 });
 
-// DELETE /workspaces/restore
+// PATCH /workspaces/:id
 //
-// body:
+// param:
 //   id: number (required)
 // return:
 //   result: [workspace]
-router.delete("/restore", (request, response) => {
+router.patch("/:id", (request, response) => {
     restoreWorkspace(request).then((result) => {
         if (!result.error && result !== "") {
             response.status(200).json({

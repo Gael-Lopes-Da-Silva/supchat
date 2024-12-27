@@ -1,6 +1,8 @@
 import express from "express";
 import jsonwebtoken from "jsonwebtoken";
-import dotenv from "dotenv/config";
+import dotenv from "dotenv";
+
+dotenv.config();
 
 const router = express.Router();
 
@@ -13,11 +15,7 @@ import {
     restoreUser,
 } from "../controllers/Users.js";
 
-// --------------------
-// Create
-// --------------------
-
-// POST /users/create
+// POST /users
 //
 // body:
 //   username: string (required)
@@ -28,7 +26,7 @@ import {
 //   link_facebook: boolean (optional)
 // return:
 //   result: [user]
-router.post("/create", (request, response) => {
+router.post("/", (request, response) => {
     createUser(request).then((result) => {
         if (!result.error && result !== "") {
             response.status(201).json({
@@ -52,11 +50,7 @@ router.post("/create", (request, response) => {
     });
 });
 
-// --------------------
-// Read
-// --------------------
-
-// GET /users/login
+// POST /users/login
 //
 // body:
 //   email: string (required)
@@ -64,7 +58,7 @@ router.post("/create", (request, response) => {
 // return:
 //   token: string
 //   result: [user]
-router.get("/login", (request, response) => {
+router.post("/login", (request, response) => {
     loginUser(request).then((result) => {
         if (!result.error && result !== "") {
             const token = jsonwebtoken.sign({ id: result.id }, process.env.SECRET, { expiresIn: "24h" });
@@ -91,10 +85,9 @@ router.get("/login", (request, response) => {
     });
 });
 
-// GET /users/read
+// GET /users
 //
-// body:
-//   id: number (optional)
+// query:
 //   username: string (optional)
 //   email: string (optional)
 //   password: string (optional)
@@ -103,7 +96,7 @@ router.get("/login", (request, response) => {
 //   link_facebook: boolean (optional)
 // return:
 //   result: [user]
-router.get("/read", (request, response) => {
+router.get("/", (request, response) => {
     readUser(request).then((result) => {
         if (!result.error && result !== "") {
             response.status(202).json({
@@ -127,14 +120,41 @@ router.get("/read", (request, response) => {
     });
 });
 
-// --------------------
-// Update
-// --------------------
-
-// PUT /users/update
+// GET /users/:id
 //
-// body:
+// param:
 //   id: number (required)
+// return:
+//   result: [user]
+router.get("/:id", (request, response) => {
+    readUser(request).then((result) => {
+        if (!result.error && result !== "") {
+            response.status(202).json({
+                when: "Users > ReadUser",
+                result: result,
+                error: 0,
+            });
+        } else {
+            response.status(404).json({
+                when: "Users > ReadUser",
+                error: 1,
+                error_message: result.error_message ? result.error_message : "Could not read user",
+            });
+        }
+    }).catch((error) => {
+        response.status(500).json({
+            when: "Users > ReadUser",
+            error: 1,
+            error_message: error.message,
+        });
+    });
+});
+
+// PUT /users/:id
+//
+// param:
+//   id: number (required)
+// body:
 //   username: string (optional)
 //   email: string (optional)
 //   password: string (optional)
@@ -143,7 +163,7 @@ router.get("/read", (request, response) => {
 //   link_facebook: boolean (optional)
 // return:
 //   result: [user]
-router.put("/update", (request, response) => {
+router.put("/update/:id", (request, response) => {
     updateUser(request).then((result) => {
         if (!result.error && result !== "") {
             response.status(202).json({
@@ -167,17 +187,13 @@ router.put("/update", (request, response) => {
     });
 });
 
-// --------------------
-// Delete
-// --------------------
-
-// DELETE /users/delete
+// DELETE /users/:id
 //
-// body:
+// param:
 //   id: number (required)
 // return:
 //   result: [user]
-router.delete("/delete", (request, response) => {
+router.delete("/:id", (request, response) => {
     deleteUser(request).then((result) => {
         if (!result.error && result !== "") {
             response.status(202).json({
@@ -201,13 +217,13 @@ router.delete("/delete", (request, response) => {
     });
 });
 
-// DELETE /users/restore
+// PATCH /users/:id
 //
-// body:
+// param:
 //   id: number (required)
 // return:
 //   result: [user]
-router.delete("/restore", (request, response) => {
+router.patch("/:id", (request, response) => {
     restoreUser(request).then((result) => {
         if (!result.error && result !== "") {
             response.status(202).json({

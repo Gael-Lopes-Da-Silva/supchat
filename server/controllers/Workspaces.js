@@ -1,9 +1,5 @@
 import pool from "../database/db.js";
 
-// --------------------
-// Create
-// --------------------
-
 export const createWorkspace = async (request) => {
     if (!request.body.name) return {
         error: 1,
@@ -47,18 +43,10 @@ export const createWorkspace = async (request) => {
     ]);
 };
 
-// --------------------
-// Read
-// --------------------
-
 export const readWorkspace = async (request) => {
-    let query = "SELECT * FROM workspaces"
-    let where = [];
-    let params = [];
-
-    if (request.body.id) {
+    if (request.params.id) {
         const [workspace] = await pool.query("SELECT * FROM workspaces WHERE id = ?", [
-            request.body.id
+            request.params.id
         ]);
 
         if (!workspace) return {
@@ -66,58 +54,57 @@ export const readWorkspace = async (request) => {
             error_message: "Workspace not found"
         };
 
-        where.push("id = ?");
-        params.push(request.body.id);
+        return workspace;
+    } else {
+        let query = "SELECT * FROM workspaces"
+        let where = [];
+        let params = [];
+
+        if (request.query.name) {
+            where.push("name = ?");
+            params.push(request.query.name);
+        }
+
+        if (request.query.description) {
+            where.push("description = ?");
+            params.push(request.query.description);
+        }
+
+        if (request.query.is_private) {
+            where.push("is_private = ?");
+            params.push(request.query.is_private);
+        }
+
+        if (request.query.user_id) {
+            const [user] = await pool.query("SELECT * FROM users WHERE id = ?", [
+                request.query.user_id
+            ]);
+
+            if (!user) return {
+                error: 1,
+                error_message: "User not found"
+            };
+
+            where.push("user_id = ?");
+            params.push(request.query.user_id);
+        }
+
+        if (where > 0) {
+            query += " WHERE " + where.join(" AND ");
+        }
+
+        return pool.query(query, params);
     }
-
-    if (request.body.name) {
-        where.push("name = ?");
-        params.push(request.body.name);
-    }
-
-    if (request.body.description) {
-        where.push("description = ?");
-        params.push(request.body.description);
-    }
-
-    if (request.body.is_private) {
-        where.push("is_private = ?");
-        params.push(request.body.is_private);
-    }
-
-    if (request.body.user_id) {
-        const [user] = await pool.query("SELECT * FROM users WHERE id = ?", [
-            request.body.user_id
-        ]);
-
-        if (!user) return {
-            error: 1,
-            error_message: "User not found"
-        };
-
-        where.push("user_id = ?");
-        params.push(request.body.user_id);
-    }
-
-    if (where > 0) {
-        query += " WHERE " + where.join(" AND ");
-    }
-
-    return pool.query(query, params);
 };
 
-// --------------------
-// Update
-// --------------------
-
 export const updateWorkspace = async (request) => {
-    if (!request.body.id) return {
+    if (!request.params.id) return {
         error: 1,
         error_message: "Id not provided"
     };
 
     const [workspace] = await pool.query("SELECT * FROM workspaces WHERE id = ?", [
-        request.body.id
+        request.params.id
     ]);
 
     if (!workspace) return {
@@ -151,22 +138,18 @@ export const updateWorkspace = async (request) => {
         request.body.description || workspace.description,
         request.body.is_private || workspace.is_private,
         request.body.user_id || workspace.user_id,
-        request.body.id
+        request.params.id
     ]);
 };
 
-// --------------------
-// Delete
-// --------------------
-
 export const deleteWorkspace = async (request) => {
-    if (!request.body.id) return {
+    if (!request.params.id) return {
         error: 1,
         error_message: "Id not provided"
     };
 
     const [workspace] = await pool.query("SELECT * FROM workspaces WHERE id = ?", [
-        request.body.id
+        request.params.id
     ]);
 
     if (!workspace) return {
@@ -180,18 +163,18 @@ export const deleteWorkspace = async (request) => {
     };
 
     return pool.query("UPDATE workspaces SET deleted_at = NOW() WHERE id = ?", [
-        request.body.id
+        request.params.id
     ]);
 };
 
 export const restoreWorkspace = async (request) => {
-    if (!request.body.id) return {
+    if (!request.params.id) return {
         error: 1,
         error_message: "Id not provided"
     };
 
     const [workspace] = await pool.query("SELECT * FROM workspaces WHERE id = ?", [
-        request.body.id
+        request.params.id
     ]);
 
     if (!workspace) return {
@@ -205,6 +188,6 @@ export const restoreWorkspace = async (request) => {
     };
 
     return pool.query("UPDATE workspaces SET deleted_at = NULL WHERE id = ?", [
-        request.body.id
+        request.params.id
     ]);
 };

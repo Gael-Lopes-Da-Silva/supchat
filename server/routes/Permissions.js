@@ -6,21 +6,40 @@ import {
     readPermission,
 } from "../controllers/Permissions.js";
 
-// --------------------
-// Create
-// --------------------
-
-// Add it in base.sql
-
-// --------------------
-// Read
-// --------------------
-
-// GET /permissions/read
+// GET /permissions
 //
-// body:
-//   id: number (optional)
+// query:
 //   name: string (optional)
+// return:
+//   result: [permission]
+router.get("/", (request, response) => {
+    readPermission(request).then((result) => {
+        if (!result.error && result !== "") {
+            response.status(202).json({
+                when: "Permissions > ReadPermission",
+                result: result,
+                error: 0,
+            });
+        } else {
+            response.status(404).json({
+                when: "Permissions > ReadPermission",
+                error: 1,
+                error_message: result.error_message ? result.error_message : "Could not read permission",
+            });
+        }
+    }).catch((error) => {
+        response.status(500).json({
+            when: "Permissions > ReadPermission",
+            error: 1,
+            error_message: error.message,
+        });
+    });
+});
+
+// GET /permissions/:id
+//
+// param:
+//   id: number (required)
 // return:
 //   result: [permission]
 router.get("/read", (request, response) => {
@@ -46,17 +65,5 @@ router.get("/read", (request, response) => {
         });
     });
 });
-
-// --------------------
-// Update
-// --------------------
-
-// Update it in base.sql
-
-// --------------------
-// Delete
-// --------------------
-
-// Delete it in base.sql
 
 export default router;

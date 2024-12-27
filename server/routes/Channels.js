@@ -10,11 +10,7 @@ import {
 
 const router = express.Router();
 
-// --------------------
-// Create
-// --------------------
-
-// POST /channels/create
+// POST /channels
 //
 // body:
 //   user_id: number (required)
@@ -23,7 +19,7 @@ const router = express.Router();
 //   is_private: boolean (required)
 // return:
 //   result: [channel]
-router.post("/create", (request, response) => {
+router.post("/", (request, response) => {
     createChannel(request).then((result) => {
         if (!result.error && result !== "") {
             response.status(201).json({
@@ -47,14 +43,9 @@ router.post("/create", (request, response) => {
     });
 });
 
-// --------------------
-// Read
-// --------------------
-
-// GET /channels/read
+// GET /channels
 //
-// body:
-//   id: number (optional)
+// query:
 //   workspace_id: number (optional)
 //   name: string (optional)
 //   is_private: boolean (optional)
@@ -85,21 +76,48 @@ router.get("/read", (request, response) => {
     });
 });
 
-// --------------------
-// Update
-// --------------------
-
-// PUT /channels/update
+// GET /channels/:id
 //
-// body:
+// params:
 //   id: number (required)
+// return:
+//   result: [channel]
+router.get("/read", (request, response) => {
+    readChannel(request).then((result) => {
+        if (!result.error && result !== "") {
+            response.status(202).json({
+                when: "Channels > ReadChannel",
+                result: result,
+                error: 0,
+            });
+        } else {
+            response.status(404).json({
+                when: "Channels > ReadChannel",
+                error: 1,
+                error_message: result.error_message ? result.error_message : "Could not read channel",
+            });
+        }
+    }).catch((error) => {
+        response.status(500).json({
+            when: "Channels > ReadChannel",
+            error: 1,
+            error_message: error.message,
+        });
+    });
+});
+
+// PUT /channels/:id
+//
+// param:
+//   id: number (required)
+// body:
 //   workspace_id: number (optional)
 //   name: string (optional)
 //   is_private: boolean (optional)
 //   user_id: number (optional)
 // return:
 //   result: [channel]
-router.put("/update", (request, response) => {
+router.put("/:id", (request, response) => {
     updateChannel(request).then((result) => {
         if (!result.error && result !== "") {
             response.status(202).json({
@@ -127,9 +145,9 @@ router.put("/update", (request, response) => {
 // Delete
 // --------------------
 
-// DELETE /channels/delete
+// DELETE /channels/:id
 //
-// body:
+// param:
 //   id: number (required)
 // return:
 //   result: [channel]
@@ -157,13 +175,13 @@ router.delete("/delete", (request, response) => {
     });
 });
 
-// DELETE /channels/restore
+// PATCH /channels/:id
 //
-// body:
+// param:
 //   id: number (required)
 // return:
 //   result: [channel]
-router.delete("/restore", (request, response) => {
+router.patch("/:id", (request, response) => {
     restoreChannel(request).then((result) => {
         if (!result.error && result !== "") {
             response.status(202).json({

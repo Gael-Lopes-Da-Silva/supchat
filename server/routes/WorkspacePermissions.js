@@ -8,11 +8,7 @@ import {
 
 const router = express.Router();
 
-// --------------------
-// Create
-// --------------------
-
-// POST /workspaces/permissions/create
+// POST /workspaces/permissions
 //
 // body:
 //   user_id: number (required)
@@ -20,7 +16,7 @@ const router = express.Router();
 //   permission_id: number (required)
 // return:
 //   result: [workspace_permission]
-router.post("/create", (request, response) => {
+router.post("/", (request, response) => {
     createWorkspacePermission(request).then((result) => {
         if (!result.error && result !== "") {
             response.status(201).json({
@@ -44,19 +40,15 @@ router.post("/create", (request, response) => {
     });
 });
 
-// --------------------
-// Read
-// --------------------
-
-// GET /workspaces/permissions/read
+// GET /workspaces/permissions
 //
-// body:
+// query:
 //   user_id: number (optional)
 //   workspace_id: number (optional)
 //   permission_id: number (optional)
 // return:
 //   result: [workspace_permission]
-router.get("/read", (request, response) => {
+router.get("/", (request, response) => {
     readWorkspacePermission(request).then((result) => {
         if (!result.error && result !== "") {
             response.status(202).json({
@@ -80,25 +72,47 @@ router.get("/read", (request, response) => {
     });
 });
 
-// --------------------
-// Update
-// --------------------
-
-// Use Add and Delete to update
-
-// --------------------
-// Delete
-// --------------------
-
-// DELETE /workspaces/permissions/delete
+// GET /workspaces/permissions/user/:user_id/workspace/:workspace_id/permission/:permission_id
 //
-// body:
+// param:
+//   user_id: number (optional)
+//   workspace_id: number (optional)
+//   permission_id: number (optional)
+// return:
+//   result: [workspace_permission]
+router.get("/user/:user_id/workspace/:workspace_id/permission/:permission_id", (request, response) => {
+    readWorkspacePermission(request).then((result) => {
+        if (!result.error && result !== "") {
+            response.status(202).json({
+                when: "WorkspacePermissions > ReadWorkspacePermission",
+                result: result,
+                error: 0,
+            });
+        } else {
+            response.status(404).json({
+                when: "WorkspacePermissions > ReadWorkspacePermission",
+                error: 1,
+                error_message: result.error_message ? result.error_message : "Could not read workspace permission",
+            });
+        }
+    }).catch((error) => {
+        response.status(500).json({
+            when: "WorkspacePermissions > ReadWorkspacePermission",
+            error: 1,
+            error_message: error.message,
+        });
+    });
+});
+
+// DELETE /workspaces/permissions/user/:user_id/workspace/:workspace_id/permission/:permission_id
+//
+// param:
 //   user_id: number (required)
 //   workspace_id: number (required)
 //   permission_id: number (required)
 // return:
 //   result: [workspace_permission]
-router.delete("/delete", (request, response) => {
+router.delete("/user/:user_id/workspace/:workspace_id/permission/:permission_id", (request, response) => {
     deleteWorkspacePermission(request).then((result) => {
         if (!result.error && result !== "") {
             response.status(202).json({

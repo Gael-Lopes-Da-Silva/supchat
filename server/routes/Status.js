@@ -6,24 +6,13 @@ import {
     readStatus,
 } from "../controllers/Status.js";
 
-// --------------------
-// Create
-// --------------------
-
-// Add it in base.sql
-
-// --------------------
-// Read
-// --------------------
-
-// GET /status/read
+// GET /status
 //
-// body:
-//   id: number (optional)
+// query:
 //   name: string (optional)
 // return:
 //   result: [status]
-router.get("/read", (request, response) => {
+router.get("/", (request, response) => {
     readStatus(request).then((result) => {
         if (!result.error && result !== "") {
             response.status(202).json({
@@ -47,16 +36,34 @@ router.get("/read", (request, response) => {
     });
 });
 
-// --------------------
-// Update
-// --------------------
-
-// Update it in base.sql
-
-// --------------------
-// Delete
-// --------------------
-
-// Delete it in base.sql
+// GET /status/:id
+//
+// param:
+//   id: number (required)
+// return:
+//   result: [status]
+router.get("/:id", (request, response) => {
+    readStatus(request).then((result) => {
+        if (!result.error && result !== "") {
+            response.status(202).json({
+                when: "Status > ReadStatus",
+                result: result,
+                error: 0,
+            });
+        } else {
+            response.status(404).json({
+                when: "Status > ReadStatus",
+                error: 1,
+                error_message: result.error_message ? result.error_message : "Could not read status",
+            });
+        }
+    }).catch((error) => {
+        response.status(500).json({
+            when: "Status > ReadStatus",
+            error: 1,
+            error_message: error.message,
+        });
+    });
+});
 
 export default router;

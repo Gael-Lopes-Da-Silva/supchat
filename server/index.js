@@ -1,5 +1,6 @@
 import express from "express";
-import dotenv from "dotenv";
+import cors from "cors";
+
 import pool from "./database/db.js";
 
 import UsersRouter from "./routes/Users.js";
@@ -15,16 +16,19 @@ import ChannelPermissionsRouter from "./routes/ChannelPermissions.js";
 import RolesRouter from "./routes/Roles.js";
 import RolePermissionsRouter from "./routes/RolePermissions.js";
 
-dotenv.config();
-
 const app = express();
-app.use(express.urlencoded({ extended: true }));
-app.use(express.json());
-
 const PORT = 3000;
 
 pool.getConnection().then((connection) => {
     console.log("Connected to database!");
+
+    app.use(express.urlencoded({ extended: true }));
+    app.use(express.json());
+    app.use(cors({
+        origin: "http://localhost:5000",
+        methods: ["GET", "POST", "PUT", "DELETE"],
+        credentials: true,
+    }));
 
     app.get("/", (request, response) => {
         response.sendFile("index.html", { root: "public" });

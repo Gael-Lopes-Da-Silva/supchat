@@ -10,11 +10,7 @@ import {
 
 const router = express.Router();
 
-// --------------------
-// Create
-// --------------------
-
-// POST /workspaces/members/create
+// POST /workspaces/members
 //
 // body:
 //   workspace_id: number (required)
@@ -22,7 +18,7 @@ const router = express.Router();
 //   role_id: number (required)
 // return:
 //   result: [workspace_member]
-router.post("/create", (request, response) => {
+router.post("/", (request, response) => {
     createWorkspaceMember(request).then((result) => {
         if (!result.error && result !== "") {
             response.status(201).json({
@@ -46,20 +42,15 @@ router.post("/create", (request, response) => {
     });
 });
 
-// --------------------
-// Read
-// --------------------
-
-// GET /workspaces/members/read
+// GET /workspaces/members
 //
-// body:
-//   id: number (optional)
+// query:
 //   workspace_id: number (optional)
 //   user_id: number (optional)
 //   role_id: number (optional)
 // return:
 //   result: [workspace_member]
-router.get("/read", (request, response) => {
+router.get("/", (request, response) => {
     readWorkspaceMember().then((result) => {
         if (!result.error && result !== "") {
             response.status(200).json({
@@ -83,20 +74,47 @@ router.get("/read", (request, response) => {
     });
 });
 
-// --------------------
-// Update
-// --------------------
-
-// PUT /workspaces/members/update
+// GET /workspaces/members/:id
 //
-// body:
+// param:
 //   id: number (required)
+// return:
+//   result: [workspace_member]
+router.get("/:id", (request, response) => {
+    readWorkspaceMember().then((result) => {
+        if (!result.error && result !== "") {
+            response.status(200).json({
+                when: "WorkspaceMembers > ReadWorkspaceMember",
+                result: result,
+                error: 0,
+            });
+        } else {
+            response.status(404).json({
+                when: "WorkspaceMembers > ReadWorkspaceMember",
+                error: 1,
+                error_message: result.error_message ? result.error_message : "Could not read workspace member",
+            });
+        }
+    }).catch((error) => {
+        response.status(500).json({
+            when: "WorkspaceMembers > ReadWorkspaceMember",
+            error: 1,
+            error_message: error.message,
+        });
+    });
+});
+
+// PUT /workspaces/members/:id
+//
+// param:
+//   id: number (required)
+// body:
 //   user_id: number (optional)
 //   workspace_id: number (optional)
 //   role_id: number (optional)
 // return:
 //   result: [workspace_member]
-router.put("/update", (request, response) => {
+router.put("/:id", (request, response) => {
     updateWorkspaceMember(request).then((result) => {
         if (!result.error && result !== "") {
             response.status(200).json({
@@ -120,17 +138,13 @@ router.put("/update", (request, response) => {
     });
 });
 
-// --------------------
-// Delete
-// --------------------
-
-// DELETE /workspaces/members/delete
+// DELETE /workspaces/members/:id
 //
-// body:
+// param:
 //   id: number (required)
 // return:
 //   result: [workspace_member]
-router.delete("/delete", (request, response) => {
+router.delete("/:id", (request, response) => {
     deleteWorkspaceMember(request).then((result) => {
         if (!result.error && result !== "") {
             response.status(200).json({
@@ -154,13 +168,13 @@ router.delete("/delete", (request, response) => {
     });
 });
 
-// DELETE /workspaces/members/restore
+// PATCH /workspaces/members/:id
 //
-// body:
+// param:
 //   id: number (required)
 // return:
 //   result: [workspace_member]
-router.delete("/restore", (request, response) => {
+router.patch("/:id", (request, response) => {
     restoreWorkspaceMember(request).then((result) => {
         if (!result.error && result !== "") {
             response.status(200).json({

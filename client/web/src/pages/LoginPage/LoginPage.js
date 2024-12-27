@@ -25,13 +25,12 @@ const LoginPage = () => {
     const handleSubmit = async (event) => {
         event.preventDefault();
 
-        try {
-            const data = await loginUser(email, password);
+        loginUser(email, password).then((data) => {
             localStorage.setItem('token', data.token);
             window.location.href = '/dashboard';
-        } catch (error) {
+        }).catch((error) => {
             setError('Email ou mot de passe incorrect.');
-        }
+        });
     };
 
     return (

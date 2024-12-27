@@ -16,18 +16,7 @@
     box-shadow: #f77066 5px 5px 0px;
 }
 
-.button:active {
-    margin-top: 4px;
-    margin-left: 4px;
-    margin-bottom: -4px;
-    margin-right: -4px;
-    box-shadow: #333 1px 1px 0px;
-}
-
 .button:hover:active {
-    margin-top: 4px;
-    margin-left: 4px;
-    margin-bottom: -4px;
-    margin-right: -4px;
-    box-shadow: #f77066 1px 1px 0px;
+    border: solid 3px #A0A0A0   ;
+    box-shadow: #A0A0A0 5px 5px 0px;
 }

@@ -8,18 +8,14 @@ import {
 
 const router = express.Router();
 
-// --------------------
-// Create
-// --------------------
-
-// POST /roles/permissions/create
+// POST /roles/permissions
 //
 // body:
 //   role_id: number (required)
 //   permission_id: number (required)
 // return:
 //   result: [role_permission]
-router.post("/create", (request, response) => {
+router.post("/", (request, response) => {
     createRolePermission(request).then((result) => {
         if (!result.error && result !== "") {
             response.status(201).json({
@@ -43,18 +39,14 @@ router.post("/create", (request, response) => {
     });
 });
 
-// --------------------
-// Read
-// --------------------
-
-// GET /roles/permissions/read
+// GET /roles/permissions
 //
-// body:
+// query:
 //   role_id: number (optional)
 //   permission_id: number (optional)
 // return:
 //   result: [role_permission]
-router.get("/read", (request, response) => {
+router.get("/", (request, response) => {
     readRolePermission(request).then((result) => {
         if (!result.error && result !== "") {
             response.status(202).json({
@@ -78,24 +70,45 @@ router.get("/read", (request, response) => {
     });
 });
 
-// --------------------
-// Update
-// --------------------
-
-// Use Add and Delete to update
-
-// --------------------
-// Delete
-// --------------------
-
-// DELETE /roles/permissions/delete
+// GET /roles/permissions/role/:role_id/permission/:permission_id
 //
-// body:
+// param:
 //   role_id: number (required)
 //   permission_id: number (required)
 // return:
 //   result: [role_permission]
-router.delete("/delete", (request, response) => {
+router.get("/role/:role_id/permission/:permission_id", (request, response) => {
+    readRolePermission(request).then((result) => {
+        if (!result.error && result !== "") {
+            response.status(202).json({
+                when: "RolePermissions > ReadRolePermission",
+                result: result,
+                error: 0,
+            });
+        } else {
+            response.status(404).json({
+                when: "RolePermissions > ReadRolePermission",
+                error: 1,
+                error_message: result.error_message ? result.error_message : "Could not read role permission",
+            });
+        }
+    }).catch((error) => {
+        response.status(500).json({
+            when: "RolePermissions > ReadRolePermission",
+            error: 1,
+            error_message: error.message,
+        });
+    });
+});
+
+// DELETE /roles/permissions/role/:role_id/permission/:permission_id
+//
+// param:
+//   role_id: number (required)
+//   permission_id: number (required)
+// return:
+//   result: [role_permission]
+router.delete("/role/:role_id/permission/:permission_id", (request, response) => {
     deleteRolePermission(request).then((result) => {
         if (!result.error && result !== "") {
             response.status(202).json({
