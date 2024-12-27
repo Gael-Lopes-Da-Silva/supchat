@@ -1,10 +1,9 @@
 import express from "express";
+const router = express.Router();
+
 import jsonwebtoken from "jsonwebtoken";
 import dotenv from "dotenv";
-
 dotenv.config();
-
-const router = express.Router();
 
 import {
     createUser,

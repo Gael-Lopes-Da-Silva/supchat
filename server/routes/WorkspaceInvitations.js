@@ -1,4 +1,5 @@
 import express from "express";
+const router = express.Router();
 
 import {
     createWorkspaceInvitation,
@@ -7,8 +8,6 @@ import {
     deleteWorkspaceInvitation,
     restoreWorkspaceInvitation,
 } from "../controllers/WorkspaceInvitations.js";
-
-const router = express.Router();
 
 // POST /workspaces/invitations
 //

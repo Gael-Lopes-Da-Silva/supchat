@@ -1,12 +1,11 @@
 import express from "express";
+const router = express.Router();
 
 import {
     createRolePermission,
     readRolePermission,
     deleteRolePermission,
 } from "../controllers/RolePermissions.js";
-
-const router = express.Router();
 
 // POST /roles/permissions
 //
