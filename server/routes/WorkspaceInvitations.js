@@ -56,7 +56,7 @@ router.post("/", (request, response) => {
 // return:
 //   result: [workspace_invitation]
 router.get("/", (request, response) => {
-    readWorkspaceInvitation().then((result) => {
+    readWorkspaceInvitation(request).then((result) => {
         if (!result.error && result !== "") {
             response.status(200).json({
                 when: "WorkspaceInvitations > ReadWorkspaceInvitation",
@@ -86,7 +86,7 @@ router.get("/", (request, response) => {
 // return:
 //   result: [workspace_invitation]
 router.get("/:id", (request, response) => {
-    readWorkspaceInvitation().then((result) => {
+    readWorkspaceInvitation(request).then((result) => {
         if (!result.error && result !== "") {
             response.status(200).json({
                 when: "WorkspaceInvitations > ReadWorkspaceInvitation",

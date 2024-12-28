@@ -13,8 +13,8 @@ import {
 //
 // body:
 //   name: string (required)
-//   description: string (required)
-//   is_private: boolean (required)
+//   description: string (optional)
+//   is_private: boolean (optional)
 //   user_id: number (required)
 // return:
 //   result: [workspace]
@@ -52,7 +52,7 @@ router.post("/", (request, response) => {
 // return:
 //   result: [workspace]
 router.get("/", (request, response) => {
-    readWorkspace().then((result) => {
+    readWorkspace(request).then((result) => {
         if (!result.error && result !== "") {
             response.status(200).json({
                 when: "Workspaces > ReadWorkspace",
@@ -82,7 +82,7 @@ router.get("/", (request, response) => {
 // return:
 //   result: [workspace]
 router.get("/:id", (request, response) => {
-    readWorkspace().then((result) => {
+    readWorkspace(request).then((result) => {
         if (!result.error && result !== "") {
             response.status(200).json({
                 when: "Workspaces > ReadWorkspace",

@@ -236,7 +236,7 @@ AFTER INSERT ON workspaces
 FOR EACH ROW
 BEGIN
     INSERT INTO workspace_members (workspace_id, user_id, role_id, added_at)
-    VALUES (NEW.id, NEW.user_id, 'admin', NOW());
+    VALUES (NEW.id, NEW.user_id, (SELECT id FROM roles WHERE name = 'admin'), NOW());
 END$$
 
 DELIMITER ;
@@ -247,7 +247,7 @@ AFTER INSERT ON channels
 FOR EACH ROW
 BEGIN
     INSERT INTO channel_members (channel_id, user_id, role_id, added_at)
-    VALUES (NEW.id, NEW.user_id, 'admin', NOW());
+    VALUES (NEW.id, NEW.user_id, (SELECT id FROM roles WHERE name = 'admin'), NOW());
 END$$
 
 DELIMITER ;

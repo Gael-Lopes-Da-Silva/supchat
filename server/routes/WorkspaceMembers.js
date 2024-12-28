@@ -50,7 +50,7 @@ router.post("/", (request, response) => {
 // return:
 //   result: [workspace_member]
 router.get("/", (request, response) => {
-    readWorkspaceMember().then((result) => {
+    readWorkspaceMember(request).then((result) => {
         if (!result.error && result !== "") {
             response.status(200).json({
                 when: "WorkspaceMembers > ReadWorkspaceMember",
@@ -80,7 +80,7 @@ router.get("/", (request, response) => {
 // return:
 //   result: [workspace_member]
 router.get("/:id", (request, response) => {
-    readWorkspaceMember().then((result) => {
+    readWorkspaceMember(request).then((result) => {
         if (!result.error && result !== "") {
             response.status(200).json({
                 when: "WorkspaceMembers > ReadWorkspaceMember",

@@ -34,11 +34,16 @@ export const createWorkspace = async (request) => {
         error: 1,
         error_message: "User deleted"
     };
+    
+    if (request.body.is_private && request.body.is_private != "true" && request.body.is_private != "false") return {
+        error: 1,
+        error_message: "Is_private should be a boolean"
+    };
 
     return pool.query("INSERT INTO workspaces (name, description, is_private, user_id) VALUES (?, ?, ?, ?)", [
         request.body.name,
-        request.body.description,
-        request.body.is_private,
+        request.body.description || "",
+        request.body.is_private ? request.body.is_private === "true" : false,
         request.body.user_id
     ]);
 };
@@ -71,8 +76,13 @@ export const readWorkspace = async (request) => {
         }
 
         if (request.query.is_private) {
+            if (request.query.is_private != "true" && request.query.is_private != "false") return {
+                error: 1,
+                error_message: "Is_private should be a boolean"
+            };
+            
             where.push("is_private = ?");
-            params.push(request.query.is_private);
+            params.push(request.query.is_private === "true");
         }
 
         if (request.query.user_id) {
@@ -132,11 +142,16 @@ export const updateWorkspace = async (request) => {
             error_message: "User deleted"
         };
     }
+    
+    if (request.body.is_private && request.body.is_private != "true" && request.body.is_private != "false") return {
+        error: 1,
+        error_message: "Is_private should be a boolean"
+    };
 
     return pool.query("UPDATE workspaces SET name = ?, description = ?, is_private = ?, user_id = ?, updated_at = NOW() WHERE id = ?", [
         request.body.name || workspace.name,
         request.body.description || workspace.description,
-        request.body.is_private || workspace.is_private,
+        request.body.is_private ? request.body.is_private === "true" : workspace.is_private,
         request.body.user_id || workspace.user_id,
         request.params.id
     ]);
