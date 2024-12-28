@@ -162,7 +162,7 @@ router.get("/:id", (request, response) => {
 //   link_facebook: boolean (optional)
 // return:
 //   result: [user]
-router.put("/update/:id", (request, response) => {
+router.put("/:id", (request, response) => {
     updateUser(request).then((result) => {
         if (!result.error && result !== "") {
             response.status(202).json({

@@ -140,7 +140,7 @@ export const readUser = async (request) => {
             params.push(request.query.link_facebook === "true");
         }
 
-        if (where > 0) {
+        if (where.length > 0) {
             query += " WHERE " + where.join(" AND ");
         }
 
@@ -190,12 +190,12 @@ export const updateUser = async (request) => {
     };
 
     return pool.query("UPDATE users SET username = ?, email = ?, password = ?, status_id = ?, link_google = ?, link_facebook = ?, updated_at = NOW() WHERE id = ?", [
-        request.body.username || userQuery[0].username,
-        request.body.email || userQuery[0].email,
-        request.body.password ? bcrypt.hashSync(request.body.password, 10) : userQuery[0].password,
-        request.body.status_id || userQuery[0].status_id,
-        request.body.link_google ? request.body.link_google === "true" : userQuery[0].link_google,
-        request.body.link_facebook ? request.body.link_facebook === "true" : userQuery[0].link_facebook,
+        request.body.username || user.username,
+        request.body.email || user.email,
+        request.body.password ? bcrypt.hashSync(request.body.password, 10) : user.password,
+        request.body.status_id || user.status_id,
+        request.body.link_google ? request.body.link_google === "true" : user.link_google,
+        request.body.link_facebook ? request.body.link_facebook === "true" : user.link_facebook,
         request.params.id
     ]);
 }
