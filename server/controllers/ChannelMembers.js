@@ -37,6 +37,14 @@ export const createChannelMember = async (request) => {
         error: 1,
         error_message: "Role not found"
     };
+    
+    if (await pool.query("SELECT * FROM channel_members WHERE user_id = ? AND channel_id = ?", [
+        request.body.user_id,
+        request.body.channel_id
+    ])) return {
+        error: 1,
+        error_message: "User already exist in this channel"
+    };
 
     return pool.query("INSERT INTO channel_members (channel_id, user_id, role_id) VALUES (?, ?, ?, ?, ?)", [
         request.body.channel_id,
@@ -174,6 +182,14 @@ export const updateChannelMember = async (request) => {
             error_message: "Role not found"
         };
     }
+    
+    if (await pool.query("SELECT * FROM channel_members WHERE user_id = ? AND channel_id = ?", [
+        request.body.user_id,
+        request.body.channel_id
+    ])) return {
+        error: 1,
+        error_message: "User already exist in this channel"
+    };
 
     return pool.query("UPDATE channel_members SET channel_id = ?, user_id = ?, role_id = ?, updated_at = NOW() WHERE id = ?", [
         request.body.channel_id || channelMember.channel_id,

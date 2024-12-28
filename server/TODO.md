@@ -1,2 +1,0 @@
-- [] workspace_members: Vérifier que l'utilisateur n'existe pas déjà dans ce workspace (POST, PUT)
-- [] channel_members: Vérifier que l'utilisateur n'existe pas déjà dans ce channel (POST, PUT)

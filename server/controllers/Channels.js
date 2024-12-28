@@ -43,11 +43,16 @@ export const createChannel = async (request) => {
         error: 1,
         error_message: "Workspace deleted"
     };
+    
+    if (request.body.is_private && request.body.is_private != "true" && request.body.is_private != "false") return {
+        error: 1,
+        error_message: "Is_private should be a boolean"
+    };
 
     return pool.query("INSERT INTO channels (workspace_id, name, is_private, user_id) VALUES (?, ?, ?, ?, ?)", [
         request.body.workspace_id,
         request.body.name,
-        request.body.is_private,
+        request.body.is_private ? request.body.is_private === "true" : false,
         request.body.user_id
     ]);
 }
@@ -89,6 +94,11 @@ export const readChannel = async (request) => {
         }
 
         if (request.query.is_private) {
+            if (request.query.is_private != "true" && request.query.is_private != "false") return {
+                error: 1,
+                error_message: "Is_private should be a boolean"
+            };
+
             where.push("is_private = ?");
             params.push(request.query.is_private);
         }
@@ -166,12 +176,16 @@ export const updateChannel = async (request) => {
             error_message: "User deleted"
         };
     }
+    
+    if (request.body.is_private && request.body.is_private != "true" && request.body.is_private != "false") return {
+        error: 1,
+        error_message: "Is_private should be a boolean"
+    };
 
     return pool.query("UPDATE channels SET workspace_id = ?, name = ?, is_private = ?, role = ?, user_id = ?, updated_at = NOW() WHERE id = ?", [
         request.body.workspace_id || channel.workspace_id,
         request.body.name || channel.name,
-        request.body.is_private || channel.is_private,
-        request.body.role || channel.role,
+        request.body.is_private ? request.body.is_private === "true" : channel.is_private,
         request.body.user_id || channel.user_id,
         request.params.id
     ]);

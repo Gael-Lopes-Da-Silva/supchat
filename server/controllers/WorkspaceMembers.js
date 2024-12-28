@@ -53,6 +53,14 @@ export const createWorkspaceMember = async (request) => {
         error_message: "Role not found"
     };
 
+    if (await pool.query("SELECT * FROM workspace_members WHERE user_id = ? AND workspace_id = ?", [
+        request.body.user_id,
+        request.body.workspace_id
+    ])) return {
+        error: 1,
+        error_message: "User already exist in this workspace"
+    };
+
     return pool.query("INSERT INTO workspace_members (workspace_id, user_id, role_id) VALUES (?, ?, ?)", [
         request.body.workspace_id,
         request.body.user_id,
@@ -189,6 +197,14 @@ export const updateWorkspaceMember = async (request) => {
             error_message: "Role not found"
         };
     }
+
+    if (await pool.query("SELECT * FROM workspace_members WHERE user_id = ? AND workspace_id = ?", [
+        request.body.user_id,
+        request.body.workspace_id
+    ])) return {
+        error: 1,
+        error_message: "User already exist in this workspace"
+    };
 
     return pool.query("UPDATE workspace_members SET workspace_id = ?, user_id = ?, role_id = ? WHERE id = ?", [
         request.body.workspace_id || workspaceMember.workspace_id,
