@@ -22,7 +22,7 @@ export const readRole = async (request) => {
             params.push(request.query.name);
         }
 
-        if (where > 0) {
+        if (where.length > 0) {
             query += " WHERE " + where.join(" AND ");
         }
 

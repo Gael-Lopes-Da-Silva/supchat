@@ -128,7 +128,7 @@ export const readWorkspaceInvitation = async (request) => {
             params.push(request.query.expire_at);
         }
 
-        if (where > 0) {
+        if (where.length > 0) {
             query += " WHERE " + where.join(" AND ");
         }
 

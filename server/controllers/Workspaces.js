@@ -89,7 +89,7 @@ export const readWorkspace = async (request) => {
             params.push(request.query.user_id);
         }
 
-        if (where > 0) {
+        if (where.length > 0) {
             query += " WHERE " + where.join(" AND ");
         }
 

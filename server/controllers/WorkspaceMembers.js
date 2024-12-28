@@ -119,7 +119,7 @@ export const readWorkspaceMember = async (request) => {
             params.push(request.query.role_id);
         }
 
-        if (where > 0) {
+        if (where.length > 0) {
             query += " WHERE " + where.join(" AND ");
         }
 

@@ -91,7 +91,7 @@ export const readRolePermission = async (request) => {
             params.push(request.query.permission_id);
         }
 
-        if (where > 0) {
+        if (where.length > 0) {
             query += " WHERE " + where.join(" AND ");
         }
 
