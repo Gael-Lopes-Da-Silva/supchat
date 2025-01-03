@@ -3,14 +3,14 @@ import React, { useEffect, useState } from 'react';
 import InputField from '../../components/InputField/InputField';
 import Button from '../../components/Button/Button';
 
-import { loginUser } from '../../services/auth';
+import { registerUser } from '../../services/auth';
 
-import './LoginPage.css';
+import './RegisterPage.css';
 
-const LoginPage = () => {
+const RegisterPage = () => {
+    const [username, setUsername] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    const [error, setError] = useState('');
     
     useEffect(() => {
         const token = localStorage.getItem('token');
@@ -23,14 +23,8 @@ const LoginPage = () => {
     const handleSubmit = async (event) => {
         event.preventDefault();
 
-        loginUser(email, password).then((data) => {
-            if (data === "") {
-                setError('Email ou mot de passe incorrect.');
-                return;
-            }
+        registerUser(username, email, password).then((data) => {
             
-            localStorage.setItem('token', data.token);
-            window.location.href = '/dashboard';
         }).catch((error) => {
             console.error(error);
         });
@@ -39,26 +33,31 @@ const LoginPage = () => {
     return (
         <div className="login-container">
             <div className="login-box">
-                <h1>Connexion</h1>
+                <h1>Création de compte</h1>
                 <form onSubmit={handleSubmit}>
+                    <InputField
+                        label="Pseudo"
+                        type="text"
+                        value={username}
+                        onChange={(event) => setUsername(event.target.value)}
+                    />
                     <InputField
                         label="Email"
                         type="email"
                         value={email}
-                        onChange={(e) => setEmail(e.target.value)}
+                        onChange={(event) => setEmail(event.target.value)}
                     />
                     <InputField
                         label="Mot de passe"
                         type="password"
                         value={password}
-                        onChange={(e) => setPassword(e.target.value)}
+                        onChange={(event) => setPassword(event.target.value)}
                     />
-                    {error && <p className="error-message">{error}</p>}
-                    <Button type="submit" text="Se Connecter" />
+                    <Button type="submit" text="Enregistrer" />
                 </form>
             </div>
         </div>
     );
 };
 
-export default LoginPage;
+export default RegisterPage;
