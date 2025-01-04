@@ -28,8 +28,8 @@ router.post("/", (request, response) => {
         } else {
             response.status(404).json({
                 when: "WorkspaceMembers > CreateWorkspaceMember",
-                error: 1,
-                error_message: result.error_message ? result.error_message : "Could not create workspace member",
+                error: result.error || 1,
+                error_message: result.error_message || "Could not create workspace member",
             });
         }
     }).catch((error) => {
@@ -60,8 +60,8 @@ router.get("/", (request, response) => {
         } else {
             response.status(404).json({
                 when: "WorkspaceMembers > ReadWorkspaceMember",
-                error: 1,
-                error_message: result.error_message ? result.error_message : "Could not read workspace member",
+                error: result.error || 1,
+                error_message: result.error_message || "Could not read workspace member",
             });
         }
     }).catch((error) => {
@@ -90,8 +90,8 @@ router.get("/:id", (request, response) => {
         } else {
             response.status(404).json({
                 when: "WorkspaceMembers > ReadWorkspaceMember",
-                error: 1,
-                error_message: result.error_message ? result.error_message : "Could not read workspace member",
+                error: result.error || 1,
+                error_message: result.error_message || "Could not read workspace member",
             });
         }
     }).catch((error) => {
@@ -124,8 +124,8 @@ router.put("/:id", (request, response) => {
         } else {
             response.status(404).json({
                 when: "WorkspaceMembers > UpdateWorkspaceMember",
-                error: 1,
-                error_message: result.error_message ? result.error_message : "Could not update workspace member",
+                error: result.error || 1,
+                error_message: result.error_message || "Could not update workspace member",
             });
         }
     }).catch((error) => {
@@ -154,8 +154,8 @@ router.delete("/:id", (request, response) => {
         } else {
             response.status(404).json({
                 when: "WorkspaceMembers > DeleteWorkspaceMember",
-                error: 1,
-                error_message: result.error_message ? result.error_message : "Could not delete workspace member",
+                error: result.error || 1,
+                error_message: result.error_message || "Could not delete workspace member",
             });
         }
     }).catch((error) => {
@@ -184,8 +184,8 @@ router.patch("/:id", (request, response) => {
         } else {
             response.status(404).json({
                 when: "WorkspaceMembers > RestoreWorkspaceMember",
-                error: 1,
-                error_message: result.error_message ? result.error_message : "Could not restore workspace member",
+                error: result.error || 1,
+                error_message: result.error_message || "Could not restore workspace member",
             });
         }
     }).catch((error) => {

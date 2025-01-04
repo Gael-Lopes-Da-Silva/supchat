@@ -23,6 +23,8 @@ import {
 //   status_id: number (optional)
 //   link_google: boolean (optional)
 //   link_facebook: boolean (optional)
+//   confirm_token: string (optional)
+//   password_reset_token: string (optional)
 // return:
 //   result: [user]
 router.post("/", (request, response) => {
@@ -36,8 +38,8 @@ router.post("/", (request, response) => {
         } else {
             response.status(404).json({
                 when: "Users > CreateUser",
-                error: 1,
-                error_message: result.error_message ? result.error_message : "Could not create user",
+                error: result.error || 1,
+                error_message: result.error_message || "Could not create user",
             });
         }
     }).catch((error) => {
@@ -71,8 +73,8 @@ router.post("/login", (request, response) => {
         } else {
             response.status(404).json({
                 when: "Users > LoginUser",
-                error: 1,
-                error_message: result.error_message ? result.error_message : "Could not login user",
+                error: result.error || 1,
+                error_message: result.error_message || "Could not login user",
             });
         }
     }).catch((error) => {
@@ -93,6 +95,8 @@ router.post("/login", (request, response) => {
 //   status_id: number (optional)
 //   link_google: boolean (optional)
 //   link_facebook: boolean (optional)
+//   confirm_token: string (optional)
+//   password_reset_token: string (optional)
 // return:
 //   result: [user]
 router.get("/", (request, response) => {
@@ -106,8 +110,8 @@ router.get("/", (request, response) => {
         } else {
             response.status(404).json({
                 when: "Users > ReadUser",
-                error: 1,
-                error_message: result.error_message ? result.error_message : "Could not read user",
+                error: result.error || 1,
+                error_message: result.error_message || "Could not read user",
             });
         }
     }).catch((error) => {
@@ -136,8 +140,8 @@ router.get("/:id", (request, response) => {
         } else {
             response.status(404).json({
                 when: "Users > ReadUser",
-                error: 1,
-                error_message: result.error_message ? result.error_message : "Could not read user",
+                error: result.error || 1,
+                error_message: result.error_message || "Could not read user",
             });
         }
     }).catch((error) => {
@@ -160,6 +164,8 @@ router.get("/:id", (request, response) => {
 //   status_id: number (optional)
 //   link_google: boolean (optional)
 //   link_facebook: boolean (optional)
+//   confirm_token: string (optional)
+//   password_reset_token: string (optional)
 // return:
 //   result: [user]
 router.put("/:id", (request, response) => {
@@ -173,8 +179,8 @@ router.put("/:id", (request, response) => {
         } else {
             response.status(404).json({
                 when: "Users > UpdateUser",
-                error: 1,
-                error_message: result.error_message ? result.error_message : "Could not update user",
+                error: result.error || 1,
+                error_message: result.error_message || "Could not update user",
             });
         }
     }).catch((error) => {
@@ -203,8 +209,8 @@ router.delete("/:id", (request, response) => {
         } else {
             response.status(404).json({
                 when: "Users > DeleteUser",
-                error: 1,
-                error_message: result.error_message ? result.error_message : "Could not delete user",
+                error: result.error || 1,
+                error_message: result.error_message || "Could not delete user",
             });
         }
     }).catch((error) => {
@@ -233,8 +239,8 @@ router.patch("/:id", (request, response) => {
         } else {
             response.status(404).json({
                 when: "Users > RestoreUser",
-                error: 1,
-                error_message: result.error_message ? result.error_message : "Could not restore user",
+                error: result.error || 1,
+                error_message: result.error_message || "Could not restore user",
             });
         }
     }).catch((error) => {

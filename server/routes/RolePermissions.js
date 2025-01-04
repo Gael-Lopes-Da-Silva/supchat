@@ -25,8 +25,8 @@ router.post("/", (request, response) => {
         } else {
             response.status(404).json({
                 when: "RolePermissions > CreateRolePermission",
-                error: 1,
-                error_message: result.error_message ? result.error_message : "Could not create role permission",
+                error: result.error || 1,
+                error_message: result.error_message || "Could not create role permission",
             });
         }
     }).catch((error) => {
@@ -56,8 +56,8 @@ router.get("/", (request, response) => {
         } else {
             response.status(404).json({
                 when: "RolePermissions > ReadRolePermission",
-                error: 1,
-                error_message: result.error_message ? result.error_message : "Could not read role permission",
+                error: result.error || 1,
+                error_message: result.error_message || "Could not read role permission",
             });
         }
     }).catch((error) => {
@@ -87,8 +87,8 @@ router.get("/role/:role_id/permission/:permission_id", (request, response) => {
         } else {
             response.status(404).json({
                 when: "RolePermissions > ReadRolePermission",
-                error: 1,
-                error_message: result.error_message ? result.error_message : "Could not read role permission",
+                error: result.error || 1,
+                error_message: result.error_message || "Could not read role permission",
             });
         }
     }).catch((error) => {
@@ -118,8 +118,8 @@ router.delete("/role/:role_id/permission/:permission_id", (request, response) =>
         } else {
             response.status(404).json({
                 when: "RolePermissions > DeleteRolePermission",
-                error: 1,
-                error_message: result.error_message ? result.error_message : "Could not delete role permission",
+                error: result.error || 1,
+                error_message: result.error_message || "Could not delete role permission",
             });
         }
     }).catch((error) => {

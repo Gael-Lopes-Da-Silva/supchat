@@ -1,50 +1,26 @@
 import pool from "../database/db.js";
+import { ERROR_CODES, createErrorResponse } from "./ErrorHandler/Errors.js";
 
 export const createChannelMember = async (request) => {
-    const [channel] = await pool.query("SELECT * FROM channels WHERE id = ?", [
-        request.body.channel_id
-    ]);
+    if (!request.body.user_id) return createErrorResponse(ERROR_CODES.USER_ID_NOT_PROVIDED);
+    if (!request.body.channel_id) return createErrorResponse(ERROR_CODES.CHANNEL_ID_NOT_PROVIDED);
+    if (!request.body.role_id) return createErrorResponse(ERROR_CODES.ROLE_ID_NOT_PROVIDED);
+    
+    const [channel] = await pool.query("SELECT * FROM channels WHERE id = ?", [request.body.channel_id]);
+    if (!channel) return createErrorResponse(ERROR_CODES.CHANNEL_NOT_FOUND);
+    if (channel.deleted_at !== null) return createErrorResponse(ERROR_CODES.CHANNEL_DELETED);
 
-    if (!channel) return {
-        error: 1,
-        error_message: "Channel not found"
-    };
+    const [user] = await pool.query("SELECT * FROM users WHERE id = ?", [request.body.user_id]);
+    if (!user) return createErrorResponse(ERROR_CODES.USER_NOT_FOUND);
+    if (channel.deleted_at !== null) return createErrorResponse(ERROR_CODES.USER_DELETED);
 
-    if (channel.deleted_at != null) return {
-        error: 1,
-        error_message: "Channel deleted"
-    };
-
-    const [user] = await pool.query("SELECT * FROM users WHERE id = ?", [
-        request.body.user_id
-    ]);
-
-    if (!user) return {
-        error: 1,
-        error_message: "User not found"
-    };
-
-    if (channel.deleted_at != null) return {
-        error: 1,
-        error_message: "User deleted"
-    };
-
-    const [role] = await pool.query("SELECT * FROM roles WHERE id = ?", [
-        request.body.role_id
-    ]);
-
-    if (!role) return {
-        error: 1,
-        error_message: "Role not found"
-    };
+    const [role] = await pool.query("SELECT * FROM roles WHERE id = ?", [request.body.role_id]);
+    if (!role) return createErrorResponse(ERROR_CODES.ROLE_NOT_FOUND);
     
     if (await pool.query("SELECT * FROM channel_members WHERE user_id = ? AND channel_id = ?", [
         request.body.user_id,
         request.body.channel_id
-    ])) return {
-        error: 1,
-        error_message: "User already exist in this channel"
-    };
+    ])) return createErrorResponse(ERROR_CODES.USER_ALREADY_EXIST_IN_CHANNEL);
 
     return pool.query("INSERT INTO channel_members (channel_id, user_id, role_id) VALUES (?, ?, ?, ?, ?)", [
         request.body.channel_id,
@@ -55,15 +31,8 @@ export const createChannelMember = async (request) => {
 
 export const readChannelMember = async (request) => {
     if (request.params.id) {
-        const [channelMember] = await pool.query("SELECT * FROM channel_members WHERE id = ?", [
-            request.body.id
-        ]);
-
-        if (!channelMember) return {
-            error: 1,
-            error_message: "Channel member not found"
-        };
-
+        const [channelMember] = await pool.query("SELECT * FROM channel_members WHERE id = ?", [request.body.id]);
+        if (!channelMember) return createErrorResponse(ERROR_CODES.CHANNEL_MEMBER_NOT_FOUND);
         return channelMember;
     } else {
         let query = "SELECT * FROM channel_members"
@@ -71,43 +40,22 @@ export const readChannelMember = async (request) => {
         let params = [];
 
         if (request.query.channel_id) {
-            const [channel] = await pool.query("SELECT * FROM channels WHERE id = ?", [
-                request.query.channel_id
-            ]);
-
-            if (!channel) return {
-                error: 1,
-                error_message: "Channel not found"
-            };
-
+            const [channel] = await pool.query("SELECT * FROM channels WHERE id = ?", [request.query.channel_id]);
+            if (!channel) return createErrorResponse(ERROR_CODES.CHANNEL_NOT_FOUND);
             where.push("channel_id = ?");
             params.push(request.query.channel_id);
         }
 
         if (request.query.user_id) {
-            const [user] = await pool.query("SELECT * FROM users WHERE id = ?", [
-                request.query.user_id
-            ]);
-
-            if (!user) return {
-                error: 1,
-                error_message: "User not found"
-            };
-
+            const [user] = await pool.query("SELECT * FROM users WHERE id = ?", [request.query.user_id]);
+            if (!user) return createErrorResponse(ERROR_CODES.USER_NOT_FOUND);
             where.push("user_id = ?");
             params.push(request.query.user_id);
         }
 
         if (request.query.role_id) {
-            const [role] = await pool.query("SELECT * FROM roles WHERE id = ?", [
-                request.query.role_id
-            ]);
-
-            if (!role) return {
-                error: 1,
-                error_message: "Role not found"
-            };
-
+            const [role] = await pool.query("SELECT * FROM roles WHERE id = ?", [request.query.role_id]);
+            if (!role) return createErrorResponse(ERROR_CODES.ROLE_NOT_FOUND);
             where.push("role_id = ?");
             params.push(request.query.role_id);
         }
@@ -121,75 +69,33 @@ export const readChannelMember = async (request) => {
 }
 
 export const updateChannelMember = async (request) => {
-    if (!request.params.id) return {
-        error: 1,
-        error_message: "Id not provided"
-    };
+    if (!request.params.id) return createErrorResponse(ERROR_CODES.ID_NOT_PROVIDED);
 
-    const [channelMember] = await pool.query("SELECT * FROM channel_members WHERE id = ?", [
-        request.params.id
-    ]);
-
-    if (!channelMember) return {
-        error: 1,
-        error_message: "Channel member not found"
-    };
-
-    if (channelMember.deleted_at != null) return {
-        error: 1,
-        error_message: "Channel member deleted"
-    };
+    const [channelMember] = await pool.query("SELECT * FROM channel_members WHERE id = ?", [request.params.id]);
+    if (!channelMember) return createErrorResponse(ERROR_CODES.CHANNEL_MEMBER_NOT_FOUND);
+    if (channelMember.deleted_at !== null) return createErrorResponse(ERROR_CODES.CHANNEL_MEMBER_DELETED);
 
     if (request.body.channel_id) {
-        const [channel] = await pool.query("SELECT * FROM channels WHERE id = ?", [
-            request.body.channel_id
-        ]);
-
-        if (!channel) return {
-            error: 1,
-            error_message: "Channel not found"
-        };
-
-        if (channel.deleted_at != null) return {
-            error: 1,
-            error_message: "Channel deleted"
-        };
+        const [channel] = await pool.query("SELECT * FROM channels WHERE id = ?", [request.body.channel_id]);
+        if (!channel) return createErrorResponse(ERROR_CODES.CHANNEL_NOT_FOUND);
+        if (channel.deleted_at !== null) return createErrorResponse(ERROR_CODES.CHANNEL_DELETED);
     }
 
     if (request.body.user_id) {
-        const [user] = await pool.query("SELECT * FROM users WHERE id = ?", [
-            request.body.user_id
-        ]);
-
-        if (!user) return {
-            error: 1,
-            error_message: "User not found"
-        };
-
-        if (user.deleted_at != null) return {
-            error: 1,
-            error_message: "User deleted"
-        };
+        const [user] = await pool.query("SELECT * FROM users WHERE id = ?", [request.body.user_id]);
+        if (!user) return createErrorResponse(ERROR_CODES.USER_NOT_FOUND);
+        if (user.deleted_at !== null) return createErrorResponse(ERROR_CODES.USER_DELETED);
     }
 
     if (request.body.role_id) {
-        const [role] = await pool.query("SELECT * FROM roles WHERE id = ?", [
-            request.body.role_id
-        ]);
-
-        if (!role) return {
-            error: 1,
-            error_message: "Role not found"
-        };
+        const [role] = await pool.query("SELECT * FROM roles WHERE id = ?", [request.body.role_id]);
+        if (!role) return createErrorResponse(ERROR_CODES.ROLE_NOT_FOUND);
     }
     
     if (await pool.query("SELECT * FROM channel_members WHERE user_id = ? AND channel_id = ?", [
         request.body.user_id,
         request.body.channel_id
-    ])) return {
-        error: 1,
-        error_message: "User already exist in this channel"
-    };
+    ])) return createErrorResponse(ERROR_CODES.USER_ALREADY_EXIST_IN_CHANNEL);
 
     return pool.query("UPDATE channel_members SET channel_id = ?, user_id = ?, role_id = ?, updated_at = NOW() WHERE id = ?", [
         request.body.channel_id || channelMember.channel_id,
@@ -200,41 +106,17 @@ export const updateChannelMember = async (request) => {
 }
 
 export const deleteChannelMember = async (request) => {
-    const [channelMember] = await pool.query("SELECT * FROM channel_members WHERE id = ?", [
-        request.params.id
-    ]);
+    const [channelMember] = await pool.query("SELECT * FROM channel_members WHERE id = ?", [request.params.id]);
+    if (!channelMember) return createErrorResponse(ERROR_CODES.CHANNEL_MEMBER_NOT_FOUND);
+    if (channelMember.deleted_at !== null) return createErrorResponse(ERROR_CODES.CHANNEL_MEMBER_ALREADY_DELETED);
 
-    if (!channelMember) return {
-        error: 1,
-        error_message: "Channel member not found"
-    };
-
-    if (channelMember.deleted_at != null) return {
-        error: 1,
-        error_message: "Channel member already deleted"
-    };
-
-    return pool.query("UPDATE channel_members SET deleted_at = NOW() WHERE id = ?", [
-        request.params.id
-    ]);
+    return pool.query("UPDATE channel_members SET deleted_at = NOW() WHERE id = ?", [request.params.id]);
 }
 
 export const restoreChannelMember = async (request) => {
-    const [channelMember] = await pool.query("SELECT * FROM channel_members WHERE id = ?", [
-        request.params.id
-    ]);
+    const [channelMember] = await pool.query("SELECT * FROM channel_members WHERE id = ?", [request.params.id]);
+    if (!channelMember) return createErrorResponse(ERROR_CODES.CHANNEL_MEMBER_NOT_FOUND);
+    if (channelMember.deleted_at === null) return createErrorResponse(ERROR_CODES.CHANNEL_MEMBER_NOT_DELETED);
 
-    if (!channelMember) return {
-        error: 1,
-        error_message: "Channel member not found"
-    };
-
-    if (channelMember.deleted_at == null) return {
-        error: 1,
-        error_message: "Channel member not deleted"
-    };
-
-    return pool.query("UPDATE channel_members SET deleted_at = NULL WHERE id = ?", [
-        request.params.id
-    ]);
+    return pool.query("UPDATE channel_members SET deleted_at = NULL WHERE id = ?", [request.params.id]);
 }

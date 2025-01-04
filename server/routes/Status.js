@@ -22,8 +22,8 @@ router.get("/", (request, response) => {
         } else {
             response.status(404).json({
                 when: "Status > ReadStatus",
-                error: 1,
-                error_message: result.error_message ? result.error_message : "Could not read status",
+                error: result.error || 1,
+                error_message: result.error_message || "Could not read status",
             });
         }
     }).catch((error) => {
@@ -52,8 +52,8 @@ router.get("/:id", (request, response) => {
         } else {
             response.status(404).json({
                 when: "Status > ReadStatus",
-                error: 1,
-                error_message: result.error_message ? result.error_message : "Could not read status",
+                error: result.error || 1,
+                error_message: result.error_message || "Could not read status",
             });
         }
     }).catch((error) => {

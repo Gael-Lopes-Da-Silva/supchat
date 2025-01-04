@@ -28,8 +28,8 @@ router.post("/", (request, response) => {
         } else {
             response.status(404).json({
                 when: "ChannelMembers > CreateChannelMember",
-                error: 1,
-                error_message: result.error_message ? result.error_message : "Could not create channel member",
+                error: result.error || 1,
+                error_message: result.error_message || "Could not create channel member",
             });
         }
     }).catch((error) => {
@@ -60,8 +60,8 @@ router.get("/", (request, response) => {
         } else {
             response.status(404).json({
                 when: "ChannelMembers > ReadChannelMember",
-                error: 1,
-                error_message: result.error_message ? result.error_message : "Could not read channel member",
+                error: result.error || 1,
+                error_message: result.error_message || "Could not read channel member",
             });
         }
     }).catch((error) => {
@@ -90,8 +90,8 @@ router.get("/:id", (request, response) => {
         } else {
             response.status(404).json({
                 when: "ChannelMembers > ReadChannelMember",
-                error: 1,
-                error_message: result.error_message ? result.error_message : "Could not read channel member",
+                error: result.error || 1,
+                error_message: result.error_message || "Could not read channel member",
             });
         }
     }).catch((error) => {
@@ -124,8 +124,8 @@ router.put("/:id", (request, response) => {
         } else {
             response.status(404).json({
                 when: "ChannelMembers > UpdateChannelMember",
-                error: 1,
-                error_message: result.error_message ? result.error_message : "Could not update channel member",
+                error: result.error || 1,
+                error_message: result.error_message || "Could not update channel member",
             });
         }
     }).catch((error) => {
@@ -154,8 +154,8 @@ router.delete("/delete", (request, response) => {
         } else {
             response.status(404).json({
                 when: "ChannelMembers > DeleteChannelMember",
-                error: 1,
-                error_message: result.error_message ? result.error_message : "Could not delete channel member",
+                error: result.error || 1,
+                error_message: result.error_message || "Could not delete channel member",
             });
         }
     }).catch((error) => {
@@ -184,8 +184,8 @@ router.patch("/:id", (request, response) => {
         } else {
             response.status(404).json({
                 when: "ChannelMembers > RestoreChannelMember",
-                error: 1,
-                error_message: result.error_message ? result.error_message : "Could not restore channel member",
+                error: result.error || 1,
+                error_message: result.error_message || "Could not restore channel member",
             });
         }
     }).catch((error) => {

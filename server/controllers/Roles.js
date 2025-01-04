@@ -1,16 +1,10 @@
 import pool from "../database/db.js";
+import { ERROR_CODES, createErrorResponse } from "./ErrorHandler/Errors.js";
 
 export const readRole = async (request) => {
     if (request.params.id) {
-        const [role] = await pool.query("SELECT * FROM roles WHERE id = ?", [
-            request.body.id
-        ]);
-
-        if (!role) return {
-            error: 1,
-            error_message: "Role not found"
-        };
-
+        const [role] = await pool.query("SELECT * FROM roles WHERE id = ?", [request.body.id]);
+        if (!role) return createErrorResponse(ERROR_CODES.ROLE_NOT_FOUND);
         return role;
     } else {
         let query = "SELECT * FROM roles"

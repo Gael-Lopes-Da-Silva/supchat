@@ -22,8 +22,8 @@ router.get("/", (request, response) => {
         } else {
             response.status(404).json({
                 when: "Permissions > ReadPermission",
-                error: 1,
-                error_message: result.error_message ? result.error_message : "Could not read permission",
+                error: result.error || 1,
+                error_message: result.error_message || "Could not read permission",
             });
         }
     }).catch((error) => {
@@ -52,8 +52,8 @@ router.get("/read", (request, response) => {
         } else {
             response.status(404).json({
                 when: "Permissions > ReadPermission",
-                error: 1,
-                error_message: result.error_message ? result.error_message : "Could not read permission",
+                error: result.error || 1,
+                error_message: result.error_message || "Could not read permission",
             });
         }
     }).catch((error) => {

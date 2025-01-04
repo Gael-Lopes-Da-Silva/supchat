@@ -1,16 +1,10 @@
 import pool from "../database/db.js";
+import { ERROR_CODES, createErrorResponse } from "./ErrorHandler/Errors.js";
 
 export const readStatus = async (request) => {
     if (request.params.id) {
-        const [status] = await pool.query("SELECT * FROM status WHERE id = ?", [
-            request.body.id
-        ]);
-
-        if (!status) return {
-            error: 1,
-            error_message: "Status not found"
-        };
-
+        const [status] = await pool.query("SELECT * FROM status WHERE id = ?", [request.body.id]);
+        if (!status) return createErrorResponse(ERROR_CODES.STATUS_NOT_FOUND);
         return status;
     } else {
         let query = "SELECT * FROM status"

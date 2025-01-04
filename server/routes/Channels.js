@@ -29,8 +29,8 @@ router.post("/", (request, response) => {
         } else {
             response.status(404).json({
                 when: "Channels > CreateChannel",
-                error: 1,
-                error_message: result.error_message ? result.error_message : "Could not create channel",
+                error: result.error || 1,
+                error_message: result.error_message || "Could not create channel",
             });
         }
     }).catch((error) => {
@@ -62,8 +62,8 @@ router.get("/read", (request, response) => {
         } else {
             response.status(404).json({
                 when: "Channels > ReadChannel",
-                error: 1,
-                error_message: result.error_message ? result.error_message : "Could not read channel",
+                error: result.error || 1,
+                error_message: result.error_message || "Could not read channel",
             });
         }
     }).catch((error) => {
@@ -92,8 +92,8 @@ router.get("/read", (request, response) => {
         } else {
             response.status(404).json({
                 when: "Channels > ReadChannel",
-                error: 1,
-                error_message: result.error_message ? result.error_message : "Could not read channel",
+                error: result.error || 1,
+                error_message: result.error_message || "Could not read channel",
             });
         }
     }).catch((error) => {
@@ -127,8 +127,8 @@ router.put("/:id", (request, response) => {
         } else {
             response.status(404).json({
                 when: "Channels > UpdateChannel",
-                error: 1,
-                error_message: result.error_message ? result.error_message : "Could not update channel",
+                error: result.error || 1,
+                error_message: result.error_message || "Could not update channel",
             });
         }
     }).catch((error) => {
@@ -161,8 +161,8 @@ router.delete("/delete", (request, response) => {
         } else {
             response.status(404).json({
                 when: "Channels > DeleteChannel",
-                error: 1,
-                error_message: result.error_message ? result.error_message : "Could not delete channel",
+                error: result.error || 1,
+                error_message: result.error_message || "Could not delete channel",
             });
         }
     }).catch((error) => {
@@ -191,8 +191,8 @@ router.patch("/:id", (request, response) => {
         } else {
             response.status(404).json({
                 when: "Channels > RestoreChannel",
-                error: 1,
-                error_message: result.error_message ? result.error_message : "Could not restore channel",
+                error: result.error || 1,
+                error_message: result.error_message || "Could not restore channel",
             });
         }
     }).catch((error) => {

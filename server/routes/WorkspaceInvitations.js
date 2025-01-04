@@ -31,8 +31,8 @@ router.post("/", (request, response) => {
         } else {
             response.status(404).json({
                 when: "WorkspaceInvitations > CreateWorkspaceInvitation",
-                error: 1,
-                error_message: result.error_message ? result.error_message : "Could not create workspace invitation",
+                error: result.error || 1,
+                error_message: result.error_message || "Could not create workspace invitation",
             });
         }
     }).catch((error) => {
@@ -66,8 +66,8 @@ router.get("/", (request, response) => {
         } else {
             response.status(404).json({
                 when: "WorkspaceInvitations > ReadWorkspaceInvitation",
-                error: 1,
-                error_message: result.error_message ? result.error_message : "Could not read workspace invitation",
+                error: result.error || 1,
+                error_message: result.error_message || "Could not read workspace invitation",
             });
         }
     }).catch((error) => {
@@ -96,8 +96,8 @@ router.get("/:id", (request, response) => {
         } else {
             response.status(404).json({
                 when: "WorkspaceInvitations > ReadWorkspaceInvitation",
-                error: 1,
-                error_message: result.error_message ? result.error_message : "Could not read workspace invitation",
+                error: result.error || 1,
+                error_message: result.error_message || "Could not read workspace invitation",
             });
         }
     }).catch((error) => {
@@ -133,8 +133,8 @@ router.put("/update", (request, response) => {
         } else {
             response.status(404).json({
                 when: "WorkspaceInvitations > UpdateWorkspaceInvitation",
-                error: 1,
-                error_message: result.error_message ? result.error_message : "Could not update workspace invitation",
+                error: result.error || 1,
+                error_message: result.error_message || "Could not update workspace invitation",
             });
         }
     }).catch((error) => {
@@ -163,8 +163,8 @@ router.delete("/:id", (request, response) => {
         } else {
             response.status(404).json({
                 when: "WorkspaceInvitations > DeleteWorkspaceInvitation",
-                error: 1,
-                error_message: result.error_message ? result.error_message : "Could not delete workspace invitation",
+                error: result.error || 1,
+                error_message: result.error_message || "Could not delete workspace invitation",
             });
         }
     }).catch((error) => {
@@ -193,8 +193,8 @@ router.patch("/:id", (request, response) => {
         } else {
             response.status(404).json({
                 when: "WorkspaceInvitations > RestoreWorkspaceInvitation",
-                error: 1,
-                error_message: result.error_message ? result.error_message : "Could not restore workspace invitation",
+                error: result.error || 1,
+                error_message: result.error_message || "Could not restore workspace invitation",
             });
         }
     }).catch((error) => {

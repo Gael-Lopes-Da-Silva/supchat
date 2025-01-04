@@ -1,0 +1,20 @@
+.privacy-container {
+    flex: 1;
+    margin: 2rem;
+    color: black;
+    border: solid 3px #333;
+    box-shadow: #333 5px 5px 0px;
+    background-color: #fffceb;
+    padding: 2rem;
+    border-radius: 12px;
+    animation: fadeIn 0.8s ease-in-out;
+    overflow-y: scroll;
+}
+
+.privacy-box p {
+    font-weight: bold;
+}
+
+.privacy-box li {
+    font-weight: bold;
+}

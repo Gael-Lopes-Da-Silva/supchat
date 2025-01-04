@@ -22,8 +22,8 @@ router.get("/", (request, response) => {
         } else {
             response.status(404).json({
                 when: "Roles > ReadRole",
-                error: 1,
-                error_message: result.error_message ? result.error_message : "Could not read role",
+                error: result.error || 1,
+                error_message: result.error_message || "Could not read role",
             });
         }
     }).catch((error) => {
@@ -52,8 +52,8 @@ router.get("/:id", (request, response) => {
         } else {
             response.status(404).json({
                 when: "Roles > ReadRole",
-                error: 1,
-                error_message: result.error_message ? result.error_message : "Could not read role",
+                error: result.error || 1,
+                error_message: result.error_message || "Could not read role",
             });
         }
     }).catch((error) => {

@@ -1,4 +1,7 @@
-.button {
+.button-google {
+    display: flex;
+    align-items: center;
+    justify-content: center;
     cursor: pointer;
     padding: 0.8rem;
     background-color: #fffceb;
@@ -11,17 +14,16 @@
     transition: all 0.3s ease;
 }
 
-.button:disabled {
-    opacity: 30%;
-    pointer-events: none;
+.button-google svg {
+    margin-right: 0.4rem;
 }
 
-.button:hover {
-    border: solid 3px #f77066   ;
+.button-google:hover {
+    border: solid 3px #f77066;
     box-shadow: #f77066 5px 5px 0px;
 }
 
-.button:hover:active {
-    border: solid 3px #A0A0A0   ;
+.button-google:hover:active {
+    border: solid 3px #A0A0A0;
     box-shadow: #A0A0A0 5px 5px 0px;
 }

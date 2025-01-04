@@ -26,8 +26,8 @@ router.post("/", (request, response) => {
         } else {
             response.status(404).json({
                 when: "ChannelPermissions > CreateChannelPermission",
-                error: 1,
-                error_message: result.error_message ? result.error_message : "Could not create channel permission",
+                error: result.error || 1,
+                error_message: result.error_message || "Could not create channel permission",
             });
         }
     }).catch((error) => {
@@ -58,8 +58,8 @@ router.get("/", (request, response) => {
         } else {
             response.status(404).json({
                 when: "ChannelPermission > ReadChannelPermission",
-                error: 1,
-                error_message: result.error_message ? result.error_message : "Could not read channel permission",
+                error: result.error || 1,
+                error_message: result.error_message || "Could not read channel permission",
             });
         }
     }).catch((error) => {
@@ -90,8 +90,8 @@ router.get("/user/:user_id/channel/:channel_id/permission/:permission_id", (requ
         } else {
             response.status(404).json({
                 when: "ChannelPermission > ReadChannelPermission",
-                error: 1,
-                error_message: result.error_message ? result.error_message : "Could not read channel permission",
+                error: result.error || 1,
+                error_message: result.error_message || "Could not read channel permission",
             });
         }
     }).catch((error) => {
@@ -122,8 +122,8 @@ router.delete("/user/:user_id/channel/:channel_id/permission/:permission_id", (r
         } else {
             response.status(404).json({
                 when: "ChannelPermissions > DeleteChannelPermission",
-                error: 1,
-                error_message: result.error_message ? result.error_message : "Could not delete channel permission",
+                error: result.error || 1,
+                error_message: result.error_message || "Could not delete channel permission",
             });
         }
     }).catch((error) => {

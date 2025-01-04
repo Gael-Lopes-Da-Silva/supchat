@@ -1,15 +1,15 @@
 import React from 'react';
 import './InputField.css';
 
-const InputField = ({ label, type, value, onChange }) => {
+const InputField = ({ label, type, value, required, onChange }) => {
     return (
         <div className="input-field">
-            <label className="input-label">{label}</label>
+            <label>{label}<span>{required ? "*" : ""}</span></label>
             <input
                 type={type}
                 value={value}
                 onChange={onChange}
-                className="input-box"
+                required={required}
             />
         </div>
     );

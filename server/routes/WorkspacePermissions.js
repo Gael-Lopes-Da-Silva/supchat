@@ -26,8 +26,8 @@ router.post("/", (request, response) => {
         } else {
             response.status(404).json({
                 when: "WorkspacePermissions > CreateWorkspacePermission",
-                error: 1,
-                error_message: result.error_message ? result.error_message : "Could not create workspace permission",
+                error: result.error || 1,
+                error_message: result.error_message || "Could not create workspace permission",
             });
         }
     }).catch((error) => {
@@ -58,8 +58,8 @@ router.get("/", (request, response) => {
         } else {
             response.status(404).json({
                 when: "WorkspacePermissions > ReadWorkspacePermission",
-                error: 1,
-                error_message: result.error_message ? result.error_message : "Could not read workspace permission",
+                error: result.error || 1,
+                error_message: result.error_message || "Could not read workspace permission",
             });
         }
     }).catch((error) => {
@@ -90,8 +90,8 @@ router.get("/user/:user_id/workspace/:workspace_id/permission/:permission_id", (
         } else {
             response.status(404).json({
                 when: "WorkspacePermissions > ReadWorkspacePermission",
-                error: 1,
-                error_message: result.error_message ? result.error_message : "Could not read workspace permission",
+                error: result.error || 1,
+                error_message: result.error_message || "Could not read workspace permission",
             });
         }
     }).catch((error) => {
@@ -122,8 +122,8 @@ router.delete("/user/:user_id/workspace/:workspace_id/permission/:permission_id"
         } else {
             response.status(404).json({
                 when: "WorkspacePermissions > DeleteWorkspacePermission",
-                error: 1,
-                error_message: result.error_message ? result.error_message : "Could not delete workspace permission",
+                error: result.error || 1,
+                error_message: result.error_message || "Could not delete workspace permission",
             });
         }
     }).catch((error) => {

@@ -31,6 +31,8 @@ CREATE TABLE users (
     status_id INT NOT NULL,
     link_google TINYINT(1) DEFAULT 0,
     link_facebook TINYINT(1) DEFAULT 0,
+    confirm_token VARCHAR(100) DEFAULT NULL,
+    password_reset_token VARCHAR(100) DEFAULT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NULL,
     deleted_at TIMESTAMP NULL,
