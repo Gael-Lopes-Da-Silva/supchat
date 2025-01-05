@@ -1,31 +1,50 @@
-import React, { useEffect, useState } from 'react';
+import react from 'react';
 import { isMobile } from 'react-device-detect';
 import { toast } from 'react-toastify';
 
+import {
+    createUser,
+    readUser,
+    updateUser,
+} from '../../services/Users';
+
 import InputField from '../../components/InputField/InputField';
 import Button from '../../components/Button/Button';
-
-import { createUser } from '../../services/Users';
-
 import logo from "../../assets/logo.png";
 
 import './RegisterPage.css';
 
 const RegisterPage = () => {
-    const [username, setUsername] = useState('');
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-    const [checked, setChecked] = useState('');
+    const [username, setUsername] = react.useState('');
+    const [email, setEmail] = react.useState('');
+    const [password, setPassword] = react.useState('');
+    const [checked, setChecked] = react.useState('');
 
-    useEffect(() => {
+    react.useEffect(() => {
         const query = new URLSearchParams(window.location.search);
         if (query.get("confirm_token") !== null) {
-            // Vérifier la validité du token et passer le confirm_token de l'utilisateur à null
-            console.log(query.get("confirm_token"));
-            // window.location.href = '/login';
+            const confirmToken = query.get("confirm_token");
+
+            readUser({
+                confirm_token: confirmToken
+            }).then((data) => {
+                const [user] = data.result;
+                if (!user) {
+                    window.location.href = '/login';
+                    return;
+                }
+
+                updateUser(user.id, {
+                    confirm_token: null
+                }).then(() => {
+                    // TODO: Envoyer un mail de confirmation et de bienvenue
+                    window.location.href = '/login';
+                }).catch((error) => console.error(error));
+            }).catch((error) => console.error(error));
+
             return;
         }
-        
+
         if (localStorage.getItem('token')) {
             window.location.href = '/dashboard';
             return;
@@ -34,14 +53,13 @@ const RegisterPage = () => {
 
     const handleSubmit = async (event) => {
         event.preventDefault();
-
-        const token = Math.random().toString(36);
+        const confirmToken = Math.random().toString(36);
 
         createUser({
             username: username,
             email: email,
             password: password,
-            confirm_token: token,
+            confirm_token: confirmToken,
         }).then((data) => {
             if (data.error !== 0) {
                 switch (data.error) {
@@ -63,13 +81,11 @@ const RegisterPage = () => {
                 return;
             }
 
-            // A remplacer par un envoi de mail
-            toast.success("Activez votre compte à cette adresse: " + window.location.protocol + '//' + window.location.host + "/register?confirm_token=" + token, {
+            // TODO: Envoyer un mail pour confirmer son compte et son adresse mail
+            toast.success("Activez votre compte à cette adresse: " + window.location.protocol + '//' + window.location.host + "/register?confirm_token=" + confirmToken, {
                 position: "top-center",
             });
-        }).catch((error) => {
-            console.error(error);
-        });
+        }).catch((error) => console.error(error));
     };
 
     return (

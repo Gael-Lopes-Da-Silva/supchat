@@ -23,3 +23,28 @@ export const loginUser = async (body) => {
 
     return await response.json();
 };
+
+export const readUser = async (query) => {
+    const response = await fetch('http://localhost:3000/users?' + new URLSearchParams(query), {
+        method: "GET",
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+        },
+    });
+
+    return await response.json();
+};
+
+export const updateUser = async (id, body) => {
+    const response = await fetch('http://localhost:3000/users/' + id, {
+        method: "PUT",
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(body),
+    });
+
+    return await response.json();
+};

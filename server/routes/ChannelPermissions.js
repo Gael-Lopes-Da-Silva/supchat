@@ -1,11 +1,12 @@
 import express from "express";
-const router = express.Router();
 
 import {
     createChannelPermission,
     readChannelPermission,
     deleteChannelPermission,
 } from "../controllers/ChannelPermissions.js";
+
+const router = express.Router();
 
 // POST /channels/permissions
 //

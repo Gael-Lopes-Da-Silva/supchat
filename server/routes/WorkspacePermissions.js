@@ -1,11 +1,12 @@
 import express from "express";
-const router = express.Router();
 
 import {
     createWorkspacePermission,
     readWorkspacePermission,
     deleteWorkspacePermission,
 } from "../controllers/WorkspacePermissions.js";
+
+const router = express.Router();
 
 // POST /workspaces/permissions
 //

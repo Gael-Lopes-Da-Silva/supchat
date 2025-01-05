@@ -1,5 +1,4 @@
 import express from "express";
-const router = express.Router();
 
 import {
     createWorkspace,
@@ -8,6 +7,8 @@ import {
     deleteWorkspace,
     restoreWorkspace,
 } from "../controllers/Workspaces.js";
+
+const router = express.Router();
 
 // POST /workspaces
 //

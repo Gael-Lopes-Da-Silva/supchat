@@ -9,15 +9,12 @@ export const createWorkspace = async (request) => {
 
     const [user] = await pool.query("SELECT * FROM users WHERE id = ?", [request.body.user_id]);
     if (!user) return createErrorResponse(ERROR_CODES.USER_NOT_FOUND);
-
     if (user.deleted_at !== null) return createErrorResponse(ERROR_CODES.USER_DELETED);
-
-    if (request.body.is_private && request.body.is_private !== "true" && request.body.is_private !== "false") return createErrorResponse(ERROR_CODES.IS_PRIVATE_INVALID);
 
     return pool.query("INSERT INTO workspaces (name, description, is_private, user_id) VALUES (?, ?, ?, ?)", [
         request.body.name,
         request.body.description || "",
-        request.body.is_private ? request.body.is_private === "true" : false,
+        request.body.is_private || false,
         request.body.user_id
     ]);
 };
@@ -43,9 +40,8 @@ export const readWorkspace = async (request) => {
         }
 
         if (request.query.is_private) {
-            if (request.query.is_private !== "true" && request.query.is_private !== "false") return createErrorResponse(ERROR_CODES.IS_PRIVATE_INVALID);
             where.push("is_private = ?");
-            params.push(request.query.is_private === "true");
+            params.push(request.query.is_private);
         }
 
         if (request.query.user_id) {
@@ -76,12 +72,10 @@ export const updateWorkspace = async (request) => {
         if (user.deleted_at !== null) return createErrorResponse(ERROR_CODES.USER_DELETED);
     }
 
-    if (request.body.is_private && request.body.is_private !== "true" && request.body.is_private !== "false") return createErrorResponse(ERROR_CODES.IS_PRIVATE_INVALID);
-
     return pool.query("UPDATE workspaces SET name = ?, description = ?, is_private = ?, user_id = ?, updated_at = NOW() WHERE id = ?", [
         request.body.name || workspace.name,
         request.body.description || workspace.description,
-        request.body.is_private ? request.body.is_private === "true" : workspace.is_private,
+        request.body.is_private || workspace.is_private,
         request.body.user_id || workspace.user_id,
         request.params.id
     ]);

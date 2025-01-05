@@ -1,9 +1,10 @@
 import express from "express";
-const router = express.Router();
 
 import {
     readPermission,
 } from "../controllers/Permissions.js";
+
+const router = express.Router();
 
 // GET /permissions
 //

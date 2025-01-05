@@ -23,17 +23,13 @@ export const createUser = async (request) => {
         if (!status) return createErrorResponse(ERROR_CODES.STATUS_NOT_FOUND);
     }
 
-    if (request.body.link_google && request.body.link_google !== "true" && request.body.link_google !== "false") return createErrorResponse(ERROR_CODES.LINK_GOOGLE_INVALID);
-
-    if (request.body.link_facebook && request.body.link_facebook !== "true" && request.body.link_facebook !== "false") return createErrorResponse(ERROR_CODES.LINK_FACEBOOK_INVALID);
-
     return pool.query("INSERT INTO users (username, email, password, status_id, link_google, link_facebook, confirm_token, password_reset_token) VALUES (?, ?, ?, ?, ?, ?, ?, ?)", [
         request.body.username,
         request.body.email,
         bcrypt.hashSync(request.body.password, 10),
         request.body.status_id || 1,
-        request.body.link_google ? request.body.link_google === "true" : false,
-        request.body.link_facebook ? request.body.link_facebook === "true" : false,
+        request.body.link_google || false,
+        request.body.link_facebook || false,
         request.body.confirm_token || null,
         request.body.password_reset_token || null,
     ]);
@@ -52,7 +48,7 @@ export const loginUser = async (request) => {
         return user;
     }
 
-    return (user.link_google === 1 || user.link_facebook === 1) ? user : createErrorResponse(ERROR_CODES.USER_NOT_LINKED_TO_SOCIALS);
+    return (user.link_google == true || user.link_facebook == true) ? user : createErrorResponse(ERROR_CODES.USER_NOT_LINKED_TO_SOCIALS);
 }
 
 export const readUser = async (request) => {
@@ -83,22 +79,20 @@ export const readUser = async (request) => {
         }
 
         if (request.query.link_google) {
-            if (request.query.link_google !== "true" && request.query.link_google !== "false") return createErrorResponse(ERROR_CODES.LINK_GOOGLE_INVALID);
             where.push("link_google = ?");
-            params.push(request.query.link_google === "true");
+            params.push(request.query.link_google);
         }
 
         if (request.query.link_facebook) {
-            if (request.query.link_facebook !== "true" && request.query.link_facebook !== "false") return createErrorResponse(ERROR_CODES.LINK_FACEBOOK_INVALID);
             where.push("link_facebook = ?");
-            params.push(request.query.link_facebook === "true");
+            params.push(request.query.link_facebook);
         }
-        
+
         if (request.query.confirm_token) {
             where.push("confirm_token = ?");
             params.push(request.query.confirm_token);
         }
-        
+
         if (request.query.password_reset_token) {
             where.push("password_reset_token = ?");
             params.push(request.query.password_reset_token);
@@ -123,20 +117,16 @@ export const updateUser = async (request) => {
         const [status] = await pool.query("SELECT * FROM status WHERE id = ?", [request.body.status_id]);
         if (!status) return createErrorResponse(ERROR_CODES.STATUS_NOT_FOUND);
     }
-
-    if (request.body.link_google && request.body.link_google !== "true" && request.body.link_google !== "false") return createErrorResponse(ERROR_CODES.LINK_GOOGLE_INVALID);
-
-    if (request.body.link_facebook && request.body.link_facebook !== "true" && request.body.link_facebook !== "false") return createErrorResponse(ERROR_CODES.LINK_FACEBOOK_INVALID);
-
-    return pool.query("UPDATE users SET username = ?, email = ?, password = ?, status_id = ?, link_google = ?, link_facebook = ?, updated_at = NOW() WHERE id = ?", [
+    
+    return pool.query("UPDATE users SET username = ?, email = ?, password = ?, status_id = ?, link_google = ?, link_facebook = ?, confirm_token = ?, password_reset_token = ?, updated_at = NOW() WHERE id = ?", [
         request.body.username || user.username,
         request.body.email || user.email,
         request.body.password ? bcrypt.hashSync(request.body.password, 10) : user.password,
         request.body.status_id || user.status_id,
-        request.body.link_google ? request.body.link_google === "true" : user.link_google,
-        request.body.link_facebook ? request.body.link_facebook === "true" : user.link_facebook,
-        request.body.confirm_token || user.confirm_token,
-        request.body.password_reset_token || user.password_reset_token,
+        request.body.link_google || user.link_google,
+        request.body.link_facebook || user.link_facebook,
+        request.body.confirm_token !== undefined ? request.body.confirm_token : user.confirm_token,
+        request.body.password_reset_token !== undefined ? request.body.password_reset_token : user.password_reset_token,
         request.params.id
     ]);
 }

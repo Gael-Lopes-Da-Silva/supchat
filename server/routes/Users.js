@@ -1,9 +1,6 @@
 import express from "express";
-const router = express.Router();
-
 import jsonwebtoken from "jsonwebtoken";
 import dotenv from "dotenv";
-dotenv.config();
 
 import {
     createUser,
@@ -13,6 +10,9 @@ import {
     deleteUser,
     restoreUser,
 } from "../controllers/Users.js";
+
+const router = express.Router();
+dotenv.config();
 
 // POST /users
 //

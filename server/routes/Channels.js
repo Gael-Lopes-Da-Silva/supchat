@@ -1,5 +1,4 @@
 import express from "express";
-const router = express.Router();
 
 import {
     createChannel,
@@ -8,6 +7,8 @@ import {
     deleteChannel,
     restoreChannel,
 } from "../controllers/Channels.js";
+
+const router = express.Router();
 
 // POST /channels
 //

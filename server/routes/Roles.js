@@ -1,9 +1,10 @@
 import express from "express";
-const router = express.Router();
 
 import {
     readRole,
 } from "../controllers/Roles.js";
+
+const router = express.Router();
 
 // GET /roles
 //

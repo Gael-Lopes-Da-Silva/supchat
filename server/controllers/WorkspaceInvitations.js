@@ -107,9 +107,9 @@ export const updateWorkspaceInvitation = async (request) => {
         request.body.user_id || workspaceInvitation.user_id,
         request.body.workspace_id || workspaceInvitation.workspace_id,
         request.body.token || workspaceInvitation.token,
-        request.body.maximum_use || workspaceInvitation.maximum_use,
+        request.body.maximum_use !== undefined ? request.body.maximum_use : workspaceInvitation.maximum_use,
         request.body.used_by || workspaceInvitation.used_by,
-        request.body.expire_at || workspaceInvitation.expire_at,
+        request.body.expire_at !== undefined ? request.body.expire_at : workspaceInvitation.expire_at,
         request.params.id
     ]);
 };

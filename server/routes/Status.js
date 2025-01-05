@@ -1,9 +1,10 @@
 import express from "express";
-const router = express.Router();
 
 import {
     readStatus,
 } from "../controllers/Status.js";
+
+const router = express.Router();
 
 // GET /status
 //
