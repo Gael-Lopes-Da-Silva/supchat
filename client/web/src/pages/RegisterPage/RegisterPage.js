@@ -18,16 +18,17 @@ const RegisterPage = () => {
     const [checked, setChecked] = useState('');
 
     useEffect(() => {
-        if (localStorage.getItem('token')) {
-            window.location.href = '/dashboard';
+        const query = new URLSearchParams(window.location.search);
+        if (query.get("confirm_token") !== null) {
+            // Vérifier la validité du token et passer le confirm_token de l'utilisateur à null
+            console.log(query.get("confirm_token"));
+            // window.location.href = '/login';
             return;
         }
         
-        const query = new URLSearchParams(window.location.search);
-        if (query.get("confirm_token")) {
-            console.log(query.get("confirm_token"));
-            // window.location.href = '/login';
-            // return;
+        if (localStorage.getItem('token')) {
+            window.location.href = '/dashboard';
+            return;
         }
     }, []);
 
@@ -62,6 +63,7 @@ const RegisterPage = () => {
                 return;
             }
 
+            // A remplacer par un envoi de mail
             toast.success("Activez votre compte à cette adresse: " + window.location.protocol + '//' + window.location.host + "/register?confirm_token=" + token, {
                 position: "top-center",
             });

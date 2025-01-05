@@ -1,6 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import { ToastContainer, Slide } from 'react-toastify';
+import { ToastContainer } from 'react-toastify';
 
 import App from './App';
 import reportWebVitals from './reportWebVitals';

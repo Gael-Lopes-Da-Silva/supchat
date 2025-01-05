@@ -18,10 +18,18 @@ const LoginPage = () => {
     const [password, setPassword] = useState('');
 
     useEffect(() => {
-        const token = localStorage.getItem('token');
+        const query = new URLSearchParams(window.location.search);
+        if (query.get("logout") !== null) {
+            localStorage.removeItem('token');
+            toast.info("Vous avez été déconnecté.", {
+                position: "top-center",
+            });
+            return;
+        }
 
-        if (token) {
+        if (localStorage.getItem('token')) {
             window.location.href = '/dashboard';
+            return;
         }
     }, []);
 
