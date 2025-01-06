@@ -1,14 +1,11 @@
 import * as React from "react";
 
-import { loginUser } from '../services/auth';
-
 import {
     Text,
     View,
     StyleSheet,
     TextInput,
     TouchableOpacity,
-    BackHandler,
 } from "react-native";
 
 const styles = StyleSheet.create({

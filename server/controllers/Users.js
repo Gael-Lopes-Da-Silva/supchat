@@ -1,26 +1,26 @@
 import bcrypt from "bcrypt";
 
 import pool from "../database/db.js";
-import { ERROR_CODES, createErrorResponse } from "./ErrorHandler/Errors.js";
+import { ERRORS, createErrorResponse } from "../app/ErrorHandler.js";
 
 export const createUser = async (request) => {
-    if (!request.body.username) return createErrorResponse(ERROR_CODES.USERNAME_NOT_PROVIDED);
-    if (!request.body.email) return createErrorResponse(ERROR_CODES.EMAIL_NOT_PROVIDED);
-    if (!request.body.password) return createErrorResponse(ERROR_CODES.PASSWORD_NOT_PROVIDED);
+    if (!request.body.username) return createErrorResponse(ERRORS.USERNAME_NOT_PROVIDED);
+    if (!request.body.email) return createErrorResponse(ERRORS.EMAIL_NOT_PROVIDED);
+    if (!request.body.password) return createErrorResponse(ERRORS.PASSWORD_NOT_PROVIDED);
 
     if (request.body.username) {
         const [user] = await pool.query("SELECT * FROM users WHERE username = ?", [request.body.username]);
-        if (user) return createErrorResponse(ERROR_CODES.USERNAME_ALREADY_USED);
+        if (user) return createErrorResponse(ERRORS.USERNAME_ALREADY_USED);
     }
 
     if (request.body.email) {
         const [user] = await pool.query("SELECT * FROM users WHERE email = ?", [request.body.email]);
-        if (user) return createErrorResponse(ERROR_CODES.EMAIL_ALREADY_USED);
+        if (user) return createErrorResponse(ERRORS.EMAIL_ALREADY_USED);
     }
 
     if (request.body.status_id) {
         const [status] = await pool.query("SELECT * FROM status WHERE id = ?", [request.body.status_id]);
-        if (!status) return createErrorResponse(ERROR_CODES.STATUS_NOT_FOUND);
+        if (!status) return createErrorResponse(ERRORS.STATUS_NOT_FOUND);
     }
 
     return pool.query("INSERT INTO users (username, email, password, status_id, link_google, link_facebook, confirm_token, password_reset_token) VALUES (?, ?, ?, ?, ?, ?, ?, ?)", [
@@ -36,25 +36,25 @@ export const createUser = async (request) => {
 }
 
 export const loginUser = async (request) => {
-    if (!request.body.email) return createErrorResponse(ERROR_CODES.EMAIL_NOT_PROVIDED);
+    if (!request.body.email) return createErrorResponse(ERRORS.EMAIL_NOT_PROVIDED);
 
     const [user] = await pool.query("SELECT * FROM users WHERE email = ?", [request.body.email]);
-    if (!user) return createErrorResponse(ERROR_CODES.USER_NOT_FOUND);
+    if (!user) return createErrorResponse(ERRORS.USER_NOT_FOUND);
 
     if (request.body.password) {
         const match = await bcrypt.compare(request.body.password, user.password);
-        if (!match) return createErrorResponse(ERROR_CODES.WRONG_PASSWORD);
-        if (match && user.confirm_token !== null) return createErrorResponse(ERROR_CODES.USER_NOT_CONFIRMED);
+        if (!match) return createErrorResponse(ERRORS.WRONG_PASSWORD);
+        if (match && user.confirm_token !== null) return createErrorResponse(ERRORS.USER_NOT_CONFIRMED);
         return user;
     }
 
-    return (user.link_google == true || user.link_facebook == true) ? user : createErrorResponse(ERROR_CODES.USER_NOT_LINKED_TO_SOCIALS);
+    return (user.link_google == true || user.link_facebook == true) ? user : createErrorResponse(ERRORS.USER_NOT_LINKED_TO_SOCIALS);
 }
 
 export const readUser = async (request) => {
     if (request.params.id) {
         const [user] = await pool.query("SELECT * FROM users WHERE id = ?", [request.params.id]);
-        if (!user) return createErrorResponse(ERROR_CODES.USER_NOT_FOUND);
+        if (!user) return createErrorResponse(ERRORS.USER_NOT_FOUND);
         return user;
     } else {
         let query = "SELECT * FROM users";
@@ -73,7 +73,7 @@ export const readUser = async (request) => {
 
         if (request.query.status_id) {
             const [status] = await pool.query("SELECT * FROM status WHERE id = ?", [request.query.status_id]);
-            if (!status) return createErrorResponse(ERROR_CODES.STATUS_NOT_FOUND);
+            if (!status) return createErrorResponse(ERRORS.STATUS_NOT_FOUND);
             where.push("status_id = ?");
             params.push(request.query.status_id);
         }
@@ -107,15 +107,15 @@ export const readUser = async (request) => {
 }
 
 export const updateUser = async (request) => {
-    if (!request.params.id) return createErrorResponse(ERROR_CODES.ID_NOT_PROVIDED);
+    if (!request.params.id) return createErrorResponse(ERRORS.ID_NOT_PROVIDED);
 
     const [user] = await pool.query("SELECT * FROM users WHERE id = ?", [request.params.id]);
-    if (!user) return createErrorResponse(ERROR_CODES.USER_NOT_FOUND);
-    if (user.deleted_at !== null) return createErrorResponse(ERROR_CODES.USER_DELETED);
+    if (!user) return createErrorResponse(ERRORS.USER_NOT_FOUND);
+    if (user.deleted_at !== null) return createErrorResponse(ERRORS.USER_DELETED);
 
     if (request.body.status_id) {
         const [status] = await pool.query("SELECT * FROM status WHERE id = ?", [request.body.status_id]);
-        if (!status) return createErrorResponse(ERROR_CODES.STATUS_NOT_FOUND);
+        if (!status) return createErrorResponse(ERRORS.STATUS_NOT_FOUND);
     }
     
     return pool.query("UPDATE users SET username = ?, email = ?, password = ?, status_id = ?, link_google = ?, link_facebook = ?, confirm_token = ?, password_reset_token = ?, updated_at = NOW() WHERE id = ?", [
@@ -132,21 +132,21 @@ export const updateUser = async (request) => {
 }
 
 export const deleteUser = async (request) => {
-    if (!request.params.id) return createErrorResponse(ERROR_CODES.ID_NOT_PROVIDED);
+    if (!request.params.id) return createErrorResponse(ERRORS.ID_NOT_PROVIDED);
 
     const [user] = await pool.query("SELECT * FROM users WHERE id = ?", [request.params.id]);
-    if (!user) return createErrorResponse(ERROR_CODES.USER_NOT_FOUND);
-    if (user.deleted_at !== null) return createErrorResponse(ERROR_CODES.USER_ALREADY_DELETED);
+    if (!user) return createErrorResponse(ERRORS.USER_NOT_FOUND);
+    if (user.deleted_at !== null) return createErrorResponse(ERRORS.USER_ALREADY_DELETED);
 
     return pool.query("UPDATE users SET deleted_at = NOW() WHERE id = ?", [request.params.id]);
 }
 
 export const restoreUser = async (request) => {
-    if (!request.params.id) return createErrorResponse(ERROR_CODES.ID_NOT_PROVIDED);
+    if (!request.params.id) return createErrorResponse(ERRORS.ID_NOT_PROVIDED);
 
     const [user] = await pool.query("SELECT * FROM users WHERE id = ?", [request.params.id]);
-    if (!user) return createErrorResponse(ERROR_CODES.USER_NOT_FOUND);
-    if (user.deleted_at === null) return createErrorResponse(ERROR_CODES.USER_NOT_DELETED);
+    if (!user) return createErrorResponse(ERRORS.USER_NOT_FOUND);
+    if (user.deleted_at === null) return createErrorResponse(ERRORS.USER_NOT_DELETED);
 
     return pool.query("UPDATE users SET deleted_at = NULL WHERE id = ?", [request.params.id]);
 }

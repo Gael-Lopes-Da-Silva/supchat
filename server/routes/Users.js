@@ -1,6 +1,6 @@
 import express from "express";
 import jsonwebtoken from "jsonwebtoken";
-import dotenv from "dotenv";
+import dotenv from "dotenv/config";
 
 import {
     createUser,
@@ -12,7 +12,6 @@ import {
 } from "../controllers/Users.js";
 
 const router = express.Router();
-dotenv.config();
 
 // POST /users
 //

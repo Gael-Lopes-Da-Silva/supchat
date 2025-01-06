@@ -1,7 +1,5 @@
 import mariadb from "mariadb";
-import dotenv from "dotenv";
-
-dotenv.config();
+import dotenv from "dotenv/config";
 
 const pool = mariadb.createPool({
     host: process.env.DB_HOST,

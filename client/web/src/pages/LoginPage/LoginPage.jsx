@@ -1,23 +1,23 @@
-import React, { useEffect, useState } from 'react';
+import react from 'react';
 import { isMobile } from 'react-device-detect';
 import { toast } from 'react-toastify';
+import { FaGoogle, FaFacebook } from 'react-icons/fa6';
+
+import {
+    loginUser
+} from '../../services/Users';
 
 import InputField from '../../components/InputField/InputField';
 import Button from '../../components/Button/Button';
-import GoogleButton from '../../components/Button/Google/Google';
-import FacebookButton from '../../components/Button/Facebook/Facebook';
-
-import { loginUser } from '../../services/Users';
-
 import logo from "../../assets/logo.png";
 
 import './LoginPage.css';
 
 const LoginPage = () => {
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
+    const [email, setEmail] = react.useState('');
+    const [password, setPassword] = react.useState('');
 
-    useEffect(() => {
+    react.useEffect(() => {
         const query = new URLSearchParams(window.location.search);
         if (query.get("logout") !== null) {
             localStorage.removeItem('token');
@@ -69,7 +69,7 @@ const LoginPage = () => {
             localStorage.setItem('token', data.token);
             window.location.href = '/dashboard';
         }).catch((error) => {
-            console.error(error);
+            if (process.env.REACT_APP_ENV === "dev") console.error(error);
         });
     };
 
@@ -109,8 +109,8 @@ const LoginPage = () => {
                     <p>Pas de compte ? <a href="/register">En créer un maintenant !</a></p>
                 </form>
                 <div className='login-socials'>
-                    <GoogleButton onClick={handleGoogle} type="submit" text="Google" />
-                    <FacebookButton onClick={handleFacebook} type="submit" text="Facebook" />
+                    <Button icon={<FaGoogle />} onClick={handleGoogle} type="button" text="Google" />
+                    <Button icon={<FaFacebook />} onClick={handleFacebook} type="button" text="Facebook" />
                 </div>
             </div>
         </div>

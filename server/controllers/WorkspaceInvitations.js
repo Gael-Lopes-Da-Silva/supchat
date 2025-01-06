@@ -1,21 +1,21 @@
 import pool from "../database/db.js";
-import { ERROR_CODES, createErrorResponse } from "./ErrorHandler/Errors.js";
+import { ERRORS, createErrorResponse } from "../app/ErrorHandler.js";
 
 export const createWorkspaceInvitation = async (request) => {
-    if (!request.body.user_id) return createErrorResponse(ERROR_CODES.USER_ID_NOT_PROVIDED);
-    if (!request.body.workspace_id) return createErrorResponse(ERROR_CODES.WORKSPACE_ID_NOT_PROVIDED);
-    if (!request.body.token) return createErrorResponse(ERROR_CODES.TOKEN_NOT_PROVIDED);
+    if (!request.body.user_id) return createErrorResponse(ERRORS.USER_ID_NOT_PROVIDED);
+    if (!request.body.workspace_id) return createErrorResponse(ERRORS.WORKSPACE_ID_NOT_PROVIDED);
+    if (!request.body.token) return createErrorResponse(ERRORS.TOKEN_NOT_PROVIDED);
 
     const [user] = await pool.query("SELECT * FROM users WHERE id = ?", [request.body.user_id]);
-    if (!user) return createErrorResponse(ERROR_CODES.USER_NOT_FOUND);
-    if (user.deleted_at !== null) return createErrorResponse(ERROR_CODES.USER_DELETED);
+    if (!user) return createErrorResponse(ERRORS.USER_NOT_FOUND);
+    if (user.deleted_at !== null) return createErrorResponse(ERRORS.USER_DELETED);
 
     const [workspace] = await pool.query("SELECT * FROM workspaces WHERE id = ?", [request.body.workspace_id]);
-    if (!workspace) return createErrorResponse(ERROR_CODES.WORKSPACE_NOT_FOUND);
-    if (workspace.deleted_at !== null) return createErrorResponse(ERROR_CODES.WORKSPACE_DELETED);
+    if (!workspace) return createErrorResponse(ERRORS.WORKSPACE_NOT_FOUND);
+    if (workspace.deleted_at !== null) return createErrorResponse(ERRORS.WORKSPACE_DELETED);
 
     const [token] = await pool.query("SELECT * FROM workspace_invitations WHERE token = ?", [request.body.token]);
-    if (token) return createErrorResponse(ERROR_CODES.TOKEN_NOT_UNIQUE);
+    if (token) return createErrorResponse(ERRORS.TOKEN_NOT_UNIQUE);
 
     return pool.query("INSERT INTO workspace_invitations (user_id, workspace_id, token, maximum_use, used_by, expire_at) VALUES (?, ?, ?, ?, ?, ?)", [
         request.body.user_id,
@@ -30,7 +30,7 @@ export const createWorkspaceInvitation = async (request) => {
 export const readWorkspaceInvitation = async (request) => {
     if (request.params.id) {
         const [workspaceInvitation] = await pool.query("SELECT * FROM workspace_invitations WHERE id = ?", [request.body.id]);
-        if (!workspaceInvitation) return createErrorResponse(ERROR_CODES.WORKSPACE_INVITATION_NOT_FOUND);
+        if (!workspaceInvitation) return createErrorResponse(ERRORS.WORKSPACE_INVITATION_NOT_FOUND);
         return workspaceInvitation;
     } else {
         let query = "SELECT * FROM workspace_invitations"
@@ -39,14 +39,14 @@ export const readWorkspaceInvitation = async (request) => {
 
         if (request.query.user_id) {
             const [user] = await pool.query("SELECT * FROM users WHERE id = ?", [request.query.user_id]);
-            if (!user) return createErrorResponse(ERROR_CODES.USER_NOT_FOUND);
+            if (!user) return createErrorResponse(ERRORS.USER_NOT_FOUND);
             where.push("user_id = ?");
             params.push(request.query.user_id);
         }
 
         if (request.query.workspace_id) {
             const [workspace] = await pool.query("SELECT * FROM workspaces WHERE id = ?", [request.query.workspace_id]);
-            if (!workspace) return createErrorResponse(ERROR_CODES.WORKSPACE_NOT_FOUND);
+            if (!workspace) return createErrorResponse(ERRORS.WORKSPACE_NOT_FOUND);
             where.push("workspace_id = ?");
             params.push(request.query.workspace_id);
         }
@@ -80,27 +80,27 @@ export const readWorkspaceInvitation = async (request) => {
 };
 
 export const updateWorkspaceInvitation = async (request) => {
-    if (!request.params.id) return createErrorResponse(ERROR_CODES.ID_NOT_PROVIDED);
+    if (!request.params.id) return createErrorResponse(ERRORS.ID_NOT_PROVIDED);
 
     const [workspaceInvitation] = await pool.query("SELECT * FROM workspace_invitations WHERE id = ?", [request.params.id]);
-    if (!workspaceInvitation) return createErrorResponse(ERROR_CODES.WORKSPACE_INVITATION_NOT_FOUND);
-    if (workspaceInvitation.deleted_at !== null) return createErrorResponse(ERROR_CODES.WORKSPACE_INVITATION_DELETED);
+    if (!workspaceInvitation) return createErrorResponse(ERRORS.WORKSPACE_INVITATION_NOT_FOUND);
+    if (workspaceInvitation.deleted_at !== null) return createErrorResponse(ERRORS.WORKSPACE_INVITATION_DELETED);
 
     if (request.body.user_id) {
         const [user] = await pool.query("SELECT * FROM users WHERE id = ?", [request.body.user_id]);
-        if (!user) return createErrorResponse(ERROR_CODES.USER_NOT_FOUND);
-        if (user.deleted_at !== null) return createErrorResponse(ERROR_CODES.USER_DELETED);
+        if (!user) return createErrorResponse(ERRORS.USER_NOT_FOUND);
+        if (user.deleted_at !== null) return createErrorResponse(ERRORS.USER_DELETED);
     }
 
     if (request.body.workspace_id) {
         const [workspace] = await pool.query("SELECT * FROM workspaces WHERE id = ?", [request.body.workspace_id]);
-        if (!workspace) return createErrorResponse(ERROR_CODES.WORKSPACE_NOT_FOUND);
-        if (workspace.deleted_at !== null) return createErrorResponse(ERROR_CODES.WORKSPACE_DELETED);
+        if (!workspace) return createErrorResponse(ERRORS.WORKSPACE_NOT_FOUND);
+        if (workspace.deleted_at !== null) return createErrorResponse(ERRORS.WORKSPACE_DELETED);
     }
 
     if (request.body.token) {
         const [token] = await pool.query("SELECT * FROM workspace_invitations WHERE token = ?", [request.body.token]);
-        if (token) return createErrorResponse(ERROR_CODES.TOKEN_NOT_UNIQUE);
+        if (token) return createErrorResponse(ERRORS.TOKEN_NOT_UNIQUE);
     }
 
     return pool.query("UPDATE workspace_members SET user_id = ?, workspace_id = ?, token = ?, maximum_user = ?, used_by = ?, expire_at = ? WHERE id = ?", [
@@ -115,21 +115,21 @@ export const updateWorkspaceInvitation = async (request) => {
 };
 
 export const deleteWorkspaceInvitation = async (request) => {
-    if (!request.params.id) return createErrorResponse(ERROR_CODES.ID_NOT_PROVIDED);
+    if (!request.params.id) return createErrorResponse(ERRORS.ID_NOT_PROVIDED);
 
     const [workspaceInvitation] = await pool.query("SELECT * FROM workspace_invitations WHERE id = ?", [request.params.id]);
-    if (!workspaceInvitation) return createErrorResponse(ERROR_CODES.WORKSPACE_INVITATION_NOT_FOUND);
-    if (workspaceInvitation.deleted_at !== null) return createErrorResponse(ERROR_CODES.WORKSPACE_INVITATION_ALREADY_DELETED);
+    if (!workspaceInvitation) return createErrorResponse(ERRORS.WORKSPACE_INVITATION_NOT_FOUND);
+    if (workspaceInvitation.deleted_at !== null) return createErrorResponse(ERRORS.WORKSPACE_INVITATION_ALREADY_DELETED);
 
     return pool.query("UPDATE workspace_invitations SET deleted_at = NOW() WHERE id = ?", [request.params.id]);
 };
 
 export const restoreWorkspaceInvitation = async (request) => {
-    if (!request.params.id) return createErrorResponse(ERROR_CODES.ID_NOT_PROVIDED);
+    if (!request.params.id) return createErrorResponse(ERRORS.ID_NOT_PROVIDED);
 
     const [workspaceInvitation] = await pool.query("SELECT * FROM workspace_invitations WHERE id = ?", [request.params.id]);
-    if (!workspaceInvitation) return createErrorResponse(ERROR_CODES.WORKSPACE_INVITATION_NOT_FOUND);
-    if (workspaceInvitation.deleted_at === null) return createErrorResponse(ERROR_CODES.WORKSPACE_INVITATION_NOT_DELETED);
+    if (!workspaceInvitation) return createErrorResponse(ERRORS.WORKSPACE_INVITATION_NOT_FOUND);
+    if (workspaceInvitation.deleted_at === null) return createErrorResponse(ERRORS.WORKSPACE_INVITATION_NOT_DELETED);
 
     return pool.query("UPDATE workspace_invitations SET deleted_at = NULL WHERE id = ?", [request.params.id]);
 };

@@ -1,9 +1,9 @@
-import { useEffect } from 'react';
+import react from 'react';
 
 import './IndexPage.css';
 
 const IndexPage = () => {
-    useEffect(() => {
+    react.useEffect(() => {
         const token = localStorage.getItem('token');
         window.location.href = token ? "/dashboard" : "/login";
     }, []);

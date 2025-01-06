@@ -1,4 +1,4 @@
-export const ERROR_CODES = {
+export const ERRORS = {
     USERNAME_NOT_PROVIDED: { code: 1, message: "Username not provided" },
     EMAIL_NOT_PROVIDED: { code: 2, message: "Email not provided" },
     PASSWORD_NOT_PROVIDED: { code: 3, message: "Password not provided" },
@@ -51,7 +51,7 @@ export const ERROR_CODES = {
     USER_NOT_CONFIRMED: { code: 53, message: "User not confirmed" },
 };
 
-export const createErrorResponse = (errorCode) => ({
-    error: errorCode.code,
-    error_message: errorCode.message,
+export const createErrorResponse = (error) => ({
+    error: error.code,
+    error_message: error.message,
 });

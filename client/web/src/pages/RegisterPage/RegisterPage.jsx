@@ -39,8 +39,12 @@ const RegisterPage = () => {
                 }).then(() => {
                     // TODO: Envoyer un mail de confirmation et de bienvenue
                     window.location.href = '/login';
-                }).catch((error) => console.error(error));
-            }).catch((error) => console.error(error));
+                }).catch((error) => {
+                    if (process.env.REACT_APP_ENV === "dev") console.error(error);
+                });
+            }).catch((error) => {
+                if (process.env.REACT_APP_ENV === "dev") console.error(error);
+            });
 
             return;
         }
@@ -82,10 +86,13 @@ const RegisterPage = () => {
             }
 
             // TODO: Envoyer un mail pour confirmer son compte et son adresse mail
+            // Utiliser un SMTP gratuit (sendpulse, jetmail...)
             toast.success("Activez votre compte à cette adresse: " + window.location.protocol + '//' + window.location.host + "/register?confirm_token=" + confirmToken, {
                 position: "top-center",
             });
-        }).catch((error) => console.error(error));
+        }).catch((error) => {
+            if (process.env.REACT_APP_ENV === "dev") console.error(error);
+        });
     };
 
     return (
