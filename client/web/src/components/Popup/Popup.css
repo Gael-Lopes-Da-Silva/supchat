@@ -9,11 +9,11 @@
 .popup div>main {
     display: flex;
     flex-direction: column;
-    padding: 1rem;
+    padding: 0.4rem;
 }
 
 .popup div>main>a {
-    padding: 0.2rem 0.6rem;
+    padding: 0.4rem 0.6rem;
     text-decoration: none;
     color: #fffceb;
     font-size: 1.2rem;
@@ -32,7 +32,7 @@
 }
 
 .popup div>main>button {
-    padding: 0.2rem 0.6rem;
+    padding: 0.4rem 0.6rem;
     background: none;
     border: none;
     color: #fffceb;

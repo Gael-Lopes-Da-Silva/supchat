@@ -14,6 +14,7 @@ const DashboardPage = () => {
     const [user, setUser] = react.useState('');
 
     const [showProfilePopup, setShowProfilePopup] = react.useState(false);
+    const [mousePosition, setMousePosition] = react.useState({ x: 0, y: 0 });
 
     const navigate = reactdom.useNavigate();
 
@@ -74,7 +75,7 @@ const DashboardPage = () => {
                     </main>
                     <footer></footer>
                 </div>
-            } bottom={100} left={200} />
+            } top={mousePosition && mousePosition.y - 60} left={mousePosition && mousePosition.x} />
             <div className="dashboard-left" style={{ display: !showLeftPanel && "none" }}>
                 <div className='dashboard-left-workspaces'>
                 </div>
@@ -82,7 +83,13 @@ const DashboardPage = () => {
                     <header></header>
                     <main></main>
                     <footer>
-                        <div onClick={() => { setShowProfilePopup(true) }} className='dashboard-left-footer-profile'>
+                        <div onClick={(event) => {
+                            setShowProfilePopup(true);
+                            setMousePosition({
+                                x: event.clientX,
+                                y: event.clientY,
+                            });
+                        }} className='dashboard-left-footer-profile' title='Menu de profil'>
                             <div style={{ background: userProfileBackground(user && user.username), color: userProfileForeground(user && user.username) }}>{user && user.username[0].toUpperCase()}</div>
                             <p>{user && user.username}</p>
                         </div>
