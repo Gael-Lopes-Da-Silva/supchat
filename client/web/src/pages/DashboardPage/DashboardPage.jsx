@@ -10,7 +10,7 @@ import "./DashboardPage.css"
 
 const DashboardPage = () => {
     const [showUserList, setShowUserList] = react.useState(true);
-    const [showLeftPanel, setShowLeftPanel] = react.useState(false);
+    const [showLeftPanel, setShowLeftPanel] = react.useState(true);
     const [user, setUser] = react.useState('');
 
     const [showProfilePopup, setShowProfilePopup] = react.useState(false);
@@ -116,7 +116,7 @@ const DashboardPage = () => {
                         <div className='dashboard-right-footer-buttons'>
                             <button title='Uploader un fichier'><Fa.FaCirclePlus /></button>
                         </div>
-                        <input type="text" />
+                        <input type="text" placeholder='Envoyer un message' />
                         <div className='dashboard-right-footer-buttons'>
                             <button title='Insérer un émoji'><Fa.FaFaceSmile /></button>
                         </div>

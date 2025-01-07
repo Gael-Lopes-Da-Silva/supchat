@@ -66,7 +66,7 @@
     border: solid 3px #333;
     box-shadow: #333 5px 5px 0px;
     box-sizing: border-box;
-    padding: 0.6rem;
+    padding: 0.4rem;
 }
 
 .dashboard-left-content footer>.dashboard-left-footer-profile {
@@ -135,6 +135,8 @@
 
 .dashboard-left-content footer>.dashboard-left-footer-buttons>a>svg {
     color: #fffceb;
+    width: 1rem;
+    height: 1rem;
 }
 
 .dashboard-right {
@@ -200,6 +202,8 @@
 
 .dashboard-right-content header>.dashboard-right-header-buttons>button>svg {
     color: #fffceb;
+    width: 1rem;
+    height: 1rem;
 }
 
 .dashboard-right-content main {
@@ -252,6 +256,8 @@
 
 .dashboard-right-content footer>.dashboard-right-footer-buttons>button>svg {
     color: #fffceb;
+    width: 1rem;
+    height: 1rem;
 }
 
 .dashboard-right-content footer>input {
@@ -259,10 +265,12 @@
     box-sizing: border-box;
     background: none;
     border: none;
+    color: #fffceb;
+    font-size: 1rem;
 }
 
 .dashboard-right-content footer>input:focus {
-    border: none;
+    outline: none;
 }
 
 .dashboard-right-peoples {
