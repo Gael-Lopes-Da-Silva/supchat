@@ -8,6 +8,7 @@ import PrivaryPage from './pages/PrivacyPage/PrivacyPage';
 import RegisterPage from './pages/RegisterPage/RegisterPage';
 import DashboardPage from './pages/DashboardPage/DashboardPage';
 import SettingsPage from './pages/SettingsPage/SettingsPage';
+import ResetPasswordPage from './pages/ResetPasswordPage/ResetPasswordPage';
 
 const App = () => {
     return (
@@ -20,6 +21,7 @@ const App = () => {
                 <Route path="/privacy" element={<PrivaryPage />} />
                 <Route path="/dashboard" element={<DashboardPage />} />
                 <Route path="/settings" element={<SettingsPage />} />
+                <Route path="/reset_password" element={<ResetPasswordPage />} />
             </Routes>
         </Router>
     );
