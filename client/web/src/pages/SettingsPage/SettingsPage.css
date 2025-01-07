@@ -1,0 +1,82 @@
+.settings-container {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    gap: 1rem;
+}
+
+.settings-left {
+    display: flex;
+    padding: 1rem;
+    width: 15rem;
+    height: 100%;
+    background: #4d4d4d;
+    border-radius: 1rem;
+    border: solid 3px #333;
+    box-shadow: #333 5px 5px 0px;
+    box-sizing: border-box;
+    gap: 1rem;
+}
+
+.settings-right {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    height: 100%;
+    padding: 1rem;
+    background: #4d4d4d;
+    border-radius: 1rem;
+    border: solid 3px #333;
+    box-shadow: #333 5px 5px 0px;
+    box-sizing: border-box;
+    gap: 1rem;
+}
+
+.settings-right header {
+    display: flex;
+    align-items: center;
+    justify-content: end;
+    height: 4rem;
+    background: #3D3D3D;
+    border-radius: 1rem;
+    border: solid 3px #333;
+    box-shadow: #333 5px 5px 0px;
+    box-sizing: border-box;
+}
+
+.settings-right header>.settings-right-header-buttons {
+    display: flex;
+    height: 100%;
+    padding: 0.4rem;
+    box-sizing: border-box;
+}
+
+.settings-right header>.settings-right-header-buttons>a {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    height: 100%;
+    width: 100%;
+    border-radius: 0.6rem;
+    cursor: pointer;
+    aspect-ratio: 1 / 1;
+}
+
+.settings-right header>.settings-right-header-buttons>a:hover {
+    background: #4d4d4d;
+}
+
+.settings-right header>.settings-right-header-buttons>a:active {
+    background: #5E5E5E;
+}
+
+.settings-right header>.settings-right-header-buttons>a>svg {
+    color: #fffceb;
+}
+
+.settings-right main {
+    flex: 1;
+}

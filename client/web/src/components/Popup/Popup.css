@@ -1,0 +1,52 @@
+.popup {
+    background: #363636;
+    border-radius: 1rem;
+    border: solid 3px #333;
+    box-shadow: #333 5px 5px 0px;
+    position: absolute;
+}
+
+.popup div>main {
+    display: flex;
+    flex-direction: column;
+    padding: 1rem;
+}
+
+.popup div>main>a {
+    padding: 0.2rem 0.6rem;
+    text-decoration: none;
+    color: #fffceb;
+    font-size: 1.2rem;
+    font-weight: bold;
+    cursor: pointer;
+    border-radius: 0.6rem;
+    box-sizing: border-box;
+}
+
+.popup div>main>a:hover {
+    background: #4d4d4d;
+}
+
+.popup div>main>a:active {
+    background: #5E5E5E;
+}
+
+.popup div>main>button {
+    padding: 0.2rem 0.6rem;
+    background: none;
+    border: none;
+    color: #fffceb;
+    font-size: 1.2rem;
+    font-weight: bold;
+    cursor: pointer;
+    border-radius: 0.6rem;
+    box-sizing: border-box;
+}
+
+.popup div>main>button:hover {
+    background: #4d4d4d;
+}
+
+.popup div>main>button:active {
+    background: #5E5E5E;
+}

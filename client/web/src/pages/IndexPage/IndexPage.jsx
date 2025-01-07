@@ -1,11 +1,13 @@
-import react from 'react';
+import * as react from 'react';
+import * as reactdom from 'react-router-dom';
 
 import './IndexPage.css';
 
 const IndexPage = () => {
+    const navigate = reactdom.useNavigate();
+    
     react.useEffect(() => {
-        const token = localStorage.getItem('token');
-        window.location.href = token ? "/dashboard" : "/login";
+        navigate(localStorage.getItem('token') ? "/dashboard" : "/login");
     }, []);
 
     return null;

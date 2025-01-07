@@ -1,5 +1,3 @@
-// import react from 'react';
-
 import './PrivacyPage.css';
 
 const PrivacyPage = () => {

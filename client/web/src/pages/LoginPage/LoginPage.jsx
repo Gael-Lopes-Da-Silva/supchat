@@ -1,7 +1,8 @@
-import react from 'react';
-import { isMobile } from 'react-device-detect';
-import { toast } from 'react-toastify';
-import { FaGoogle, FaFacebook } from 'react-icons/fa6';
+import * as react from 'react';
+import * as reactdom from 'react-router-dom';
+import * as reactdevices from 'react-device-detect';
+import * as reacttoastify from 'react-toastify';
+import * as Fa from 'react-icons/fa6';
 
 import {
     loginUser
@@ -16,22 +17,39 @@ import './LoginPage.css';
 const LoginPage = () => {
     const [email, setEmail] = react.useState('');
     const [password, setPassword] = react.useState('');
+    
+    const navigate = reactdom.useNavigate();
+    const location = reactdom.useLocation();
+    
+    const isLogout = location.state?.logout || false;
+    const isExpired = location.state?.expired || false;
+    const isConfirmed = location.state?.confirmed || false;
 
     react.useEffect(() => {
-        const query = new URLSearchParams(window.location.search);
-        if (query.get("logout") !== null) {
-            localStorage.removeItem('token');
-            toast.info("Vous avez été déconnecté.", {
+        if (isLogout) {
+            localStorage.removeItem('user');
+            reacttoastify.toast.info("Vous avez été déconnecté.", {
                 position: "top-center",
             });
-            return;
+        }
+        
+        if (isExpired) {
+            localStorage.removeItem('user');
+            reacttoastify.toast.info("Votre connexion à éxpiré. Veuillez vous réauthentifier.", {
+                position: "top-center",
+            });
+        }
+        
+        if (isConfirmed) {
+            reacttoastify.toast.info("Votre compte à été confirmé. Vous pouvez maintenant vous authentifier.", {
+                position: "top-center",
+            });
         }
 
-        if (localStorage.getItem('token')) {
-            window.location.href = '/dashboard';
-            return;
+        if (localStorage.getItem('user')) {
+            navigate("/dashboard")
         }
-    }, []);
+    }, [isLogout, isExpired, isConfirmed]);
 
     const handleSubmit = async (event) => {
         event.preventDefault();
@@ -43,19 +61,19 @@ const LoginPage = () => {
             if (data.error !== 0) {
                 switch (data.error) {
                     case 9:
-                        toast.error("E-mail non valide.", {
+                        reacttoastify.toast.error("E-mail non valide.", {
                             position: "top-center",
                         });
                         break;
 
                     case 10:
-                        toast.error("Mot de passe incorrect.", {
+                        reacttoastify.toast.error("Mot de passe incorrect.", {
                             position: "top-center",
                         });
                         break;
 
                     case 53:
-                        toast.error("Votre compte n'a pas été confirmé.", {
+                        reacttoastify.toast.error("Votre compte n'a pas été confirmé.", {
                             position: "top-center",
                         });
                         break;
@@ -66,8 +84,12 @@ const LoginPage = () => {
                 return;
             }
 
-            localStorage.setItem('token', data.token);
-            window.location.href = '/dashboard';
+            localStorage.setItem('user', JSON.stringify({
+                data: data.result,
+                token: data.token,
+            }));
+
+            navigate("/dashboard");
         }).catch((error) => {
             if (process.env.REACT_APP_ENV === "dev") console.error(error);
         });
@@ -83,7 +105,7 @@ const LoginPage = () => {
 
     return (
         <div className="login-container">
-            <a className='login-logo' href='/' style={isMobile ? { display: 'none' } : {}}>
+            <a className='login-logo' href='/' style={reactdevices.isMobile ? { display: 'none' } : {}}>
                 <img src={logo} alt="Supchat logo" />
                 <p>Supchat</p>
             </a>
@@ -109,8 +131,8 @@ const LoginPage = () => {
                     <p>Pas de compte ? <a href="/register">En créer un maintenant !</a></p>
                 </form>
                 <div className='login-socials'>
-                    <Button icon={<FaGoogle />} onClick={handleGoogle} type="button" text="Google" />
-                    <Button icon={<FaFacebook />} onClick={handleFacebook} type="button" text="Facebook" />
+                    <Button icon={<Fa.FaGoogle />} onClick={handleGoogle} type="button" text="Google" />
+                    <Button icon={<Fa.FaFacebook />} onClick={handleFacebook} type="button" text="Facebook" />
                 </div>
             </div>
         </div>

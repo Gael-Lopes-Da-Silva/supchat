@@ -1,6 +1,7 @@
-import react from 'react';
-import { isMobile } from 'react-device-detect';
-import { toast } from 'react-toastify';
+import * as react from 'react';
+import * as reactdom from 'react-router-dom';
+import * as reactdevices from 'react-device-detect';
+import * as reacttoastify from 'react-toastify';
 
 import {
     createUser,
@@ -20,6 +21,8 @@ const RegisterPage = () => {
     const [password, setPassword] = react.useState('');
     const [checked, setChecked] = react.useState('');
 
+    const navigate = reactdom.useNavigate();
+
     react.useEffect(() => {
         const query = new URLSearchParams(window.location.search);
         if (query.get("confirm_token") !== null) {
@@ -30,28 +33,24 @@ const RegisterPage = () => {
             }).then((data) => {
                 const [user] = data.result;
                 if (!user) {
-                    window.location.href = '/login';
-                    return;
+                    navigate("/login");
                 }
 
                 updateUser(user.id, {
                     confirm_token: null
                 }).then(() => {
                     // TODO: Envoyer un mail de confirmation et de bienvenue
-                    window.location.href = '/login';
+                    navigate("/login", { state: { confirmed: true } });
                 }).catch((error) => {
                     if (process.env.REACT_APP_ENV === "dev") console.error(error);
                 });
             }).catch((error) => {
                 if (process.env.REACT_APP_ENV === "dev") console.error(error);
             });
-
-            return;
         }
 
-        if (localStorage.getItem('token')) {
-            window.location.href = '/dashboard';
-            return;
+        if (localStorage.getItem('user')) {
+            navigate("/dashboard");
         }
     }, []);
 
@@ -68,13 +67,13 @@ const RegisterPage = () => {
             if (data.error !== 0) {
                 switch (data.error) {
                     case 4:
-                        toast.error("Ce pseudo est déjà utilisé par un autre utilisateur.", {
+                        reacttoastify.toast.error("Ce pseudo est déjà utilisé par un autre utilisateur.", {
                             position: "top-center",
                         });
                         break;
 
                     case 5:
-                        toast.error("Cette e-mail est déjà utilisé par un autre utilisateur.", {
+                        reacttoastify.toast.error("Cette e-mail est déjà utilisé par un autre utilisateur.", {
                             position: "top-center",
                         });
                         break;
@@ -87,7 +86,7 @@ const RegisterPage = () => {
 
             // TODO: Envoyer un mail pour confirmer son compte et son adresse mail
             // Utiliser un SMTP gratuit (sendpulse, jetmail...)
-            toast.success("Activez votre compte à cette adresse: " + window.location.protocol + '//' + window.location.host + "/register?confirm_token=" + confirmToken, {
+            reacttoastify.toast.success("Activez votre compte à cette adresse: " + window.location.protocol + '//' + window.location.host + "/register?confirm_token=" + confirmToken, {
                 position: "top-center",
             });
         }).catch((error) => {
@@ -97,7 +96,7 @@ const RegisterPage = () => {
 
     return (
         <div className="register-container">
-            <a className='register-logo' href='/' style={isMobile ? { display: 'none' } : {}}>
+            <a className='register-logo' href='/' style={reactdevices.isMobile ? { display: 'none' } : {}}>
                 <img src={logo} alt="Supchat logo" />
                 <p>Supchat</p>
             </a>

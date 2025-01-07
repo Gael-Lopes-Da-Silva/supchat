@@ -7,6 +7,7 @@ import TermsPage from './pages/TermsPage/TermsPage';
 import PrivaryPage from './pages/PrivacyPage/PrivacyPage';
 import RegisterPage from './pages/RegisterPage/RegisterPage';
 import DashboardPage from './pages/DashboardPage/DashboardPage';
+import SettingsPage from './pages/SettingsPage/SettingsPage';
 
 const App = () => {
     return (
@@ -18,6 +19,7 @@ const App = () => {
                 <Route path="/terms" element={<TermsPage />} />
                 <Route path="/privacy" element={<PrivaryPage />} />
                 <Route path="/dashboard" element={<DashboardPage />} />
+                <Route path="/settings" element={<SettingsPage />} />
             </Routes>
         </Router>
     );
