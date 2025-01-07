@@ -212,12 +212,57 @@
 }
 
 .dashboard-right-content footer {
+    display: flex;
+    align-items: center;
     height: 4rem;
     background: #3D3D3D;
     border-radius: 1rem;
     border: solid 3px #333;
     box-shadow: #333 5px 5px 0px;
     box-sizing: border-box;
+}
+
+.dashboard-right-content footer>.dashboard-right-footer-buttons {
+    display: flex;
+    height: 100%;
+    padding: 0.4rem;
+    box-sizing: border-box;
+}
+
+.dashboard-right-content footer>.dashboard-right-footer-buttons>button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    background: none;
+    height: 100%;
+    width: 100%;
+    border-radius: 0.6rem;
+    cursor: pointer;
+    aspect-ratio: 1 / 1;
+}
+
+.dashboard-right-content footer>.dashboard-right-footer-buttons>button:hover {
+    background: #4d4d4d;
+}
+
+.dashboard-right-content footer>.dashboard-right-footer-buttons>button:active {
+    background: #5E5E5E;
+}
+
+.dashboard-right-content footer>.dashboard-right-footer-buttons>button>svg {
+    color: #fffceb;
+}
+
+.dashboard-right-content footer>input {
+    flex: 1;
+    box-sizing: border-box;
+    background: none;
+    border: none;
+}
+
+.dashboard-right-content footer>input:focus {
+    border: none;
 }
 
 .dashboard-right-peoples {

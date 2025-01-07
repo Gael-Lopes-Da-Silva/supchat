@@ -112,7 +112,15 @@ const DashboardPage = () => {
                         </div>
                     </header>
                     <main></main>
-                    <footer></footer>
+                    <footer>
+                        <div className='dashboard-right-footer-buttons'>
+                            <button title='Uploader un fichier'><Fa.FaCirclePlus /></button>
+                        </div>
+                        <input type="text" />
+                        <div className='dashboard-right-footer-buttons'>
+                            <button title='Insérer un émoji'><Fa.FaFaceSmile /></button>
+                        </div>
+                    </footer>
                 </div>
                 <div className='dashboard-right-peoples' style={{ display: !showUserList && "none" }}>
                 </div>
