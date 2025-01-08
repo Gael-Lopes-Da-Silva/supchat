@@ -24,6 +24,7 @@ const LoginPage = () => {
     const isLogout = location.state?.logout || false;
     const isExpired = location.state?.expired || false;
     const isConfirmed = location.state?.confirmed || false;
+    const isPasswordReseted = location.state?.password_reseted || false;
 
     react.useEffect(() => {
         if (isLogout) {
@@ -45,11 +46,17 @@ const LoginPage = () => {
                 position: "top-center",
             });
         }
+        
+        if (isPasswordReseted) {
+            reacttoastify.toast.info("Votre nouveau mot de passe a été enregistré.", {
+                position: "top-center",
+            });
+        }
 
         if (localStorage.getItem('user')) {
             navigate("/dashboard")
         }
-    }, [isLogout, isExpired, isConfirmed]);
+    }, [isLogout, isExpired, isConfirmed, isPasswordReseted]);
 
     const handleSubmit = async (event) => {
         event.preventDefault();

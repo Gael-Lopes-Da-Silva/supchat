@@ -18,29 +18,27 @@ const ResetPasswordPage = () => {
     const [email, setEmail] = react.useState('');
     const [password, setPassword] = react.useState('');
 
+    const [checkPassword, setCheckPassword] = react.useState('');
+    const [checkMail, setCheckMail] = react.useState(false);
+
+    const [user, setUser] = react.useState('');
+
     const navigate = reactdom.useNavigate();
 
     react.useEffect(() => {
         const query = new URLSearchParams(window.location.search);
-        if (query.get("reset_password_token") !== null) {
-            const resetPasswordToken = query.get("reset_password_token");
+        if (query.get("token") !== null) {
+            setCheckMail(true);
 
             readUser({
-                reset_password_token: resetPasswordToken
+                reset_password_token: query.get("token")
             }).then((data) => {
                 const [user] = data.result;
                 if (!user) {
                     navigate("/login");
                 }
 
-                updateUser(user.id, {
-                    reset_password_token: null
-                }).then(() => {
-                    // TODO: Envoyer un mail de confirmation de mot de pass modifié
-                    navigate("/login", { state: { reseted: true } });
-                }).catch((error) => {
-                    if (process.env.REACT_APP_ENV === "dev") console.error(error);
-                });
+                setUser(user);
             }).catch((error) => {
                 if (process.env.REACT_APP_ENV === "dev") console.error(error);
             });
@@ -51,10 +49,31 @@ const ResetPasswordPage = () => {
         }
     }, []);
 
-    const handleSubmit = async (event) => {
+    const handleResetPassword = async (event) => {
         event.preventDefault();
-        const resetPasswordToken = Math.random().toString(36);
-        
+
+        if (password !== checkPassword) {
+            reacttoastify.toast.error("Les mots de passes sont différent.", {
+                position: "top-center",
+            });
+            return;
+        }
+
+        updateUser(user && user.id, {
+            password: password,
+            reset_password_token: null,
+        }).then((data) => {
+            // TODO: Envoyer un mail pour informer du changement de mot de passe
+            navigate("/login", { state: { password_reseted: true } })
+        }).catch((error) => {
+            if (process.env.REACT_APP_ENV === "dev") console.error(error);
+        });
+    };
+
+    const handleCheckEmail = async (event) => {
+        event.preventDefault();
+        const token = Math.random().toString(36);
+
         readUser({
             email: email
         }).then((data) => {
@@ -65,42 +84,17 @@ const ResetPasswordPage = () => {
                 });
                 return;
             }
-        }).catch((error) => {
-            if (process.env.REACT_APP_ENV === "dev") console.error(error);
-        });
 
-        updateUser({
-            reset_password_token: resetPasswordToken,
-        }).then((data) => {
-            if (data.error !== 0) {
-                switch (data.error) {
-                    case 4:
-                        reacttoastify.toast.error("Ce pseudo est déjà utilisé par un autre utilisateur.", {
-                            position: "top-center",
-                        });
-                        break;
-
-                    case 5:
-                        reacttoastify.toast.error("Cette e-mail est déjà utilisé par un autre utilisateur.", {
-                            position: "top-center",
-                        });
-                        break;
-
-                    default:
-                        break;
-                }
-                return;
-            }
-
-            // TODO: Envoyer un mail pour confirmer son compte et son adresse mail
-            // Utiliser un SMTP gratuit (sendpulse, jetmail...)
-            reacttoastify.toast.success("Modifiez votre mot de passe à cette adresse: " + window.location.protocol + '//' + window.location.host + "/reset_password?reset_password_token=" + resetPasswordToken, {
-                position: "top-center",
-            });
-        }).catch((error) => {
-            if (process.env.REACT_APP_ENV === "dev") console.error(error);
-        });
-    };
+            updateUser(user.id, {
+                reset_password_token: token,
+            }).then((data) => {
+                // TODO: Envoyer un mail avec le lien de réinitialisation de mot de passe
+                reacttoastify.toast.success("Veuillez réinitialiser votre mot de passe à cette adresse: " + window.location.protocol + '//' + window.location.host + "/reset_password?token=" + token, {
+                    position: "top-center",
+                });
+            }).catch((error) => { if (process.env.REACT_APP_ENV === "dev") console.error(error); });
+        }).catch((error) => { if (process.env.REACT_APP_ENV === "dev") console.error(error); });
+    }
 
     return (
         <div className="reset-password-container">
@@ -108,37 +102,47 @@ const ResetPasswordPage = () => {
                 <img src={logo} alt="Supchat logo" />
                 <p>Supchat</p>
             </a>
-            <div className="reset-password-box">
-                <h1>Réinitialisation de mot de passe</h1>
-                <form onSubmit={handleSubmit}>
-                    <InputField
-                        label="Email"
-                        error="*"
-                        type="email"
-                        value={email}
-                        required={true}
-                        onChange={(event) => setEmail(event.target.value)}
-                    />
-                    <InputField
-                        label="Mot de passe"
-                        error="*"
-                        type="password"
-                        value={password}
-                        required={true}
-                        onChange={(event) => setPassword(event.target.value)}
-                    />
-                    <InputField
-                        label="Confirmez le mot de passe"
-                        error="*"
-                        type="password"
-                        value={password}
-                        required={true}
-                        onChange={(event) => setPassword(event.target.value)}
-                    />
-                    <Button type="submit" text="Enregistrer" />
-                    <p>Pas de compte ? <a href="/register">En créer un maintenant !</a></p>
-                </form>
-            </div>
+            {!checkMail &&
+                <div className="reset-password-box">
+                    <h1>Vérification de l'adresse mail</h1>
+                    <form onSubmit={handleCheckEmail}>
+                        <InputField
+                            label="Email"
+                            error="*"
+                            type="email"
+                            value={email}
+                            required={true}
+                            onChange={(event) => setEmail(event.target.value)}
+                        />
+                        <Button type="submit" text="Enregistrer" />
+                        <p>Pas de compte ? <a href="/register">En créer un maintenant !</a></p>
+                    </form>
+                </div>
+            }
+            {checkMail &&
+                <div className="reset-password-box">
+                    <h1>Réinitialisation de mot de passe</h1>
+                    <form onSubmit={handleResetPassword}>
+                        <InputField
+                            label="Mot de passe"
+                            error="*"
+                            type="password"
+                            value={password}
+                            required={true}
+                            onChange={(event) => setPassword(event.target.value)}
+                        />
+                        <InputField
+                            label="Confirmez le mot de passe"
+                            error="*"
+                            type="password"
+                            value={checkPassword}
+                            required={true}
+                            onChange={(event) => setCheckPassword(event.target.value)}
+                        />
+                        <Button type="submit" text="Enregistrer" />
+                    </form>
+                </div>
+            }
         </div>
     );
 };

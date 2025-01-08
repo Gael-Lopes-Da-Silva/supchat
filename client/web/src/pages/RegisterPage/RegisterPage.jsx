@@ -25,8 +25,8 @@ const RegisterPage = () => {
 
     react.useEffect(() => {
         const query = new URLSearchParams(window.location.search);
-        if (query.get("confirm_token") !== null) {
-            const confirmToken = query.get("confirm_token");
+        if (query.get("token") !== null) {
+            const confirmToken = query.get("token");
 
             readUser({
                 confirm_token: confirmToken
@@ -56,13 +56,13 @@ const RegisterPage = () => {
 
     const handleSubmit = async (event) => {
         event.preventDefault();
-        const confirmToken = Math.random().toString(36);
+        const token = Math.random().toString(36);
 
         createUser({
             username: username,
             email: email,
             password: password,
-            confirm_token: confirmToken,
+            confirm_token: token,
         }).then((data) => {
             if (data.error !== 0) {
                 switch (data.error) {
@@ -86,7 +86,7 @@ const RegisterPage = () => {
 
             // TODO: Envoyer un mail pour confirmer son compte et son adresse mail
             // Utiliser un SMTP gratuit (sendpulse, jetmail...)
-            reacttoastify.toast.success("Activez votre compte à cette adresse: " + window.location.protocol + '//' + window.location.host + "/register?confirm_token=" + confirmToken, {
+            reacttoastify.toast.success("Activez votre compte à cette adresse: " + window.location.protocol + '//' + window.location.host + "/register?token=" + token, {
                 position: "top-center",
             });
         }).catch((error) => {
