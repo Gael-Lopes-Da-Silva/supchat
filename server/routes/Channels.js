@@ -16,7 +16,7 @@ const router = express.Router();
 //   user_id: number (required)
 //   workspace_id: number (required)
 //   name: string (required)
-//   is_private: boolean (required)
+//   is_private: boolean (optional)
 // return:
 //   result: [channel]
 router.post("/", (request, response) => {
@@ -52,7 +52,7 @@ router.post("/", (request, response) => {
 //   user_id: number (optional)
 // return:
 //   result: [channel]
-router.get("/read", (request, response) => {
+router.get("/", (request, response) => {
     readChannel(request).then((result) => {
         if (!result.error && result !== "") {
             response.status(202).json({
@@ -82,7 +82,7 @@ router.get("/read", (request, response) => {
 //   id: number (required)
 // return:
 //   result: [channel]
-router.get("/read", (request, response) => {
+router.get("/:id", (request, response) => {
     readChannel(request).then((result) => {
         if (!result.error && result !== "") {
             response.status(202).json({
@@ -151,7 +151,7 @@ router.put("/:id", (request, response) => {
 //   id: number (required)
 // return:
 //   result: [channel]
-router.delete("/delete", (request, response) => {
+router.delete("/:id", (request, response) => {
     deleteChannel(request).then((result) => {
         if (!result.error && result !== "") {
             response.status(202).json({

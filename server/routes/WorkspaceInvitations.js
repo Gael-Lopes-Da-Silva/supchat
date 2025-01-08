@@ -123,7 +123,7 @@ router.get("/:id", (request, response) => {
 //   expire_at: date (optional)
 // return:
 //   result: [workspace_invitation]
-router.put("/update", (request, response) => {
+router.put("/:id", (request, response) => {
     updateWorkspaceInvitation(request).then((result) => {
         if (!result.error && result !== "") {
             response.status(200).json({

@@ -37,15 +37,18 @@ pool.getConnection().then((connection) => {
     app.use("/users/", UsersRouter);
     app.use("/status/", StatusRouter);
     app.use("/permissions/", PermissionsRouter);
-    app.use("/workspaces/", WorkspacesRouter);
+
     app.use("/workspaces/invitations/", WorkspaceInvitationsRouter);
+    app.use("/workspaces/permissions/", WorkspacePermissionsRouter);
     app.use("/workspaces/members/", WorkspaceMembersRouter);
-    app.use("/workspaces/permission/", WorkspacePermissionsRouter);
-    app.use("/channels/", ChannelsRouter);
-    app.use("/channels/members/", ChannelMembersRouter);
+    app.use("/workspaces/", WorkspacesRouter);
+
     app.use("/channels/permissions/", ChannelPermissionsRouter);
-    app.use("/roles/", RolesRouter);
+    app.use("/channels/members/", ChannelMembersRouter);
+    app.use("/channels/", ChannelsRouter);
+
     app.use("/roles/permissions/", RolePermissionsRouter);
+    app.use("/roles/", RolesRouter);
 
     app.listen(PORT, () =>
         console.log(`Server running on http://localhost:${PORT} !`)

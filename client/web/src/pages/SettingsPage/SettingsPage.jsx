@@ -1,5 +1,5 @@
-import react from 'react';
-import { FaXmark } from 'react-icons/fa6';
+import * as react from 'react';
+import * as Fa from 'react-icons/fa6';
 
 import { authentificationHook } from '../../hooks/Authentification';
 
@@ -21,7 +21,7 @@ const SettingsPage = () => {
             <div className="settings-right">
                 <header>
                     <div className='settings-right-header-buttons'>
-                        <a title='Fermer les paramètres' href="/dashboard"><FaXmark /></a>
+                        <a title='Fermer les paramètres' href="/dashboard"><Fa.FaXmark /></a>
                     </div>
                 </header>
                 <main></main>

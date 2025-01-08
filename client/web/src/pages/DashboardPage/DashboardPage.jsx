@@ -2,44 +2,150 @@ import react from 'react';
 import * as reactdom from 'react-router-dom';
 import * as Fa from 'react-icons/fa6';
 
+import $ from 'jquery';
+
 import { authentificationHook } from '../../hooks/Authentification';
 
+import { readWorkspaceMember } from '../../services/WorkspaceMembers';
+import { readWorkspace } from '../../services/Workspaces';
+
 import Popup from "../../components/Popup/Popup";
+import Modal from "../../components/Modal/Modal";
 
 import "./DashboardPage.css"
 
 const DashboardPage = () => {
-    const [showUserList, setShowUserList] = react.useState(true);
-    const [showLeftPanel, setShowLeftPanel] = react.useState(true);
     const [user, setUser] = react.useState('');
 
-    const [showProfilePopup, setShowProfilePopup] = react.useState(false);
+    const [workspaces, setWorkspaces] = react.useState({});
+    const [selectedWorkspace, setSelectedWorkspace] = react.useState({});
+    const [channels, setChannels] = react.useState({});
+    const [selectedChannel, setSelectedChannel] = react.useState({});
+
+    const [guiVisibility, setGuiVisibility] = react.useState({
+        userList: false,
+        leftPanel: true,
+    });
+    const [popupVisibility, setPopupVisibility] = react.useState({
+        profile: false,
+        pinned: false,
+        notifications: false,
+        emojis: false,
+        workspace: false,
+    });
+    const [modalVisibility, setModalVisibility] = react.useState({
+        workspace: false,
+    });
+    const dashboardContainerRef = react.useRef(null);
+    const modalRefs = {
+        workspace: react.useRef(null),
+    };
+    const popupRefs = {
+        profile: react.useRef(null),
+        pinned: react.useRef(null),
+        notifications: react.useRef(null),
+        emojis: react.useRef(null),
+        workspace: react.useRef(null),
+    };
+
     const [mousePosition, setMousePosition] = react.useState({ x: 0, y: 0 });
+
 
     const navigate = reactdom.useNavigate();
 
     react.useEffect(() => {
         authentificationHook(navigate);
 
-        setUser(JSON.parse(localStorage.getItem('user')).data);
+        const user = JSON.parse(localStorage.getItem('user'))?.data;
+        setUser(user);
+
+        if (user && user.id) {
+            readWorkspaceMember({
+                user_id: user.id,
+            }).then((data) => {
+                const workspacePromises = data.result.map(async (workspaceMember) => {
+                    return readWorkspace({ id: workspaceMember.workspace_id })
+                        .then((data) => ({ id: data.result.id, data: data.result }))
+                        .catch((error) => {
+                            if (process.env.REACT_APP_ENV === "dev") console.error(error);
+                            return null;
+                        });
+                });
+
+                Promise.all(workspacePromises).then((results) => {
+                    const newWorkspaces = {};
+                    results.forEach((workspace) => {
+                        if (workspace) {
+                            newWorkspaces[workspace.id] = workspace.data;
+                        }
+                    });
+                    setWorkspaces(newWorkspaces);
+                });
+            }).catch((error) => { if (process.env.REACT_APP_ENV === "dev") console.error(error); });
+        }
 
         const showUserList = localStorage.getItem("gui.dashboard.show_user_list");
-        const showLeftPanel = localStorage.getItem("gui.dashboard.show_left_panel");
-        if (showUserList !== null) setShowUserList(showUserList === "true");
-        if (showLeftPanel !== null) setShowLeftPanel(showLeftPanel === "true");
-    }, []);
+        if (showUserList !== null) updateGuiState("userList", showUserList === "true");
 
-    const userProfileBackground = (username) => {
+        document.addEventListener('click', handleClickOutside);
+
+        return () => {
+            document.removeEventListener('click', handleClickOutside);
+        };
+    }, [navigate]);
+
+    const updateGuiState = (key, value) => {
+        setGuiVisibility((prev) => ({ ...prev, [key]: value }));
+    };
+
+    const updatePopupState = (key, value) => {
+        setPopupVisibility((prev) => ({ ...prev, [key]: value }));
+    };
+
+    const updateModalState = (key, value) => {
+        setModalVisibility((prev) => ({ ...prev, [key]: value }));
+    };
+    
+    const hideAllPopup = () => {
+        updatePopupState("profile", false);
+        updatePopupState("pinned", false);
+        updatePopupState("notifications", false);
+        updatePopupState("emojis", false);
+        updatePopupState("workspace", false);
+    }
+    
+    const hideAllModal = () => {
+        updateModalState("workspace", false);
+    }
+
+    const handleClickOutside = (event) => {
+        const isOutsideDashboard = dashboardContainerRef.current && !dashboardContainerRef.current.contains(event.target);
+
+        const isOutsideModal = Object.values(modalRefs).every(
+            (modalRef) => !modalRef?.current || !modalRef.current.contains(event.target)
+        );
+
+        const isOutsidePopups = Object.values(popupRefs).every(
+            (popupRef) => !popupRef?.current || !popupRef.current.contains(event.target)
+        );
+
+        if (!isOutsideDashboard && isOutsideModal && isOutsidePopups) {
+            hideAllPopup();
+            hideAllModal();
+        }
+    };
+
+    const getBackground = (text) => {
         let hash = 0;
-        for (let i = 0; i < username.length; i++) {
-            hash = (hash << 5) - hash + username.charCodeAt(i);
+        for (let i = 0; i < text.length; i++) {
+            hash = (hash << 5) - hash + text.charCodeAt(i);
         }
 
         return `#${((hash >> 24) & 0xFF).toString(16).padStart(2, '0')}${((hash >> 16) & 0xFF).toString(16).padStart(2, '0')}${((hash >> 8) & 0xFF).toString(16).padStart(2, '0')}`;
     }
 
-    const userProfileForeground = (username) => {
-        const background = userProfileBackground(username);
+    const getForeground = (text) => {
+        const background = getBackground(text);
         const color = background.replace('#', '');
 
         const r = parseInt(color.substring(0, 2), 16) / 255;
@@ -51,46 +157,117 @@ const DashboardPage = () => {
         return luminance > 0.5 ? '#000000' : '#FFFFFF';
     }
 
-    const toggleUsersList = () => {
-        setShowUserList(!showUserList);
-        localStorage.setItem('gui.dashboard.show_user_list', !showUserList);
-    }
-
-    const toggleLeftPanel = () => {
-        setShowLeftPanel(!showLeftPanel);
-        localStorage.setItem('gui.dashboard.show_left_panel', !showLeftPanel);
-    }
-
-    const handleLogout = () => {
-        navigate("/login", { state: { logout: true } });
-    }
-
     return (
-        <div onClick={() => { showProfilePopup && setShowProfilePopup(false) }} className="dashboard-container">
-            <Popup display={showProfilePopup} content={
+        <div ref={dashboardContainerRef} className="dashboard-container">
+            <Modal ref={modalRefs.workspace} display={modalVisibility.workspace} onClose={() => {
+                updateModalState("workspace", false);
+            }} title='Ajouter/Rejoindre un espace de travail' content={
+                <div>
+                    <header></header>
+                    <main></main>
+                    <footer></footer>
+                </div>
+            } />
+            <Popup ref={popupRefs.profile} display={popupVisibility.profile} content={
                 <div>
                     <header></header>
                     <main>
-                        <button onClick={handleLogout}>Deconnexion</button>
+                        <button onClick={() => {
+                            navigate("/login", { state: { logout: true } });
+                        }}>Deconnexion</button>
                     </main>
                     <footer></footer>
                 </div>
             } top={mousePosition && mousePosition.y - 60} left={mousePosition && mousePosition.x} />
-            <div className="dashboard-left" style={{ display: !showLeftPanel && "none" }}>
+            <Popup ref={popupRefs.pinned} display={popupVisibility.pinned} content={
+                <div>
+                    <header></header>
+                    <main>
+                        <p>Messages épinglés</p>
+                    </main>
+                    <footer></footer>
+                </div>
+            } top={mousePosition && mousePosition.y} left={mousePosition && mousePosition.x} />
+            <Popup ref={popupRefs.notifications} display={popupVisibility.notifications} content={
+                <div>
+                    <header></header>
+                    <main>
+                        <p>Notifications</p>
+                    </main>
+                    <footer></footer>
+                </div>
+            } top={mousePosition && mousePosition.y} left={mousePosition && mousePosition.x} />
+            <Popup ref={popupRefs.emojis} display={popupVisibility.emojis} content={
+                <div>
+                    <header></header>
+                    <main>
+                        <p>Emojis</p>
+                    </main>
+                    <footer></footer>
+                </div>
+            } top={mousePosition && mousePosition.y - 60} left={mousePosition && mousePosition.x} />
+            <Popup ref={popupRefs.workspace} display={popupVisibility.workspace} content={
+                <div>
+                    <header></header>
+                    <main>
+                        <p>Configuration de l'espace de travail</p>
+                    </main>
+                    <footer></footer>
+                </div>
+            } top={mousePosition && mousePosition.y} left={mousePosition && mousePosition.x} />
+            <div className="dashboard-left" style={{ display: !guiVisibility.leftPanel && "none" }}>
                 <div className='dashboard-left-workspaces'>
+                    <div className='dashboard-left-workspaces-icons'>
+                        {workspaces &&
+                            Object.values(workspaces).map((workspace) => (
+                                <button key={workspace.id} title={workspace.name} onClick={(event) => {
+                                    $(".dashboard-left-workspaces-icons button span").hide();
+                                    $(event.currentTarget).find("span").show();
+                                    setSelectedWorkspace(workspace);
+                                }} style={{ background: getBackground(workspace.name), color: getForeground(workspace.name) }}>
+                                    <p>{workspace.name[0].toUpperCase()}</p>
+                                    <span style={{ display: "none" }}></span>
+                                </button>
+                            ))
+                        }
+                    </div>
+                    <div className='dashboard-left-workspaces-buttons'>
+                        <button onClick={(event) => {
+                            event.stopPropagation();
+                            updateModalState("workspace", true);
+                        }} title='Ajouter/Rejoindre un espace de travail'><Fa.FaPlus /></button>
+                        <button title='Découvrir de nouveaux espaces de travail'><Fa.FaQuestion /></button>
+                    </div>
                 </div>
                 <div className='dashboard-left-content'>
-                    <header></header>
+                    {selectedWorkspace.id &&
+                        <header>
+                            <div onClick={(event) => {
+                                event.stopPropagation();
+                                hideAllPopup()
+                                updatePopupState("workspace", true);
+                                setMousePosition({
+                                    x: event.clientX,
+                                    y: event.clientY,
+                                });
+                            }}>
+                                <p>{selectedWorkspace.name}</p>
+                                <Fa.FaChevronDown />
+                            </div>
+                        </header>
+                    }
                     <main></main>
                     <footer>
                         <div onClick={(event) => {
-                            setShowProfilePopup(true);
+                            event.stopPropagation();
+                            hideAllPopup()
+                            updatePopupState("profile", true);
                             setMousePosition({
                                 x: event.clientX,
                                 y: event.clientY,
                             });
                         }} className='dashboard-left-footer-profile' title='Menu de profil'>
-                            <div style={{ background: userProfileBackground(user && user.username), color: userProfileForeground(user && user.username) }}>{user && user.username[0].toUpperCase()}</div>
+                            <div style={{ background: getBackground(user && user.username), color: getForeground(user && user.username) }}>{user && user.username[0].toUpperCase()}</div>
                             <p>{user && user.username}</p>
                         </div>
                         <div className='dashboard-left-footer-buttons'>
@@ -99,32 +276,68 @@ const DashboardPage = () => {
                     </footer>
                 </div>
             </div>
-            <div className="dashboard-right">
-                <div className='dashboard-right-content'>
-                    <header>
-                        <div className='dashboard-right-header-buttons'>
-                            <button onClick={toggleLeftPanel} title='Afficher/Masquer le panneau de gauche'><Fa.FaBars /></button>
-                        </div>
-                        <div className='dashboard-right-header-buttons'>
-                            <button title='Messages épinglés'><Fa.FaThumbtack /></button>
-                            <button title='Notifications'><Fa.FaBell /></button>
-                            <button onClick={toggleUsersList} title='Afficher/Masquer la liste des utilisateur'><Fa.FaUserGroup /></button>
-                        </div>
-                    </header>
-                    <main></main>
-                    <footer>
-                        <div className='dashboard-right-footer-buttons'>
-                            <button title='Uploader un fichier'><Fa.FaCirclePlus /></button>
-                        </div>
-                        <input type="text" placeholder='Envoyer un message' />
-                        <div className='dashboard-right-footer-buttons'>
-                            <button title='Insérer un émoji'><Fa.FaFaceSmile /></button>
-                        </div>
-                    </footer>
+            {selectedWorkspace.id &&
+                <div className="dashboard-right">
+                    <div className='dashboard-right-content'>
+                        <header>
+                            <div className='dashboard-right-header-buttons'>
+                                <button onClick={() => {
+                                    updateGuiState("leftPanel", !guiVisibility.leftPanel);
+                                }} title='Afficher/Masquer le panneau de gauche'><Fa.FaBars /></button>
+                            </div>
+                            <div className='dashboard-right-header-buttons'>
+                                <button onClick={(event) => {
+                                    event.stopPropagation();
+                                    hideAllPopup()
+                                    updatePopupState("pinned", true);
+                                    setMousePosition({
+                                        x: event.clientX,
+                                        y: event.clientY,
+                                    });
+                                }} title='Messages épinglés'><Fa.FaThumbtack /></button>
+                                <button onClick={(event) => {
+                                    event.stopPropagation();
+                                    hideAllPopup()
+                                    updatePopupState("notifications", true);
+                                    setMousePosition({
+                                        x: event.clientX,
+                                        y: event.clientY,
+                                    });
+                                }} title='Notifications'><Fa.FaBell /></button>
+                                <button onClick={() => {
+                                    localStorage.setItem('gui.dashboard.show_user_list', !guiVisibility.userList);
+                                    updateGuiState("userList", !guiVisibility.userList);
+                                }} title='Afficher/Masquer la liste des utilisateur'><Fa.FaUserGroup /></button>
+                            </div>
+                        </header>
+                        <main></main>
+                        <footer>
+                            <div className='dashboard-right-footer-buttons'>
+                                <button title='Uploader un fichier'><Fa.FaCirclePlus /></button>
+                            </div>
+                            <input type="text" placeholder='Envoyer un message' />
+                            <div className='dashboard-right-footer-buttons'>
+                                <button onClick={(event) => {
+                                    event.stopPropagation();
+                                    hideAllPopup()
+                                    updatePopupState("emojis", true);
+                                    setMousePosition({
+                                        x: event.clientX,
+                                        y: event.clientY,
+                                    });
+                                }} title='Insérer un émoji'><Fa.FaFaceSmile /></button>
+                            </div>
+                        </footer>
+                    </div>
+                    <div className='dashboard-right-peoples' style={{ display: !guiVisibility.userList && "none" }}>
+                    </div>
                 </div>
-                <div className='dashboard-right-peoples' style={{ display: !showUserList && "none" }}>
+            }
+            {!selectedWorkspace.id &&
+                <div className="dashboard-right">
+                    <p>Aucun espace de travail sélectionné</p>
                 </div>
-            </div>
+            }
         </div>
     );
 };

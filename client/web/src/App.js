@@ -1,5 +1,5 @@
-import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import * as reactdom from 'react-router-dom';
+import * as reacttoastify from 'react-toastify';
 
 import IndexPage from './pages/IndexPage/IndexPage'
 import LoginPage from './pages/LoginPage/LoginPage';
@@ -12,18 +12,21 @@ import ResetPasswordPage from './pages/ResetPasswordPage/ResetPasswordPage';
 
 const App = () => {
     return (
-        <Router>
-            <Routes>
-                <Route path="/" element={<IndexPage />} />
-                <Route path="/login" element={<LoginPage />} />
-                <Route path="/register" element={<RegisterPage />} />
-                <Route path="/terms" element={<TermsPage />} />
-                <Route path="/privacy" element={<PrivaryPage />} />
-                <Route path="/dashboard" element={<DashboardPage />} />
-                <Route path="/settings" element={<SettingsPage />} />
-                <Route path="/reset_password" element={<ResetPasswordPage />} />
-            </Routes>
-        </Router>
+        <reactdom.BrowserRouter>
+            <reacttoastify.ToastContainer
+                theme="colored"
+            />
+            <reactdom.Routes>
+                <reactdom.Route path="/" element={<IndexPage />} />
+                <reactdom.Route path="/login" element={<LoginPage />} />
+                <reactdom.Route path="/register" element={<RegisterPage />} />
+                <reactdom.Route path="/terms" element={<TermsPage />} />
+                <reactdom.Route path="/privacy" element={<PrivaryPage />} />
+                <reactdom.Route path="/dashboard" element={<DashboardPage />} />
+                <reactdom.Route path="/settings" element={<SettingsPage />} />
+                <reactdom.Route path="/reset_password" element={<ResetPasswordPage />} />
+            </reactdom.Routes>
+        </reactdom.BrowserRouter>
     );
 };
 

@@ -50,3 +50,10 @@
 .popup div>main>button:active {
     background: #5E5E5E;
 }
+
+.popup div>main>p {
+    font-size: 1rem;
+    font-weight: bold;
+    color: #fffceb;
+    margin: 0;
+}

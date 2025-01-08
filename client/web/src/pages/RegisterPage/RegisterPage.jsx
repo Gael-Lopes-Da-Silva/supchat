@@ -41,12 +41,8 @@ const RegisterPage = () => {
                 }).then(() => {
                     // TODO: Envoyer un mail de confirmation et de bienvenue
                     navigate("/login", { state: { confirmed: true } });
-                }).catch((error) => {
-                    if (process.env.REACT_APP_ENV === "dev") console.error(error);
-                });
-            }).catch((error) => {
-                if (process.env.REACT_APP_ENV === "dev") console.error(error);
-            });
+                }).catch((error) => { if (process.env.REACT_APP_ENV === "dev") console.error(error); });
+            }).catch((error) => { if (process.env.REACT_APP_ENV === "dev") console.error(error); });
         }
 
         if (localStorage.getItem('user')) {

@@ -3,8 +3,6 @@ import { ERRORS, createErrorResponse } from "../app/ErrorHandler.js";
 
 export const createWorkspace = async (request) => {
     if (!request.body.name) return createErrorResponse(ERRORS.NAME_NOT_PROVIDED);
-    if (!request.body.description) return createErrorResponse(ERRORS.DESCRIPTION_NOT_PROVIDED);
-    if (!request.body.is_private) return createErrorResponse(ERRORS.IS_PRIVATE_NOT_PROVIDED);
     if (!request.body.user_id) return createErrorResponse(ERRORS.USER_ID_NOT_PROVIDED);
 
     const [user] = await pool.query("SELECT * FROM users WHERE id = ?", [request.body.user_id]);

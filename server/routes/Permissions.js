@@ -42,7 +42,7 @@ router.get("/", (request, response) => {
 //   id: number (required)
 // return:
 //   result: [permission]
-router.get("/read", (request, response) => {
+router.get("/:id", (request, response) => {
     readPermission(request).then((result) => {
         if (!result.error && result !== "") {
             response.status(202).json({

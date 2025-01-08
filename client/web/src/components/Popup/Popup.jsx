@@ -1,10 +1,8 @@
-import React from 'react';
-
 import './Popup.css';
 
-const Popup = ({ content, display, top, bottom, left, right }) => {
+const Popup = ({ content, display, ref, top, bottom, left, right }) => {
     return (
-        <div className='popup' style={{display: !display ? "none" : "", top: top, bottom: bottom, left: left, right: right}}>
+        <div className='popup' ref={ref} style={{display: !display ? "none" : "", top: top, bottom: bottom, left: left, right: right}}>
             {content}
         </div>
     );

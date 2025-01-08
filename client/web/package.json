@@ -3,6 +3,7 @@
     "version": "0.1.0",
     "private": true,
     "dependencies": {
+        "jquery": "^3.7.1",
         "react": "^19.0.0",
         "react-device-detect": "^2.2.3",
         "react-dom": "^19.0.0",

@@ -144,7 +144,7 @@ router.put("/:id", (request, response) => {
 //   id: number (required)
 // return:
 //   result: [channel_member]
-router.delete("/delete", (request, response) => {
+router.delete("/:id", (request, response) => {
     deleteChannelMember(request).then((result) => {
         if (!result.error && result !== "") {
             response.status(202).json({

@@ -48,3 +48,27 @@ export const updateUser = async (id, body) => {
 
     return await response.json();
 };
+
+export const deleteUser = async (id) => {
+    const response = await fetch('http://localhost:3000/users/' + id, {
+        method: "DELETE",
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+        },
+    });
+
+    return await response.json();
+};
+
+export const restoreUser = async (id) => {
+    const response = await fetch('http://localhost:3000/users/' + id, {
+        method: "PATCH",
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+        },
+    });
+
+    return await response.json();
+};
