@@ -33,6 +33,14 @@
     box-sizing: border-box;
 }
 
+.popup.light div>main>button {
+    color: #333;
+}
+
+.popup.dark div>main>button {
+    color: #fffceb;
+}
+
 .popup.light div>main>button:hover {
     background: #b2b0a4;
 }

@@ -176,7 +176,7 @@ const DashboardPage = () => {
                     createWorkspace: false,
                     joinWorkspace: false,
                 });
-            }} title='Ajouter/Rejoindre un espace de travail' content={
+            }} title='Ajouter/Rejoindre un espace de travail' theme={theme} content={
                 <div>
                     <header></header>
                     {!(guiVisibility.workspaceModal.createWorkspace || guiVisibility.workspaceModal.joinWorkspace) &&
@@ -206,7 +206,7 @@ const DashboardPage = () => {
                     <footer></footer>
                 </div>
             } />
-            <Popup ref={popupRefs.profile} display={popupVisibility.profile} content={
+            <Popup ref={popupRefs.profile} theme={theme} display={popupVisibility.profile} content={
                 <div>
                     <header></header>
                     <main>
@@ -217,7 +217,7 @@ const DashboardPage = () => {
                     <footer></footer>
                 </div>
             } top={mousePosition && mousePosition.y - 60} left={mousePosition && mousePosition.x} />
-            <Popup ref={popupRefs.pinned} display={popupVisibility.pinned} content={
+            <Popup ref={popupRefs.pinned} theme={theme} display={popupVisibility.pinned} content={
                 <div>
                     <header></header>
                     <main>
@@ -226,7 +226,7 @@ const DashboardPage = () => {
                     <footer></footer>
                 </div>
             } top={mousePosition && mousePosition.y} left={mousePosition && mousePosition.x} />
-            <Popup ref={popupRefs.notifications} display={popupVisibility.notifications} content={
+            <Popup ref={popupRefs.notifications} theme={theme} display={popupVisibility.notifications} content={
                 <div>
                     <header></header>
                     <main>
@@ -235,7 +235,7 @@ const DashboardPage = () => {
                     <footer></footer>
                 </div>
             } top={mousePosition && mousePosition.y} left={mousePosition && mousePosition.x} />
-            <Popup ref={popupRefs.emojis} display={popupVisibility.emojis} content={
+            <Popup ref={popupRefs.emojis} theme={theme} display={popupVisibility.emojis} content={
                 <div>
                     <header></header>
                     <main>
@@ -244,7 +244,7 @@ const DashboardPage = () => {
                     <footer></footer>
                 </div>
             } top={mousePosition && mousePosition.y - 60} left={mousePosition && mousePosition.x} />
-            <Popup ref={popupRefs.workspace} display={popupVisibility.workspace} content={
+            <Popup ref={popupRefs.workspace} theme={theme} display={popupVisibility.workspace} content={
                 <div>
                     <header></header>
                     <main>

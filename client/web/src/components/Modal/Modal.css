@@ -125,12 +125,10 @@
 
 .modal-container.light .modal-box>div {
     background: #e5e2d3;
-    color: #333;
 }
 
 .modal-container.dark .modal-box>div {
     background: #3d3d3d;
-    color: #fffceb;
 }
 
 .modal-box>div>header {
@@ -140,7 +138,6 @@
 .modal-box>div>main {
     display: flex;
     flex-direction: column;
-    gap: 0.4rem;
 }
 
 .modal-box>div>main>button {
@@ -155,6 +152,14 @@
     font-size: 1.1rem;
     font-weight: bold;
     padding: 1rem;
+}
+
+.modal-container.light .modal-box>div>main>button {
+    color: #333;
+}
+
+.modal-container.dark .modal-box>div>main>button {
+    color: #fffceb;
 }
 
 .modal-container.light .modal-box>div>main>button:hover {
