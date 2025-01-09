@@ -54,7 +54,7 @@ const RegisterPage = () => {
         if (localStorage.getItem('gui.theme')) {
             setTheme(localStorage.getItem('gui.theme'));
         }
-    }, []);
+    }, [navigate]);
 
     const handleSubmit = async (event) => {
         event.preventDefault();

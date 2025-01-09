@@ -53,7 +53,7 @@ const ResetPasswordPage = () => {
         if (localStorage.getItem('gui.theme')) {
             setTheme(localStorage.getItem('gui.theme'));
         }
-    }, []);
+    }, [navigate]);
 
     const handleResetPassword = async (event) => {
         event.preventDefault();

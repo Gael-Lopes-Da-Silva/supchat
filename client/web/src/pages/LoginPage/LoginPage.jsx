@@ -62,7 +62,7 @@ const LoginPage = () => {
         if (localStorage.getItem('gui.theme')) {
             setTheme(localStorage.getItem('gui.theme'));
         }
-    }, [isLogout, isExpired, isConfirmed, isPasswordReseted]);
+    }, [isLogout, isExpired, isConfirmed, isPasswordReseted, navigate]);
 
     const handleSubmit = async (event) => {
         event.preventDefault();
