@@ -140,14 +140,14 @@
     border-radius: 1rem;
 }
 
-.dashboard-left-workspaces-buttons>button:hover>svg {
-    color: #fffceb;
-}
-
 .dashboard-left-workspaces-buttons>button>svg {
     color: #23A55A;
     width: 1.2rem;
     height: 1.2rem;
+}
+
+.dashboard-left-workspaces-buttons>button:hover>svg {
+    color: #fffceb;
 }
 
 .dashboard-left-content {
@@ -350,8 +350,8 @@
 }
 
 .dashboard-left-content footer>.dashboard-left-footer-buttons>button>svg {
-    width: 1rem;
-    height: 1rem;
+    width: 1.2rem;
+    height: 1.2rem;
 }
 
 .dashboard-container.light .dashboard-left-content footer>.dashboard-left-footer-buttons>button>svg {
@@ -462,8 +462,8 @@
 }
 
 .dashboard-right-content header>.dashboard-right-header-buttons>button>svg {
-    width: 1rem;
-    height: 1rem;
+    width: 1.2rem;
+    height: 1.2rem;
 }
 
 .dashboard-container.light .dashboard-right-content header>.dashboard-right-header-buttons>button>svg {
@@ -545,8 +545,8 @@
 }
 
 .dashboard-right-content footer>.dashboard-right-footer-buttons>button>svg {
-    width: 1rem;
-    height: 1rem;
+    width: 1.2rem;
+    height: 1.2rem;
 }
 
 .dashboard-container.light .dashboard-right-content footer>.dashboard-right-footer-buttons>button>svg {

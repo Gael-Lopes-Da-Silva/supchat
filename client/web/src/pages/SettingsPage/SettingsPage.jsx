@@ -9,16 +9,22 @@ import "./SettingsPage.css"
 const SettingsPage = () => {
     const [user, setUser] = react.useState('');
 
+    const [theme, setTheme] = react.useState('light');
+    
     const navigate = reactdom.useNavigate();
     
     react.useEffect(() => {
         authentificationHook();
 
         setUser(JSON.parse(localStorage.getItem('user')).data);
+        
+        if (localStorage.getItem('gui.theme')) {
+            setTheme(localStorage.getItem('gui.theme'));
+        }
     }, []);
 
     return (
-        <div className="settings-container">
+        <div className={`settings-container ${theme}`}>
             <div className="settings-left">
             </div>
             <div className="settings-right">

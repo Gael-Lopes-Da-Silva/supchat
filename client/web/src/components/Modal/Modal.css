@@ -15,12 +15,19 @@
     cursor: auto;
     display: flex;
     flex-direction: column;
-    background: #4d4d4d;
     border-radius: 1rem;
     border: solid 3px #333;
     box-shadow: #333 5px 5px 0px;
     padding: 1rem;
     gap: 1rem;
+}
+
+.modal-container.light .modal-box {
+    background: #fffceb;
+}
+
+.modal-container.dark .modal-box {
+    background: #4d4d4d;
 }
 
 .modal-box>header {
@@ -30,11 +37,20 @@
     gap: 2rem;
     justify-content: space-between;
     height: 4rem;
-    background: #3d3d3d;
     border-radius: 1rem;
     border: solid 3px #333;
     box-shadow: #333 5px 5px 0px;
     box-sizing: border-box;
+}
+
+.modal-container.light .modal-box>header {
+    background: #e5e2d3;
+    color: #333;
+}
+
+.modal-container.dark .modal-box>header {
+    background: #3d3d3d;
+    color: #fffceb;
 }
 
 .modal-box>header>p {
@@ -42,7 +58,6 @@
     padding: 0.6rem;
     font-size: 1.2rem;
     font-weight: bold;
-    color: #fffceb;
 }
 
 .modal-header-buttons {
@@ -67,18 +82,33 @@
     aspect-ratio: 1 / 1;
 }
 
-.modal-header-buttons>button:hover {
+.modal-container.light .modal-header-buttons>button:hover {
+    background: #ccc9bc;
+}
+
+.modal-container.dark .modal-header-buttons>button:hover {
     background: #4d4d4d;
 }
 
-.modal-header-buttons>button:active {
+.modal-container.light .modal-header-buttons>button:active {
+    background: #b2b0a4;
+}
+
+.modal-container.dark .modal-header-buttons>button:active {
     background: #5E5E5E;
 }
 
 .modal-header-buttons>button>svg {
-    color: #fffceb;
     width: 1.2rem;
     height: 1.2rem;
+}
+
+.modal-container.light .modal-header-buttons>button>svg {
+    color: #333;
+}
+
+.modal-container.dark .modal-header-buttons>button>svg {
+    color: #fffceb;
 }
 
 .modal-box>div {
@@ -87,11 +117,20 @@
     padding: 0.4rem;
     justify-content: space-between;
     min-height: 4rem;
-    background: #3d3d3d;
     border-radius: 1rem;
     border: solid 3px #333;
     box-shadow: #333 5px 5px 0px;
     box-sizing: border-box;
+}
+
+.modal-container.light .modal-box>div {
+    background: #e5e2d3;
+    color: #333;
+}
+
+.modal-container.dark .modal-box>div {
+    background: #3d3d3d;
+    color: #fffceb;
 }
 
 .modal-box>div>header {
@@ -113,23 +152,38 @@
     border: none;
     text-align: left;
     border-radius: 0.6rem;
-    color: #fffceb;
     font-size: 1.1rem;
     font-weight: bold;
     padding: 1rem;
 }
 
-.modal-box>div>main>button:hover {
+.modal-container.light .modal-box>div>main>button:hover {
+    background: #ccc9bc;
+}
+
+.modal-container.dark .modal-box>div>main>button:hover {
     background: #4d4d4d;
 }
 
-.modal-box>div>main>button:active {
+.modal-container.light .modal-box>div>main>button:active {
+    background: #b2b0a4;
+}
+
+.modal-container.dark .modal-box>div>main>button:active {
     background: #5E5E5E;
 }
 
 .modal-box>div>main>button>svg {
     width: 1.2rem;
     height: 1.2rem;
+}
+
+.modal-container.light .modal-box>div>main>button>svg {
+    color: #333;
+}
+
+.modal-container.dark .modal-box>div>main>button>svg {
+    color: #fffceb;
 }
 
 .modal-box>div>footer {

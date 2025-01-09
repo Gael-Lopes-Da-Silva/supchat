@@ -12,12 +12,19 @@
     padding: 1rem;
     width: 15rem;
     height: 100%;
-    background: #4d4d4d;
     border-radius: 1rem;
     border: solid 3px #333;
     box-shadow: #333 5px 5px 0px;
     box-sizing: border-box;
     gap: 1rem;
+}
+
+.settings-container.light .settings-left {
+    background: #fffceb;
+}
+
+.settings-container.dark .settings-left {
+    background: #4d4d4d;
 }
 
 .settings-right {
@@ -26,7 +33,6 @@
     flex: 1;
     height: 100%;
     padding: 1rem;
-    background: #4d4d4d;
     border-radius: 1rem;
     border: solid 3px #333;
     box-shadow: #333 5px 5px 0px;
@@ -34,16 +40,31 @@
     gap: 1rem;
 }
 
+.settings-container.light .settings-right {
+    background: #fffceb;
+}
+
+.settings-container.dark .settings-right {
+    background: #4d4d4d;
+}
+
 .settings-right header {
     display: flex;
     align-items: center;
     justify-content: end;
     height: 4rem;
-    background: #3D3D3D;
     border-radius: 1rem;
     border: solid 3px #333;
     box-shadow: #333 5px 5px 0px;
     box-sizing: border-box;
+}
+
+.settings-container.light .settings-right header {
+    background: #e5e2d3;
+}
+
+.settings-container.dark .settings-right header {
+    background: #3D3D3D;
 }
 
 .settings-right header>.settings-right-header-buttons {
@@ -67,18 +88,33 @@
     aspect-ratio: 1 / 1;
 }
 
-.settings-right header>.settings-right-header-buttons>button:hover {
+.settings-container.light .settings-right header>.settings-right-header-buttons>button:hover {
+    background: #ccc9bc;
+}
+
+.settings-container.dark .settings-right header>.settings-right-header-buttons>button:hover {
     background: #4d4d4d;
 }
 
-.settings-right header>.settings-right-header-buttons>button:active {
+.settings-container.light .settings-right header>.settings-right-header-buttons>button:active {
+    background: #b2b0a4;
+}
+
+.settings-container.dark .settings-right header>.settings-right-header-buttons>button:active {
     background: #5E5E5E;
 }
 
 .settings-right header>.settings-right-header-buttons>button>svg {
-    color: #fffceb;
     width: 1.2rem;
     height: 1.2rem;
+}
+
+.settings-container.light .settings-right header>.settings-right-header-buttons>button>svg {
+    color: #333;
+}
+
+.settings-container.dark .settings-right header>.settings-right-header-buttons>button>svg {
+    color: #fffceb;
 }
 
 .settings-right main {
