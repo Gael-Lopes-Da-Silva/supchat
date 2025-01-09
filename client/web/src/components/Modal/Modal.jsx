@@ -2,16 +2,21 @@ import * as Fa from 'react-icons/fa6';
 
 import './Modal.css';
 
-const Modal = ({ content, display, onClose, ref, title = "" }) => {
+const Modal = ({ content, display, goBack, ref, title = "", onClose, onGoBack }) => {
     return (
-        <div className='modal' ref={ref} style={{display: !display ? "none" : ""}}>
-            <header>
-                <p>{title}</p>
-                <div className='modal-header-buttons'>
-                    <button onClick={onClose}><Fa.FaXmark /></button>
-                </div>
-            </header>
-            {content}
+        <div className='modal-container' style={{ display: !display ? "none" : "" }}>
+            <div className='modal-box' ref={ref}>
+                <header>
+                    <div className='modal-header-buttons' style={{ display: !goBack ? "none" : "" }}>
+                        <button onClick={onGoBack} title='Retourner en arrière'><Fa.FaChevronLeft /></button>
+                    </div>
+                    <p>{title}</p>
+                    <div className='modal-header-buttons'>
+                        <button onClick={onClose} title='Fermer'><Fa.FaXmark /></button>
+                    </div>
+                </header>
+                {content}
+            </div>
         </div>
     );
 };

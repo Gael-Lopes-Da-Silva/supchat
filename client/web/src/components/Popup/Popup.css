@@ -4,6 +4,7 @@
     border: solid 3px #333;
     box-shadow: #333 5px 5px 0px;
     position: absolute;
+    z-index: 10;
 }
 
 .popup div>main {

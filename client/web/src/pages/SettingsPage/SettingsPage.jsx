@@ -1,4 +1,5 @@
 import * as react from 'react';
+import * as reactdom from 'react-router-dom';
 import * as Fa from 'react-icons/fa6';
 
 import { authentificationHook } from '../../hooks/Authentification';
@@ -8,6 +9,8 @@ import "./SettingsPage.css"
 const SettingsPage = () => {
     const [user, setUser] = react.useState('');
 
+    const navigate = reactdom.useNavigate();
+    
     react.useEffect(() => {
         authentificationHook();
 
@@ -21,7 +24,9 @@ const SettingsPage = () => {
             <div className="settings-right">
                 <header>
                     <div className='settings-right-header-buttons'>
-                        <a title='Fermer les paramètres' href="/dashboard"><Fa.FaXmark /></a>
+                        <button onClick={() => {
+                            navigate("/dashboard");
+                        }} title='Fermer les paramètres'><Fa.FaXmark /></button>
                     </div>
                 </header>
                 <main></main>

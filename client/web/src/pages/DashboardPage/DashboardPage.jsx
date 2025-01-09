@@ -1,4 +1,4 @@
-import react from 'react';
+import * as react from 'react';
 import * as reactdom from 'react-router-dom';
 import * as Fa from 'react-icons/fa6';
 
@@ -25,6 +25,11 @@ const DashboardPage = () => {
     const [guiVisibility, setGuiVisibility] = react.useState({
         userList: false,
         leftPanel: true,
+        discoverWorkspaces: false,
+        workspaceModal: {
+            createWorkspace: false,
+            joinWorkspace: false,
+        },
     });
     const [popupVisibility, setPopupVisibility] = react.useState({
         profile: false,
@@ -36,6 +41,7 @@ const DashboardPage = () => {
     const [modalVisibility, setModalVisibility] = react.useState({
         workspace: false,
     });
+
     const dashboardContainerRef = react.useRef(null);
     const modalRefs = {
         workspace: react.useRef(null),
@@ -49,7 +55,6 @@ const DashboardPage = () => {
     };
 
     const [mousePosition, setMousePosition] = react.useState({ x: 0, y: 0 });
-
 
     const navigate = reactdom.useNavigate();
 
@@ -87,10 +92,10 @@ const DashboardPage = () => {
         const showUserList = localStorage.getItem("gui.dashboard.show_user_list");
         if (showUserList !== null) updateGuiState("userList", showUserList === "true");
 
-        document.addEventListener('click', handleClickOutside);
+        document.addEventListener('click', handleOutsideClicks);
 
         return () => {
-            document.removeEventListener('click', handleClickOutside);
+            document.removeEventListener('click', handleOutsideClicks);
         };
     }, [navigate]);
 
@@ -118,7 +123,7 @@ const DashboardPage = () => {
         updateModalState("workspace", false);
     }
 
-    const handleClickOutside = (event) => {
+    const handleOutsideClicks = (event) => {
         const isOutsideDashboard = dashboardContainerRef.current && !dashboardContainerRef.current.contains(event.target);
 
         const isOutsideModal = Object.values(modalRefs).every(
@@ -159,12 +164,40 @@ const DashboardPage = () => {
 
     return (
         <div ref={dashboardContainerRef} className="dashboard-container">
-            <Modal ref={modalRefs.workspace} display={modalVisibility.workspace} onClose={() => {
+            <Modal ref={modalRefs.workspace} display={modalVisibility.workspace} goBack={guiVisibility.workspaceModal.createWorkspace || guiVisibility.workspaceModal.joinWorkspace} onClose={() => {
                 updateModalState("workspace", false);
+            }} onGoBack={() => {
+                updateGuiState("workspaceModal", {
+                    createWorkspace: false,
+                    joinWorkspace: false,
+                });
             }} title='Ajouter/Rejoindre un espace de travail' content={
                 <div>
                     <header></header>
-                    <main></main>
+                    {!(guiVisibility.workspaceModal.createWorkspace || guiVisibility.workspaceModal.joinWorkspace) &&
+                        <main>
+                            <button onClick={() => {
+                                updateGuiState("workspaceModal", {
+                                    createWorkspace: true,
+                                    joinWorkspace: false,
+                                });
+                            }}>Créer un espace de travail<Fa.FaChevronRight /></button>
+                            <button onClick={() => {
+                                updateGuiState("workspaceModal", {
+                                    createWorkspace: false,
+                                    joinWorkspace: true,
+                                });
+                            }}>Rejoindre un espace de travail<Fa.FaChevronRight /></button>
+                        </main>
+                    }
+                    {guiVisibility.workspaceModal.createWorkspace &&
+                        <main>
+                        </main>
+                    }
+                    {guiVisibility.workspaceModal.joinWorkspace &&
+                        <main>
+                        </main>
+                    }
                     <footer></footer>
                 </div>
             } />
@@ -234,9 +267,15 @@ const DashboardPage = () => {
                     <div className='dashboard-left-workspaces-buttons'>
                         <button onClick={(event) => {
                             event.stopPropagation();
+                            updateGuiState("workspaceModal", {
+                                createWorkspace: false,
+                                joinWorkspace: false,
+                            });
                             updateModalState("workspace", true);
                         }} title='Ajouter/Rejoindre un espace de travail'><Fa.FaPlus /></button>
-                        <button title='Découvrir de nouveaux espaces de travail'><Fa.FaQuestion /></button>
+                        <button onClick={() => {
+                            updateGuiState("discoverWorkspaces", true);
+                        }} title='Découvrir de nouveaux espaces de travail'><Fa.FaQuestion /></button>
                     </div>
                 </div>
                 <div className='dashboard-left-content'>
@@ -271,12 +310,14 @@ const DashboardPage = () => {
                             <p>{user && user.username}</p>
                         </div>
                         <div className='dashboard-left-footer-buttons'>
-                            <a title='Paramètres utilisateur' href="/settings"><Fa.FaGear /></a>
+                            <button onClick={() => {
+                                navigate("/settings");
+                            }} title='Paramètres utilisateur'><Fa.FaGear /></button>
                         </div>
                     </footer>
                 </div>
             </div>
-            {selectedWorkspace.id &&
+            {selectedWorkspace.id && !guiVisibility.discoverWorkspaces &&
                 <div className="dashboard-right">
                     <div className='dashboard-right-content'>
                         <header>
@@ -333,9 +374,30 @@ const DashboardPage = () => {
                     </div>
                 </div>
             }
-            {!selectedWorkspace.id &&
+            {!selectedWorkspace.id && !guiVisibility.discoverWorkspaces &&
                 <div className="dashboard-right">
                     <p>Aucun espace de travail sélectionné</p>
+                </div>
+            }
+            {guiVisibility.discoverWorkspaces &&
+                <div className="dashboard-right">
+                    <div className='dashboard-right-content'>
+                        <header>
+                            <div className='dashboard-right-header-buttons'>
+                                <button onClick={() => {
+                                    updateGuiState("leftPanel", !guiVisibility.leftPanel);
+                                }} title='Afficher/Masquer le panneau de gauche'><Fa.FaBars /></button>
+                            </div>
+                            <p>Découvrir de nouveaux espaces de travail</p>
+                            <div className='dashboard-right-header-buttons'>
+                                <button onClick={() => {
+                                    updateGuiState("discoverWorkspaces", false);
+                                }} title='Fermer'><Fa.FaXmark /></button>
+                            </div>
+                        </header>
+                        <main>
+                        </main>
+                    </div>
                 </div>
             }
         </div>

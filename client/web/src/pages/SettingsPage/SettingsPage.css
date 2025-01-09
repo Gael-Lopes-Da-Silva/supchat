@@ -53,11 +53,13 @@
     box-sizing: border-box;
 }
 
-.settings-right header>.settings-right-header-buttons>a {
+.settings-right header>.settings-right-header-buttons>button {
     display: flex;
     align-items: center;
     justify-content: center;
     text-decoration: none;
+    background: none;
+    border: none;
     height: 100%;
     width: 100%;
     border-radius: 0.6rem;
@@ -65,16 +67,18 @@
     aspect-ratio: 1 / 1;
 }
 
-.settings-right header>.settings-right-header-buttons>a:hover {
+.settings-right header>.settings-right-header-buttons>button:hover {
     background: #4d4d4d;
 }
 
-.settings-right header>.settings-right-header-buttons>a:active {
+.settings-right header>.settings-right-header-buttons>button:active {
     background: #5E5E5E;
 }
 
-.settings-right header>.settings-right-header-buttons>a>svg {
+.settings-right header>.settings-right-header-buttons>button>svg {
     color: #fffceb;
+    width: 1.2rem;
+    height: 1.2rem;
 }
 
 .settings-right main {
