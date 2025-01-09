@@ -9,8 +9,9 @@
 
 .settings-left {
     display: flex;
+    flex-direction: column;
     padding: 1rem;
-    width: 15rem;
+    width: 20rem;
     height: 100%;
     border-radius: 1rem;
     border: solid 3px #333;
@@ -25,6 +26,100 @@
 
 .settings-container.dark .settings-left {
     background: #4d4d4d;
+}
+
+.settings-left-categorie {
+    display: flex;
+    flex-direction: column;
+    padding: 0.6rem;
+    border-radius: 1rem;
+    border: solid 3px #333;
+    box-shadow: #333 5px 5px 0px;
+    box-sizing: border-box;
+}
+
+.settings-container.light .settings-left-categorie {
+    background: #e5e2d3;
+    color: #333;
+}
+
+.settings-container.dark .settings-left-categorie {
+    background: #3D3D3D;
+    color: #fffceb;
+}
+
+.settings-left-categorie>p {
+    margin: 0;
+    text-align: center;
+    font-size: 1.1rem;
+    font-weight: bold;
+}
+
+.settings-left-categorie>hr {
+    width: 80%;
+}
+
+.settings-left-categorie-buttons {
+    display: flex;
+    flex-direction: column;
+}
+
+.settings-left-categorie-buttons>button {
+    position: relative;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    background: none;
+    text-align: left;
+    border-radius: 0.6rem;
+    padding: 0.4rem 1rem;
+    border: none;
+    font-size: 1rem;
+    font-weight: bold;
+}
+
+.settings-container.light .settings-left-categorie-buttons>button {
+    color: #333;
+}
+
+.settings-container.dark .settings-left-categorie-buttons>button {
+    color: #fffceb;
+}
+
+.settings-container.light .settings-left-categorie-buttons>button:hover {
+    background: #ccc9bc;
+}
+
+.settings-container.dark .settings-left-categorie-buttons>button:hover {
+    background: #4d4d4d;
+}
+
+.settings-container.light .settings-left-categorie-buttons>button:active {
+    background: #b2b0a4;
+}
+
+.settings-container.dark .settings-left-categorie-buttons>button:active {
+    background: #5E5E5E;
+}
+
+.settings-left-categorie-buttons>button>span {
+    position: absolute;
+    left: -5px;
+    border-radius: 1rem;
+    width: 0.6rem;
+    height: 1.2rem;
+}
+
+.settings-container.light .settings-left-categorie-buttons>button>span {
+    background: #3D3D3D;
+}
+
+.settings-container.dark .settings-left-categorie-buttons>button>span {
+    background: #fffceb;
+}
+
+.settings-left-categorie-buttons>button:hover>span {
+    height: 1.8rem;
 }
 
 .settings-right {
@@ -51,26 +146,34 @@
 .settings-right header {
     display: flex;
     align-items: center;
-    justify-content: end;
+    justify-content: space-between;
     height: 4rem;
     border-radius: 1rem;
     border: solid 3px #333;
     box-shadow: #333 5px 5px 0px;
     box-sizing: border-box;
+    padding: 0.4rem;
 }
 
 .settings-container.light .settings-right header {
     background: #e5e2d3;
+    color: #333;
 }
 
 .settings-container.dark .settings-right header {
     background: #3D3D3D;
+    color: #fffceb;
+}
+
+.settings-right header>p {
+    margin-left: 1rem;
+    font-size: 1.2rem;
+    font-weight: bold;
 }
 
 .settings-right header>.settings-right-header-buttons {
     display: flex;
     height: 100%;
-    padding: 0.4rem;
     box-sizing: border-box;
 }
 
@@ -119,4 +222,63 @@
 
 .settings-right main {
     flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border-radius: 1rem;
+    border: solid 3px #333;
+    box-shadow: #333 5px 5px 0px;
+    box-sizing: border-box;
+}
+
+.settings-container.light .settings-right main {
+    background: #e5e2d3;
+    color: #333;
+}
+
+.settings-container.dark .settings-right main {
+    background: #3D3D3D;
+    color: #fffceb;
+}
+
+.settings-right-main-theme {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+}
+
+.settings-right-main-theme>button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    padding: 0;
+    width: 5rem;
+    height: 5rem;
+    border: solid 0.2rem black;
+    border-radius: 100%;
+}
+
+.settings-right-main-theme>button.light {
+    background: #fffceb;
+}
+
+.settings-right-main-theme>button.light:hover {
+    background: #e5e2d3;
+}
+
+.settings-right-main-theme>button.dark {
+    background: #333;
+}
+
+.settings-right-main-theme>button.dark:hover {
+    background: #3D3D3D;
+}
+
+.settings-right-main-theme>button>svg {
+    color: #23A55A;
+    width: 1.6rem;
+    height: 1.6rem;
 }

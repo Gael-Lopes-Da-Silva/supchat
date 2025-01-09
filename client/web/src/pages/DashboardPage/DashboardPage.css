@@ -90,11 +90,11 @@
 }
 
 .dashboard-container.light .dashboard-left-workspaces-icons>button>span {
-    background: #ccc9bc;
+    background: #3D3D3D;
 }
 
 .dashboard-container.dark .dashboard-left-workspaces-icons>button>span {
-    background: #4d4d4d;
+    background: #fffceb;
 }
 
 .dashboard-left-workspaces-icons>button:hover>span {
