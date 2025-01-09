@@ -27,10 +27,8 @@
 }
 
 .register-box {
-    color: black;
     border: solid 3px #333;
     box-shadow: #333 5px 5px 0px;
-    background-color: #fffceb;
     padding: 2rem;
     border-radius: 1rem;
     max-width: 400px;
@@ -38,18 +36,39 @@
     animation: fadeIn 0.8s ease-in-out;
 }
 
+.register-container.light .register-box {
+    background-color: #fffceb;
+    color: #333;
+}
+
+.register-container.dark .register-box {
+    background-color: #4d4d4d;
+    color: #fffceb;
+}
+
 .register-box h1 {
     text-align: center;
-    color: #333;
     margin: 0;
     margin-bottom: 1rem;
     text-decoration: underline;
+}
+
+.register-container.light .register-box h1 {
+    color: #333;
+}
+
+.register-container.dark .register-box h1 {
+    color: #fffceb;
 }
 
 .register-box a {
     font-weight: bold;
     text-decoration: none;
     font-size: 0.8rem;
+}
+
+.register-container.dark .register-box a {
+    color: #f77066;
 }
 
 .register-box a:hover {
@@ -100,10 +119,7 @@
 .register-checkbox label {
     --switch_width: 2em;
     --switch_height: 1em;
-    --thumb_color: #fffceb;
-    --track_color: #fffceb;
     --track_active_color: #f77066;
-    --outline_color: #333;
     margin: 0;
     font-size: 17px;
     position: relative;
@@ -111,6 +127,18 @@
     width: var(--switch_width);
     height: var(--switch_height);
     min-width: var(--switch_width);
+}
+
+.register-container.light .register-checkbox label {
+    --thumb_color: #e5e2d3;
+    --track_color: #e5e2d3;
+    --outline_color: #333;
+}
+
+.register-container.dark .register-checkbox label {
+    --thumb_color: #4d4d4d;
+    --track_color: #4d4d4d;
+    --outline_color: #333;
 }
 
 .register-checkbox span {

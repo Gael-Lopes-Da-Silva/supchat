@@ -4,14 +4,22 @@
     align-items: center;
     cursor: pointer;
     padding: 0.8rem;
-    background-color: #fffceb;
-    color: black;
     border: solid 3px #333;
-    font-weight: bold;
     box-shadow: #333 5px 5px 0px;
     border-radius: 1rem;
     font-size: 1rem;
+    font-weight: bold;
     transition: all 0.3s ease;
+}
+
+.button.light {
+    background-color: #e5e2d3;
+    color: #333;
+}
+
+.button.dark {
+    background-color: #3D3D3D;
+    color: #fffceb;
 }
 
 .button:disabled {

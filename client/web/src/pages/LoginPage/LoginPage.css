@@ -27,10 +27,8 @@
 }
 
 .login-box {
-    color: black;
     border: solid 3px #333;
     box-shadow: #333 5px 5px 0px;
-    background-color: #fffceb;
     padding: 2rem;
     border-radius: 1rem;
     max-width: 400px;
@@ -38,18 +36,39 @@
     animation: fadeIn 0.8s ease-in-out;
 }
 
+.login-container.light .login-box {
+    background-color: #fffceb;
+    color: #333;
+}
+
+.login-container.dark .login-box {
+    background-color: #4d4d4d;
+    color: #fffceb;
+}
+
 .login-box h1 {
     text-align: center;
-    color: #333;
     margin: 0;
     margin-bottom: 1rem;
     text-decoration: underline;
+}
+
+.login-container.light .login-box h1 {
+    color: #333;
+}
+
+.login-container.dark .login-box h1 {
+    color: #fffceb;
 }
 
 .login-box a {
     font-weight: bold;
     text-decoration: none;
     font-size: 0.8rem;
+}
+
+.login-container.dark .login-box a {
+    color: #f77066;
 }
 
 .login-box a:hover {

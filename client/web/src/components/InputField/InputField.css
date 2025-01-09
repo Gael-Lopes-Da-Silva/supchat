@@ -21,7 +21,6 @@
 .input-field input {
     width: 100%;
     padding: 0.8rem;
-    background-color: #fffceb;
     border: solid 3px #333;
     box-shadow: #333 5px 5px 0px;
     border-radius: 1rem;
@@ -29,6 +28,16 @@
     font-weight: bold;
     box-sizing: border-box;
     transition: all 0.3s ease;
+}
+
+.input-field.light input {
+    background-color: #e5e2d3;
+    color: #333;
+}
+
+.input-field.dark input {
+    background-color: #3D3D3D;
+    color: #fffceb;
 }
 
 .input-field input:focus {

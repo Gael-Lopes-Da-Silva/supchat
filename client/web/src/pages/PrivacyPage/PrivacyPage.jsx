@@ -1,8 +1,18 @@
+import * as react from 'react';
+
 import './PrivacyPage.css';
 
 const PrivacyPage = () => {
+    const [theme, setTheme] = react.useState('light');
+    
+    react.useEffect(() => {
+        if (localStorage.getItem('gui.theme')) {
+            setTheme(localStorage.getItem('gui.theme'));
+        }
+    });
+    
     return (
-        <div className="privacy-container">
+        <div className={`privacy-container ${theme}`}>
             <div className="privacy-box">
                 <h1>Politique de confidentialité de Supchat</h1>
                 <hr />

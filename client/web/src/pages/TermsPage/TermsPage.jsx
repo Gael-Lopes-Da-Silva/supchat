@@ -1,8 +1,18 @@
+import * as react from 'react';
+
 import './TermsPage.css';
 
 const TermsPage = () => {
+    const [theme, setTheme] = react.useState('light');
+    
+    react.useEffect(() => {
+        if (localStorage.getItem('gui.theme')) {
+            setTheme(localStorage.getItem('gui.theme'));
+        }
+    });
+    
     return (
-        <div className="terms-container">
+        <div className={`terms-container ${theme}`}>
             <div className="terms-box">
                 <h1>Conditions d'utilisation de Supchat</h1>
                 <hr />

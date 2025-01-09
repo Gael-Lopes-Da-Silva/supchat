@@ -20,6 +20,8 @@ const RegisterPage = () => {
     const [email, setEmail] = react.useState('');
     const [password, setPassword] = react.useState('');
     const [checked, setChecked] = react.useState('');
+    
+    const [theme, setTheme] = react.useState('light');
 
     const navigate = reactdom.useNavigate();
 
@@ -47,6 +49,10 @@ const RegisterPage = () => {
 
         if (localStorage.getItem('user')) {
             navigate("/dashboard");
+        }
+        
+        if (localStorage.getItem('gui.theme')) {
+            setTheme(localStorage.getItem('gui.theme'));
         }
     }, []);
 
@@ -91,7 +97,7 @@ const RegisterPage = () => {
     };
 
     return (
-        <div className="register-container">
+        <div className={`register-container ${theme}`}>
             <a className='register-logo' href='/' style={reactdevices.isMobile ? { display: 'none' } : {}}>
                 <img src={logo} alt="Supchat logo" />
                 <p>Supchat</p>
@@ -102,6 +108,7 @@ const RegisterPage = () => {
                     <InputField
                         label="Pseudo"
                         error="*"
+                        theme={theme}
                         type="text"
                         value={username}
                         required={true}
@@ -110,6 +117,7 @@ const RegisterPage = () => {
                     <InputField
                         label="Email"
                         error="*"
+                        theme={theme}
                         type="email"
                         value={email}
                         required={true}
@@ -118,6 +126,7 @@ const RegisterPage = () => {
                     <InputField
                         label="Mot de passe"
                         error="*"
+                        theme={theme}
                         type="password"
                         value={password}
                         required={true}
@@ -130,7 +139,7 @@ const RegisterPage = () => {
                         </label>
                         <p>J'ai lu et j'accept les <a href="/terms">conditions d'utilisation</a> et la <a href="/privacy">politique de confidentialité</a> de Supchat.</p>
                     </div>
-                    <Button type="submit" text="S'enregistrer" disabled={!checked ? true : false} />
+                    <Button type="submit" text="S'enregistrer" theme={theme} disabled={!checked ? true : false} />
                     <p>Déjà un compte ? <a href="/login">Se connecter maintenant !</a></p>
                 </form>
             </div>

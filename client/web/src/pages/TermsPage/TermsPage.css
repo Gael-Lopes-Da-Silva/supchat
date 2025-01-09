@@ -1,14 +1,26 @@
 .terms-container {
     flex: 1;
     margin: 2rem;
-    color: black;
     border: solid 3px #333;
     box-shadow: #333 5px 5px 0px;
-    background-color: #fffceb;
     padding: 2rem;
     border-radius: 12px;
     animation: fadeIn 0.8s ease-in-out;
     overflow-y: scroll;
+}
+
+.terms-container.light {
+    color: #333;
+    background-color: #fffceb;
+}
+
+.terms-container.dark {
+    color: #fffceb;
+    background-color: #4d4d4d;
+}
+
+.terms-container.dark a {
+    color: #f77066;
 }
 
 .terms-box p {

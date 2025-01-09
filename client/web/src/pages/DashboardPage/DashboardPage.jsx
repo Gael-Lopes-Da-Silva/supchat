@@ -22,6 +22,8 @@ const DashboardPage = () => {
     const [channels, setChannels] = react.useState({});
     const [selectedChannel, setSelectedChannel] = react.useState({});
 
+    const [theme, setTheme] = react.useState('light');
+
     const [guiVisibility, setGuiVisibility] = react.useState({
         userList: false,
         leftPanel: true,
@@ -62,41 +64,44 @@ const DashboardPage = () => {
         authentificationHook(navigate);
 
         const user = JSON.parse(localStorage.getItem('user'))?.data;
+
+        if (!user || !user.id) {
+            navigate("/login", { state: { expired: true } })
+        }
+
         setUser(user);
 
-        if (user && user.id) {
-            readWorkspaceMember({
-                user_id: user.id,
-            }).then((data) => {
-                const workspacePromises = data.result.map(async (workspaceMember) => {
-                    return readWorkspace({ id: workspaceMember.workspace_id })
-                        .then((data) => ({ id: data.result.id, data: data.result }))
-                        .catch((error) => {
-                            if (process.env.REACT_APP_ENV === "dev") console.error(error);
-                            return null;
-                        });
-                });
-
-                Promise.all(workspacePromises).then((results) => {
-                    const newWorkspaces = {};
-                    results.forEach((workspace) => {
-                        if (workspace) {
-                            newWorkspaces[workspace.id] = workspace.data;
-                        }
+        readWorkspaceMember({
+            user_id: user.id,
+        }).then((data) => {
+            const workspacePromises = data.result.map(async (workspaceMember) => {
+                return readWorkspace({ id: workspaceMember.workspace_id })
+                    .then((data) => ({ id: data.result.id, data: data.result }))
+                    .catch((error) => {
+                        if (process.env.REACT_APP_ENV === "dev") console.error(error);
+                        return null;
                     });
-                    setWorkspaces(newWorkspaces);
+            });
+
+            Promise.all(workspacePromises).then((results) => {
+                const newWorkspaces = {};
+                results.forEach((workspace) => {
+                    if (workspace) {
+                        newWorkspaces[workspace.id] = workspace.data;
+                    }
                 });
-            }).catch((error) => { if (process.env.REACT_APP_ENV === "dev") console.error(error); });
-        }
+                setWorkspaces(newWorkspaces);
+            });
+        }).catch((error) => { if (process.env.REACT_APP_ENV === "dev") console.error(error); });
 
         const showUserList = localStorage.getItem("gui.dashboard.show_user_list");
         if (showUserList !== null) updateGuiState("userList", showUserList === "true");
 
-        document.addEventListener('click', handleOutsideClicks);
+        if (localStorage.getItem('gui.theme')) {
+            setTheme(localStorage.getItem('gui.theme'));
+        }
 
-        return () => {
-            document.removeEventListener('click', handleOutsideClicks);
-        };
+        document.addEventListener('click', handleOutsideClicks);
     }, [navigate]);
 
     const updateGuiState = (key, value) => {
@@ -110,7 +115,7 @@ const DashboardPage = () => {
     const updateModalState = (key, value) => {
         setModalVisibility((prev) => ({ ...prev, [key]: value }));
     };
-    
+
     const hideAllPopup = () => {
         updatePopupState("profile", false);
         updatePopupState("pinned", false);
@@ -118,7 +123,7 @@ const DashboardPage = () => {
         updatePopupState("emojis", false);
         updatePopupState("workspace", false);
     }
-    
+
     const hideAllModal = () => {
         updateModalState("workspace", false);
     }
@@ -163,7 +168,7 @@ const DashboardPage = () => {
     }
 
     return (
-        <div ref={dashboardContainerRef} className="dashboard-container">
+        <div ref={dashboardContainerRef} className={`dashboard-container ${theme}`}>
             <Modal ref={modalRefs.workspace} display={modalVisibility.workspace} goBack={guiVisibility.workspaceModal.createWorkspace || guiVisibility.workspaceModal.joinWorkspace} onClose={() => {
                 updateModalState("workspace", false);
             }} onGoBack={() => {
@@ -254,6 +259,7 @@ const DashboardPage = () => {
                         {workspaces &&
                             Object.values(workspaces).map((workspace) => (
                                 <button key={workspace.id} title={workspace.name} onClick={(event) => {
+                                    updateGuiState("discoverWorkspaces", false);
                                     $(".dashboard-left-workspaces-icons button span").hide();
                                     $(event.currentTarget).find("span").show();
                                     setSelectedWorkspace(workspace);

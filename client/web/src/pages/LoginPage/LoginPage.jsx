@@ -18,6 +18,8 @@ const LoginPage = () => {
     const [email, setEmail] = react.useState('');
     const [password, setPassword] = react.useState('');
     
+    const [theme, setTheme] = react.useState('light');
+    
     const navigate = reactdom.useNavigate();
     const location = reactdom.useLocation();
     
@@ -55,6 +57,10 @@ const LoginPage = () => {
 
         if (localStorage.getItem('user')) {
             navigate("/dashboard")
+        }
+        
+        if (localStorage.getItem('gui.theme')) {
+            setTheme(localStorage.getItem('gui.theme'));
         }
     }, [isLogout, isExpired, isConfirmed, isPasswordReseted]);
 
@@ -111,7 +117,7 @@ const LoginPage = () => {
     }
 
     return (
-        <div className="login-container">
+        <div className={`login-container ${theme}`}>
             <a className='login-logo' href='/' style={reactdevices.isMobile ? { display: 'none' } : {}}>
                 <img src={logo} alt="Supchat logo" />
                 <p>Supchat</p>
@@ -122,6 +128,7 @@ const LoginPage = () => {
                     <InputField
                         label="E-mail"
                         type="email"
+                        theme={theme}
                         value={email}
                         required={true}
                         onChange={(e) => setEmail(e.target.value)}
@@ -129,17 +136,18 @@ const LoginPage = () => {
                     <InputField
                         label="Mot de passe"
                         type="password"
+                        theme={theme}
                         value={password}
                         required={true}
                         onChange={(e) => setPassword(e.target.value)}
                     />
                     <a className='login-reset-password' href="/reset_password">Mot de passe oublié ?</a>
-                    <Button type="submit" text="Se connecter" />
+                    <Button type="submit" text="Se connecter" theme={theme} />
                     <p>Pas de compte ? <a href="/register">En créer un maintenant !</a></p>
                 </form>
                 <div className='login-socials'>
-                    <Button icon={<Fa.FaGoogle />} onClick={handleGoogle} type="button" text="Google" />
-                    <Button icon={<Fa.FaFacebook />} onClick={handleFacebook} type="button" text="Facebook" />
+                    <Button icon={<Fa.FaGoogle />} onClick={handleGoogle} type="button" text="Google" theme={theme} />
+                    <Button icon={<Fa.FaFacebook />} onClick={handleFacebook} type="button" text="Facebook" theme={theme} />
                 </div>
             </div>
         </div>

@@ -11,6 +11,20 @@
     overflow-y: scroll;
 }
 
+.privacy-container.light {
+    color: #333;
+    background-color: #fffceb;
+}
+
+.privacy-container.dark {
+    color: #fffceb;
+    background-color: #4d4d4d;
+}
+
+.privacy-container.dark a {
+    color: #f77066;
+}
+
 .privacy-box p {
     font-weight: bold;
 }

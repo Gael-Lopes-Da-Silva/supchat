@@ -20,6 +20,8 @@ const ResetPasswordPage = () => {
 
     const [checkPassword, setCheckPassword] = react.useState('');
     const [checkMail, setCheckMail] = react.useState(false);
+    
+    const [theme, setTheme] = react.useState('light');
 
     const [user, setUser] = react.useState('');
 
@@ -46,6 +48,10 @@ const ResetPasswordPage = () => {
 
         if (localStorage.getItem('user')) {
             navigate("/dashboard");
+        }
+        
+        if (localStorage.getItem('gui.theme')) {
+            setTheme(localStorage.getItem('gui.theme'));
         }
     }, []);
 
@@ -97,7 +103,7 @@ const ResetPasswordPage = () => {
     }
 
     return (
-        <div className="reset-password-container">
+        <div className={`reset-password-container ${theme}`}>
             <a className='reset-password-logo' href='/' style={reactdevices.isMobile ? { display: 'none' } : {}}>
                 <img src={logo} alt="Supchat logo" />
                 <p>Supchat</p>
@@ -110,11 +116,12 @@ const ResetPasswordPage = () => {
                             label="Email"
                             error="*"
                             type="email"
+                            theme={theme}
                             value={email}
                             required={true}
                             onChange={(event) => setEmail(event.target.value)}
                         />
-                        <Button type="submit" text="Enregistrer" />
+                        <Button type="submit" text="Enregistrer" theme={theme} />
                         <p>Pas de compte ? <a href="/register">En créer un maintenant !</a></p>
                     </form>
                 </div>
@@ -127,6 +134,7 @@ const ResetPasswordPage = () => {
                             label="Mot de passe"
                             error="*"
                             type="password"
+                            theme={theme}
                             value={password}
                             required={true}
                             onChange={(event) => setPassword(event.target.value)}
@@ -135,11 +143,12 @@ const ResetPasswordPage = () => {
                             label="Confirmez le mot de passe"
                             error="*"
                             type="password"
+                            theme={theme}
                             value={checkPassword}
                             required={true}
                             onChange={(event) => setCheckPassword(event.target.value)}
                         />
-                        <Button type="submit" text="Enregistrer" />
+                        <Button type="submit" text="Enregistrer" theme={theme} />
                     </form>
                 </div>
             }

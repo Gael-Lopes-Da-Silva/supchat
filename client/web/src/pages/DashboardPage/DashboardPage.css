@@ -12,12 +12,19 @@
     padding: 1rem;
     width: 25rem;
     height: 100%;
-    background: #4d4d4d;
     border-radius: 1rem;
     border: solid 3px #333;
     box-shadow: #333 5px 5px 0px;
     box-sizing: border-box;
     gap: 1rem;
+}
+
+.dashboard-container.light .dashboard-left {
+    background: #fffceb;
+}
+
+.dashboard-container.dark .dashboard-left {
+    background: #4d4d4d;
 }
 
 .dashboard-left-workspaces {
@@ -26,11 +33,20 @@
     justify-content: space-between;
     width: 5rem;
     height: 100%;
-    background: #3D3D3D;
     border-radius: 1rem;
     border: solid 3px #333;
     box-shadow: #333 5px 5px 0px;
     box-sizing: border-box;
+}
+
+.dashboard-container.light .dashboard-left-workspaces {
+    background: #e5e2d3;
+    color: #333;
+}
+
+.dashboard-container.dark .dashboard-left-workspaces {
+    background: #3D3D3D;
+    color: #fffceb;
 }
 
 .dashboard-left-workspaces-icons {
@@ -68,10 +84,17 @@
 .dashboard-left-workspaces-icons>button>span {
     position: absolute;
     left: -5px;
-    background: #fffceb;
     border-radius: 1rem;
     width: 0.6rem;
     height: 1.4rem;
+}
+
+.dashboard-container.light .dashboard-left-workspaces-icons>button>span {
+    background: #ccc9bc;
+}
+
+.dashboard-container.dark .dashboard-left-workspaces-icons>button>span {
+    background: #4d4d4d;
 }
 
 .dashboard-left-workspaces-icons>button:hover>span {
@@ -91,7 +114,6 @@
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    background: #4d4d4d;
     padding: 0;
     border: none;
     border-radius: 100%;
@@ -100,7 +122,20 @@
     aspect-ratio: 1 / 1;
 }
 
-.dashboard-left-workspaces-buttons>button:hover {
+.dashboard-container.light .dashboard-left-workspaces-buttons>button {
+    background: #ccc9bc;
+}
+
+.dashboard-container.dark .dashboard-left-workspaces-buttons>button {
+    background: #4d4d4d;
+}
+
+.dashboard-container.light .dashboard-left-workspaces-buttons>button:hover {
+    background: #23A55A;
+    border-radius: 1rem;
+}
+
+.dashboard-container.dark .dashboard-left-workspaces-buttons>button:hover {
     background: #23A55A;
     border-radius: 1rem;
 }
@@ -129,11 +164,20 @@
     justify-content: center;
     padding: 0.4rem;
     height: 4rem;
-    background: #3D3D3D;
     border-radius: 1rem;
     border: solid 3px #333;
     box-shadow: #333 5px 5px 0px;
     box-sizing: border-box;
+}
+
+.dashboard-container.light .dashboard-left-content header {
+    background: #e5e2d3;
+    color: #333;
+}
+
+.dashboard-container.dark .dashboard-left-content header {
+    background: #3D3D3D;
+    color: #fffceb;
 }
 
 .dashboard-left-content header>div {
@@ -148,32 +192,57 @@
 }
 
 .dashboard-left-content header>div:hover {
+}
+
+.dashboard-container.light .dashboard-left-content header>div:hover {
+    background: #ccc9bc;
+}
+
+.dashboard-container.dark .dashboard-left-content header>div:hover {
     background: #4d4d4d;
 }
 
-.dashboard-left-content header>div:active {
+.dashboard-container.light .dashboard-left-content header>div:active {
+    background: #b2b0a4;
+}
+
+.dashboard-container.dark .dashboard-left-content header>div:active {
     background: #5E5E5E;
 }
 
 .dashboard-left-content header>div>p {
     margin: 0;
-    color: #fffceb;
     font-size: 1.2rem;
     font-weight: bold;
 }
 
 .dashboard-left-content header>div>svg {
+    width: 1.2rem;
+    height: 1.2rem;
+}
+
+.dashboard-container.light .dashboard-left-content header>div>svg {
+    color: #333;
+}
+
+.dashboard-container.dark .dashboard-left-content header>div>svg {
     color: #fffceb;
-    font-size: 1.2rem;
 }
 
 .dashboard-left-content main {
     flex: 1;
-    background: #3D3D3D;
     border-radius: 1rem;
     border: solid 3px #333;
     box-shadow: #333 5px 5px 0px;
     box-sizing: border-box;
+}
+
+.dashboard-container.light .dashboard-left-content main {
+    background: #e5e2d3;
+}
+
+.dashboard-container.dark .dashboard-left-content main {
+    background: #3D3D3D;
 }
 
 .dashboard-left-content footer {
@@ -181,12 +250,21 @@
     align-items: center;
     justify-content: space-between;
     height: 4rem;
-    background: #3D3D3D;
     border-radius: 1rem;
     border: solid 3px #333;
     box-shadow: #333 5px 5px 0px;
     box-sizing: border-box;
     padding: 0.4rem;
+}
+
+.dashboard-container.light .dashboard-left-content footer {   
+    background: #e5e2d3;
+    color: #333;
+}
+
+.dashboard-container.dark .dashboard-left-content footer {
+    background: #3D3D3D;
+    color: #fffceb;
 }
 
 .dashboard-left-content footer>.dashboard-left-footer-profile {
@@ -200,11 +278,19 @@
     box-sizing: border-box;
 }
 
-.dashboard-left-content footer>.dashboard-left-footer-profile:hover {
+.dashboard-container.light .dashboard-left-content footer>.dashboard-left-footer-profile:hover {
+    background: #ccc9bc;
+}
+
+.dashboard-container.dark .dashboard-left-content footer>.dashboard-left-footer-profile:hover {
     background: #4d4d4d;
 }
 
-.dashboard-left-content footer>.dashboard-left-footer-profile:active {
+.dashboard-container.light .dashboard-left-content footer>.dashboard-left-footer-profile:active {
+    background: #b2b0a4;
+}
+
+.dashboard-container.dark .dashboard-left-content footer>.dashboard-left-footer-profile:active {
     background: #5E5E5E;
 }
 
@@ -224,7 +310,6 @@
 .dashboard-left-content footer>.dashboard-left-footer-profile>p {
     margin: 0;
     font-weight: bold;
-    color: #fffceb;
     margin-right: 1rem;
 }
 
@@ -248,18 +333,33 @@
     aspect-ratio: 1 / 1;
 }
 
-.dashboard-left-content footer>.dashboard-left-footer-buttons>button:hover {
+.dashboard-container.light .dashboard-left-content footer>.dashboard-left-footer-buttons>button:hover {
+    background: #ccc9bc;
+}
+
+.dashboard-container.dark .dashboard-left-content footer>.dashboard-left-footer-buttons>button:hover {
     background: #4d4d4d;
 }
 
-.dashboard-left-content footer>.dashboard-left-footer-buttons>button:active {
+.dashboard-container.light .dashboard-left-content footer>.dashboard-left-footer-buttons>button:active {
+    background: #b2b0a4;
+}
+
+.dashboard-container.dark .dashboard-left-content footer>.dashboard-left-footer-buttons>button:active {
     background: #5E5E5E;
 }
 
 .dashboard-left-content footer>.dashboard-left-footer-buttons>button>svg {
-    color: #fffceb;
     width: 1rem;
     height: 1rem;
+}
+
+.dashboard-container.light .dashboard-left-content footer>.dashboard-left-footer-buttons>button>svg {
+    color: #333;
+}
+
+.dashboard-container.dark .dashboard-left-content footer>.dashboard-left-footer-buttons>button>svg {
+    color: #fffceb;
 }
 
 .dashboard-right {
@@ -269,12 +369,19 @@
     flex: 1;
     height: 100%;
     padding: 1rem;
-    background: #4d4d4d;
     border-radius: 1rem;
     border: solid 3px #333;
     box-shadow: #333 5px 5px 0px;
     box-sizing: border-box;
     gap: 1rem;
+}
+
+.dashboard-container.light .dashboard-right {
+    background: #fffceb;
+}
+
+.dashboard-container.dark .dashboard-right {
+    background: #4d4d4d;
 }
 
 .dashboard-right>p {
@@ -296,16 +403,24 @@
     align-items: center;
     justify-content: space-between;
     height: 4rem;
-    background: #3D3D3D;
     border-radius: 1rem;
     border: solid 3px #333;
     box-shadow: #333 5px 5px 0px;
     box-sizing: border-box;
 }
 
+.dashboard-container.light .dashboard-right-content header {
+    background: #e5e2d3;
+    color: #333;
+}
+
+.dashboard-container.dark .dashboard-right-content header {
+    background: #3D3D3D;
+    color: #fffceb;
+}
+
 .dashboard-right-content header>p {
     margin: 0;
-    color: #fffceb;
     font-size: 1.2rem;
     font-weight: bold;
 }
@@ -330,38 +445,67 @@
     aspect-ratio: 1 / 1;
 }
 
-.dashboard-right-content header>.dashboard-right-header-buttons>button:hover {
+.dashboard-container.light .dashboard-right-content header>.dashboard-right-header-buttons>button:hover {
+    background: #ccc9bc;
+}
+
+.dashboard-container.dark .dashboard-right-content header>.dashboard-right-header-buttons>button:hover {
     background: #4d4d4d;
 }
 
-.dashboard-right-content header>.dashboard-right-header-buttons>button:active {
+.dashboard-container.light .dashboard-right-content header>.dashboard-right-header-buttons>button:active {
+    background: #b2b0a4;
+}
+
+.dashboard-container.dark .dashboard-right-content header>.dashboard-right-header-buttons>button:active {
     background: #5E5E5E;
 }
 
 .dashboard-right-content header>.dashboard-right-header-buttons>button>svg {
-    color: #fffceb;
     width: 1rem;
     height: 1rem;
 }
 
+.dashboard-container.light .dashboard-right-content header>.dashboard-right-header-buttons>button>svg {
+    color: #333;
+}
+
+.dashboard-container.dark .dashboard-right-content header>.dashboard-right-header-buttons>button>svg {
+    color: #fffceb;
+}
+
 .dashboard-right-content main {
     flex: 1;
-    background: #3D3D3D;
     border-radius: 1rem;
     border: solid 3px #333;
     box-shadow: #333 5px 5px 0px;
     box-sizing: border-box;
+}
+
+.dashboard-container.light .dashboard-right-content main {
+    background: #e5e2d3;
+}
+
+.dashboard-container.dark .dashboard-right-content main {
+    background: #3D3D3D;
 }
 
 .dashboard-right-content footer {
     display: flex;
     align-items: center;
     height: 4rem;
-    background: #3D3D3D;
     border-radius: 1rem;
     border: solid 3px #333;
     box-shadow: #333 5px 5px 0px;
     box-sizing: border-box;
+}
+
+.dashboard-container.light .dashboard-right-content footer {
+    background: #e5e2d3;
+}
+
+.dashboard-container.dark .dashboard-right-content footer {
+    background: #3D3D3D;
 }
 
 .dashboard-right-content footer>.dashboard-right-footer-buttons {
@@ -384,18 +528,33 @@
     aspect-ratio: 1 / 1;
 }
 
-.dashboard-right-content footer>.dashboard-right-footer-buttons>button:hover {
+.dashboard-container.light .dashboard-right-content footer>.dashboard-right-footer-buttons>button:hover {
+    background: #ccc9bc;
+}
+
+.dashboard-container.dark .dashboard-right-content footer>.dashboard-right-footer-buttons>button:hover {
     background: #4d4d4d;
 }
 
-.dashboard-right-content footer>.dashboard-right-footer-buttons>button:active {
+.dashboard-container.light .dashboard-right-content footer>.dashboard-right-footer-buttons>button:active {
+    background: #b2b0a4;
+}
+
+.dashboard-container.dark .dashboard-right-content footer>.dashboard-right-footer-buttons>button:active {
     background: #5E5E5E;
 }
 
 .dashboard-right-content footer>.dashboard-right-footer-buttons>button>svg {
-    color: #fffceb;
     width: 1rem;
     height: 1rem;
+}
+
+.dashboard-container.light .dashboard-right-content footer>.dashboard-right-footer-buttons>button>svg {
+    color: #333;
+}
+
+.dashboard-container.dark .dashboard-right-content footer>.dashboard-right-footer-buttons>button>svg {
+    color: #fffceb;
 }
 
 .dashboard-right-content footer>input {
@@ -403,8 +562,15 @@
     box-sizing: border-box;
     background: none;
     border: none;
-    color: #fffceb;
     font-size: 1rem;
+}
+
+.dashboard-container.light .dashboard-right-content footer>input {
+    color: #333;
+}
+
+.dashboard-container.dark .dashboard-right-content footer>input {
+    color: #fffceb;
 }
 
 .dashboard-right-content footer>input:focus {
@@ -414,9 +580,16 @@
 .dashboard-right-peoples {
     width: 15rem;
     height: 100%;
-    background: #3D3D3D;
     border-radius: 1rem;
     border: solid 3px #333;
     box-shadow: #333 5px 5px 0px;
     box-sizing: border-box;
+}
+
+.dashboard-container.light .dashboard-right-peoples {
+    background: #e5e2d3;
+}
+
+.dashboard-container.dark .dashboard-right-peoples {
+    background: #3D3D3D;
 }
