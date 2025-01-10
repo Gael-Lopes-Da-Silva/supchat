@@ -6,8 +6,13 @@ import $ from 'jquery';
 
 import { authentificationHook } from '../../hooks/Authentification';
 
-import { readWorkspaceMember } from '../../services/WorkspaceMembers';
-import { readWorkspace } from '../../services/Workspaces';
+import {
+    readWorkspaceMember,
+} from '../../services/WorkspaceMembers';
+import {
+    createWorkspace,
+    readWorkspace,
+} from '../../services/Workspaces';
 
 import InputField from '../../components/InputField/InputField';
 import Checkbox from '../../components/Checkbox/Checkbox';
@@ -86,10 +91,7 @@ const DashboardPage = () => {
             const workspacePromises = data.result.map(async (workspaceMember) => {
                 return readWorkspace({ id: workspaceMember.workspace_id })
                     .then((data) => ({ id: data.result.id, data: data.result }))
-                    .catch((error) => {
-                        if (process.env.REACT_APP_ENV === "dev") console.error(error);
-                        return null;
-                    });
+                    .catch((error) => { if (process.env.REACT_APP_ENV === "dev") console.error(error); });
             });
 
             Promise.all(workspacePromises).then((results) => {
@@ -154,12 +156,35 @@ const DashboardPage = () => {
         }
     };
 
-    const handleCreateWorkspace = () => {
+    const handleCreateWorkspace = (event) => {
+        event.preventDefault();
 
+        createWorkspace({
+            name: workspaceName,
+            description: workspaceDescription,
+            is_private: workspaceIsPrivate,
+            user_id: user.id,
+        }).then((data) => {
+            readWorkspace({
+                id: data.result.insertId,
+            }).then((data) => {
+                setWorkspaces((prev) => ({
+                    ...prev,
+                    [data.result.id]: data.result,
+                }));
+                setSelectedWorkspace(data.result);
+            }).catch((error) => { if (process.env.REACT_APP_ENV === "dev") console.error(error); });
+        }).catch((error) => { if (process.env.REACT_APP_ENV === "dev") console.error(error); });
+
+        hideAllModal();
     }
 
-    const handleJoinWorkspace = () => {
+    const handleJoinWorkspace = (event) => {
+        event.preventDefault();
 
+
+
+        hideAllModal();
     }
 
     const getBackground = (text) => {
@@ -243,15 +268,19 @@ const DashboardPage = () => {
                     }
                     {guiVisibility.workspaceModal.joinWorkspace &&
                         <form onSubmit={handleJoinWorkspace}>
-                            <InputField
-                                label="Lien d'invitation ou token"
-                                type="text"
-                                theme={theme}
-                                value={workspaceInvitation}
-                                required={true}
-                                onChange={(e) => setWorkspaceInvitation(e.target.value)}
-                            />
-                            <Button type="submit" text="Rejoindre" theme={theme} />
+                            <div>
+                                <InputField
+                                    label="Lien d'invitation ou token"
+                                    type="text"
+                                    theme={theme}
+                                    value={workspaceInvitation}
+                                    required={true}
+                                    onChange={(e) => setWorkspaceInvitation(e.target.value)}
+                                />
+                            </div>
+                            <div>
+                                <Button type="submit" text="Rejoindre" theme={theme} />
+                            </div>
                         </form>
                     }
                 </div>
@@ -308,14 +337,12 @@ const DashboardPage = () => {
                     <div className='dashboard-left-workspaces-icons'>
                         {workspaces &&
                             Object.values(workspaces).map((workspace) => (
-                                <button key={workspace.id} title={workspace.name} onClick={(event) => {
+                                <button key={workspace.id} title={workspace.name} onClick={() => {
                                     updateGuiState("discoverWorkspaces", false);
-                                    $(".dashboard-left-workspaces-icons button span").hide();
-                                    $(event.currentTarget).find("span").show();
                                     setSelectedWorkspace(workspace);
                                 }} style={{ background: getBackground(workspace.name), color: getForeground(workspace.name) }}>
                                     <p>{workspace.name[0].toUpperCase()}</p>
-                                    <span style={{ display: "none" }}></span>
+                                    <span style={{ display: selectedWorkspace.id !== workspace.id ? "none" : "" }}></span>
                                 </button>
                             ))
                         }

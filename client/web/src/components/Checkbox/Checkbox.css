@@ -13,6 +13,14 @@
     margin: 0;
 }
 
+.checkbox.light>p {
+    color: #333;
+}
+
+.checkbox.dark>p {
+    color: #fffceb;
+}
+
 .checkbox>label {
     --switch_width: 2em;
     --switch_height: 1em;
