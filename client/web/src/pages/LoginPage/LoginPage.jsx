@@ -10,6 +10,7 @@ import {
 
 import InputField from '../../components/InputField/InputField';
 import Button from '../../components/Button/Button';
+import Link from '../../components/Link/Link';
 import logo from "../../assets/logo.png";
 
 import './LoginPage.css';
@@ -17,12 +18,12 @@ import './LoginPage.css';
 const LoginPage = () => {
     const [email, setEmail] = react.useState('');
     const [password, setPassword] = react.useState('');
-    
+
     const [theme, setTheme] = react.useState('light');
-    
+
     const navigate = reactdom.useNavigate();
     const location = reactdom.useLocation();
-    
+
     const isLogout = location.state?.logout || false;
     const isExpired = location.state?.expired || false;
     const isConfirmed = location.state?.confirmed || false;
@@ -35,20 +36,20 @@ const LoginPage = () => {
                 position: "top-center",
             });
         }
-        
+
         if (isExpired) {
             localStorage.removeItem('user');
             reacttoastify.toast.info("Votre connexion à éxpiré. Veuillez vous réauthentifier.", {
                 position: "top-center",
             });
         }
-        
+
         if (isConfirmed) {
             reacttoastify.toast.info("Votre compte à été confirmé. Vous pouvez maintenant vous authentifier.", {
                 position: "top-center",
             });
         }
-        
+
         if (isPasswordReseted) {
             reacttoastify.toast.info("Votre nouveau mot de passe a été enregistré.", {
                 position: "top-center",
@@ -58,7 +59,7 @@ const LoginPage = () => {
         if (localStorage.getItem('user')) {
             navigate("/dashboard")
         }
-        
+
         if (localStorage.getItem('gui.theme')) {
             setTheme(localStorage.getItem('gui.theme'));
         }
@@ -125,25 +126,31 @@ const LoginPage = () => {
             <div className="login-box">
                 <h1>Connexion</h1>
                 <form onSubmit={handleSubmit}>
-                    <InputField
-                        label="E-mail"
-                        type="email"
-                        theme={theme}
-                        value={email}
-                        required={true}
-                        onChange={(e) => setEmail(e.target.value)}
-                    />
-                    <InputField
-                        label="Mot de passe"
-                        type="password"
-                        theme={theme}
-                        value={password}
-                        required={true}
-                        onChange={(e) => setPassword(e.target.value)}
-                    />
-                    <a className='login-reset-password' href="/reset_password">Mot de passe oublié ?</a>
-                    <Button type="submit" text="Se connecter" theme={theme} />
-                    <p>Pas de compte ? <a href="/register">En créer un maintenant !</a></p>
+                    <div>
+                        <InputField
+                            label="E-mail"
+                            type="email"
+                            theme={theme}
+                            value={email}
+                            required={true}
+                            onChange={(e) => setEmail(e.target.value)}
+                        />
+                    </div>
+                    <div>
+                        <InputField
+                            label="Mot de passe"
+                            type="password"
+                            theme={theme}
+                            value={password}
+                            required={true}
+                            onChange={(e) => setPassword(e.target.value)}
+                        />
+                        <p><Link text="Mot de passe oublié ?" onClick={() => { navigate("/reset_password") }} /></p>
+                    </div>
+                    <div>
+                        <Button type="submit" text="Se connecter" theme={theme} />
+                        <p>Pas de compte ? <Link text="En créer un maintenant !" onClick={() => { navigate("/register") }} /></p>
+                    </div>
                 </form>
                 <div className='login-socials'>
                     <Button icon={<Fa.FaGoogle />} onClick={handleGoogle} type="button" text="Google" theme={theme} />

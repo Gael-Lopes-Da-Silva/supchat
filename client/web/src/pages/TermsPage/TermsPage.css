@@ -19,8 +19,14 @@
     background-color: #4d4d4d;
 }
 
-.terms-container.dark a {
+.terms-box a {
+    font-weight: bold;
     color: #f77066;
+    text-decoration: none;
+}
+
+.terms-box a:hover {
+    text-decoration: underline;
 }
 
 .terms-box p {

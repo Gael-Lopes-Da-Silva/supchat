@@ -10,6 +10,7 @@ import {
 
 import InputField from '../../components/InputField/InputField';
 import Button from '../../components/Button/Button';
+import Link from '../../components/Link/Link';
 import logo from "../../assets/logo.png";
 
 import './ResetPasswordPage.css';
@@ -112,17 +113,21 @@ const ResetPasswordPage = () => {
                 <div className="reset-password-box">
                     <h1>Vérification de l'adresse mail</h1>
                     <form onSubmit={handleCheckEmail}>
-                        <InputField
-                            label="Email"
-                            error="*"
-                            type="email"
-                            theme={theme}
-                            value={email}
-                            required={true}
-                            onChange={(event) => setEmail(event.target.value)}
-                        />
-                        <Button type="submit" text="Enregistrer" theme={theme} />
-                        <p>Pas de compte ? <a href="/register">En créer un maintenant !</a></p>
+                        <div>
+                            <InputField
+                                label="Email"
+                                error="*"
+                                type="email"
+                                theme={theme}
+                                value={email}
+                                required={true}
+                                onChange={(event) => setEmail(event.target.value)}
+                            />
+                        </div>
+                        <div>
+                            <Button type="submit" text="Enregistrer" theme={theme} />
+                            <p>Pas de compte ? <Link text="En créer un maintenant !" onClick={() => {navigate("/register")}} /></p>
+                        </div>
                     </form>
                 </div>
             }
@@ -130,25 +135,31 @@ const ResetPasswordPage = () => {
                 <div className="reset-password-box">
                     <h1>Réinitialisation de mot de passe</h1>
                     <form onSubmit={handleResetPassword}>
-                        <InputField
-                            label="Mot de passe"
-                            error="*"
-                            type="password"
-                            theme={theme}
-                            value={password}
-                            required={true}
-                            onChange={(event) => setPassword(event.target.value)}
-                        />
-                        <InputField
-                            label="Confirmez le mot de passe"
-                            error="*"
-                            type="password"
-                            theme={theme}
-                            value={checkPassword}
-                            required={true}
-                            onChange={(event) => setCheckPassword(event.target.value)}
-                        />
-                        <Button type="submit" text="Enregistrer" theme={theme} />
+                        <div>
+                            <InputField
+                                label="Mot de passe"
+                                error="*"
+                                type="password"
+                                theme={theme}
+                                value={password}
+                                required={true}
+                                onChange={(event) => setPassword(event.target.value)}
+                            />
+                        </div>
+                        <div>
+                            <InputField
+                                label="Confirmez le mot de passe"
+                                error="*"
+                                type="password"
+                                theme={theme}
+                                value={checkPassword}
+                                required={true}
+                                onChange={(event) => setCheckPassword(event.target.value)}
+                            />
+                        </div>
+                        <div>
+                            <Button type="submit" text="Enregistrer" theme={theme} />
+                        </div>
                     </form>
                 </div>
             }

@@ -9,6 +9,9 @@ import { authentificationHook } from '../../hooks/Authentification';
 import { readWorkspaceMember } from '../../services/WorkspaceMembers';
 import { readWorkspace } from '../../services/Workspaces';
 
+import InputField from '../../components/InputField/InputField';
+import Checkbox from '../../components/Checkbox/Checkbox';
+import Button from '../../components/Button/Button';
 import Popup from "../../components/Popup/Popup";
 import Modal from "../../components/Modal/Modal";
 
@@ -21,6 +24,12 @@ const DashboardPage = () => {
     const [selectedWorkspace, setSelectedWorkspace] = react.useState({});
     const [channels, setChannels] = react.useState({});
     const [selectedChannel, setSelectedChannel] = react.useState({});
+
+    const [workspaceName, setWorkspaceName] = react.useState('');
+    const [workspaceDescription, setWorkspaceDescription] = react.useState('');
+    const [workspaceIsPrivate, setWorkspaceIsPrivate] = react.useState(false);
+
+    const [workspaceInvitation, setWorkspaceInvitation] = react.useState('');
 
     const [theme, setTheme] = react.useState('light');
 
@@ -145,6 +154,14 @@ const DashboardPage = () => {
         }
     };
 
+    const handleCreateWorkspace = () => {
+
+    }
+
+    const handleJoinWorkspace = () => {
+
+    }
+
     const getBackground = (text) => {
         let hash = 0;
         for (let i = 0; i < text.length; i++) {
@@ -178,7 +195,6 @@ const DashboardPage = () => {
                 });
             }} title='Ajouter/Rejoindre un espace de travail' theme={theme} content={
                 <div>
-                    <header></header>
                     {!(guiVisibility.workspaceModal.createWorkspace || guiVisibility.workspaceModal.joinWorkspace) &&
                         <main>
                             <button onClick={() => {
@@ -196,14 +212,48 @@ const DashboardPage = () => {
                         </main>
                     }
                     {guiVisibility.workspaceModal.createWorkspace &&
-                        <main>
-                        </main>
+                        <form onSubmit={handleCreateWorkspace}>
+                            <div>
+                                <InputField
+                                    label="Nom"
+                                    type="text"
+                                    theme={theme}
+                                    value={workspaceName}
+                                    required={true}
+                                    onChange={(e) => setWorkspaceName(e.target.value)}
+                                />
+                            </div>
+                            <div>
+                                <InputField
+                                    label="Description"
+                                    type="text"
+                                    theme={theme}
+                                    value={workspaceDescription}
+                                    required={true}
+                                    onChange={(e) => setWorkspaceDescription(e.target.value)}
+                                />
+                                <Checkbox label={
+                                    <p>Espace de travail privé</p>
+                                } theme={theme} onChange={() => { setWorkspaceIsPrivate(!workspaceIsPrivate) }} />
+                            </div>
+                            <div>
+                                <Button type="submit" text="Créer" theme={theme} />
+                            </div>
+                        </form>
                     }
                     {guiVisibility.workspaceModal.joinWorkspace &&
-                        <main>
-                        </main>
+                        <form onSubmit={handleJoinWorkspace}>
+                            <InputField
+                                label="Lien d'invitation ou token"
+                                type="text"
+                                theme={theme}
+                                value={workspaceInvitation}
+                                required={true}
+                                onChange={(e) => setWorkspaceInvitation(e.target.value)}
+                            />
+                            <Button type="submit" text="Rejoindre" theme={theme} />
+                        </form>
                     }
-                    <footer></footer>
                 </div>
             } />
             <Popup ref={popupRefs.profile} theme={theme} display={popupVisibility.profile} content={

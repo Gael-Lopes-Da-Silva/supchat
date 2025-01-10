@@ -111,7 +111,7 @@
     color: #fffceb;
 }
 
-.modal-box>div {
+.modal-box>div>main {
     display: flex;
     flex-direction: column;
     padding: 0.4rem;
@@ -123,21 +123,12 @@
     box-sizing: border-box;
 }
 
-.modal-container.light .modal-box>div {
+.modal-container.light .modal-box>div>main {
     background: #e5e2d3;
 }
 
-.modal-container.dark .modal-box>div {
+.modal-container.dark .modal-box>div>main {
     background: #3d3d3d;
-}
-
-.modal-box>div>header {
-    
-}
-
-.modal-box>div>main {
-    display: flex;
-    flex-direction: column;
 }
 
 .modal-box>div>main>button {
@@ -191,6 +182,21 @@
     color: #fffceb;
 }
 
-.modal-box>div>footer {
-    
+.modal-box>div>form {
+    display: flex;
+    flex-direction: column;
+    padding: 0.4rem;
+    gap: 2rem;
+}
+
+.modal-box>div>form p {
+    font-weight: bold;
+    margin: 0;
+    font-size: 0.8rem;
+}
+
+.modal-box>div>form>div {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
 }

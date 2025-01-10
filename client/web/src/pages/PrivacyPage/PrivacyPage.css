@@ -21,8 +21,14 @@
     background-color: #4d4d4d;
 }
 
-.privacy-container.dark a {
+.privacy-box a {
+    font-weight: bold;
     color: #f77066;
+    text-decoration: none;
+}
+
+.privacy-box a:hover {
+    text-decoration: underline;
 }
 
 .privacy-box p {

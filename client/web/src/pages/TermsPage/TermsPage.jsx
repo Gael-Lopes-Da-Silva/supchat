@@ -1,16 +1,21 @@
 import * as react from 'react';
+import * as reactdom from 'react-router-dom';
+
+import Link from '../../components/Link/Link';
 
 import './TermsPage.css';
 
 const TermsPage = () => {
     const [theme, setTheme] = react.useState('light');
-    
+
+    const navigate = reactdom.useNavigate();
+
     react.useEffect(() => {
         if (localStorage.getItem('gui.theme')) {
             setTheme(localStorage.getItem('gui.theme'));
         }
     });
-    
+
     return (
         <div className={`terms-container ${theme}`}>
             <div className="terms-box">
@@ -24,7 +29,7 @@ const TermsPage = () => {
                 <p>Bienvenue sur Supchat ! Ces Conditions d'utilisation (&ldquo;Conditions&rdquo;) régissent votre utilisation du site web, des applications mobiles et des services associés de Supchat (&ldquo;Services&rdquo;). En utilisant nos Services, vous acceptez ces Conditions. Si vous n&rsquo;êtes pas d&rsquo;accord, veuillez ne pas utiliser Supchat.</p>
                 <p>Supchat est une plateforme conçue pour offrir une expérience de communication simplifiée et intuitive. Nos services incluent la messagerie instantanée, le partage de fichiers, la gestion de groupes de discussion, et bien plus encore. Notre objectif est de fournir un environnement sécurisé, convivial et accessible pour les utilisateurs du monde entier.</p>
                 <p>Ces Conditions d'utilisation sont essentielles pour garantir un usage équitable et conforme de nos Services. Elles expliquent vos droits et responsabilités en tant qu'utilisateur, ainsi que les nôtres en tant que fournisseur de services. Nous vous encourageons à lire attentivement ces Conditions pour comprendre les règles qui encadrent votre expérience sur Supchat.</p>
-                <p>En utilisant Supchat, vous acceptez également notre <a href="/privacy">Politique de confidentialité</a>, qui décrit comment nous collectons, utilisons et protégeons vos données personnelles.</p>
+                <p>En utilisant Supchat, vous acceptez également notre <Link text="Politique de confidentialité" onClick={() => {navigate("/privacy")}} />, qui décrit comment nous collectons, utilisons et protégeons vos données personnelles.</p>
 
                 <h2>2. Admissibilité</h2>
                 <p>Vous devez avoir au moins 13 ans pour utiliser Supchat. En utilisant nos Services, vous confirmez que vous remplissez cette condition d&rsquo;âge. Si vous avez entre 13 et 18 ans, vous devez obtenir l'autorisation d'un parent ou d'un tuteur légal pour utiliser nos Services. Supchat se réserve le droit de demander une preuve de cette autorisation à tout moment.</p>
@@ -72,7 +77,7 @@ const TermsPage = () => {
 
                 <h2>9. Contactez-nous</h2>
                 <p>Si vous avez des questions, des préoccupations ou des commentaires concernant ces Conditions ou nos Services, n'hésitez pas à nous contacter. Vous pouvez nous joindre par e-mail à <a href="mailto:support@supchat.com">support@supchat.com</a>. Nous nous efforcerons de répondre à votre demande dans les plus brefs délais. Pour des questions urgentes, nous vous recommandons d'indiquer clairement l'urgence dans l'objet de votre e-mail.</p>
-                
+
                 <hr />
                 <p>&copy; 2025 Supchat. Tous droits réservés.</p>
             </div>

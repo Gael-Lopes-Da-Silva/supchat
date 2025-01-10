@@ -11,6 +11,8 @@ import {
 
 import InputField from '../../components/InputField/InputField';
 import Button from '../../components/Button/Button';
+import Checkbox from '../../components/Checkbox/Checkbox';
+import Link from '../../components/Link/Link';
 import logo from "../../assets/logo.png";
 
 import './RegisterPage.css';
@@ -20,7 +22,7 @@ const RegisterPage = () => {
     const [email, setEmail] = react.useState('');
     const [password, setPassword] = react.useState('');
     const [checked, setChecked] = react.useState('');
-    
+
     const [theme, setTheme] = react.useState('light');
 
     const navigate = reactdom.useNavigate();
@@ -50,7 +52,7 @@ const RegisterPage = () => {
         if (localStorage.getItem('user')) {
             navigate("/dashboard");
         }
-        
+
         if (localStorage.getItem('gui.theme')) {
             setTheme(localStorage.getItem('gui.theme'));
         }
@@ -105,42 +107,46 @@ const RegisterPage = () => {
             <div className="register-box">
                 <h1>Création d'un compte</h1>
                 <form onSubmit={handleSubmit}>
-                    <InputField
-                        label="Pseudo"
-                        error="*"
-                        theme={theme}
-                        type="text"
-                        value={username}
-                        required={true}
-                        onChange={(event) => setUsername(event.target.value)}
-                    />
-                    <InputField
-                        label="Email"
-                        error="*"
-                        theme={theme}
-                        type="email"
-                        value={email}
-                        required={true}
-                        onChange={(event) => setEmail(event.target.value)}
-                    />
-                    <InputField
-                        label="Mot de passe"
-                        error="*"
-                        theme={theme}
-                        type="password"
-                        value={password}
-                        required={true}
-                        onChange={(event) => setPassword(event.target.value)}
-                    />
-                    <div className="register-checkbox">
-                        <label onChange={() => setChecked(!checked)}>
-                            <input type="checkbox" />
-                            <span></span>
-                        </label>
-                        <p>J'ai lu et j'accept les <a href="/terms">conditions d'utilisation</a> et la <a href="/privacy">politique de confidentialité</a> de Supchat.</p>
+                    <div>
+                        <InputField
+                            label="Pseudo"
+                            error="*"
+                            theme={theme}
+                            type="text"
+                            value={username}
+                            required={true}
+                            onChange={(event) => setUsername(event.target.value)}
+                        />
                     </div>
-                    <Button type="submit" text="S'enregistrer" theme={theme} disabled={!checked ? true : false} />
-                    <p>Déjà un compte ? <a href="/login">Se connecter maintenant !</a></p>
+                    <div>
+                        <InputField
+                            label="Email"
+                            error="*"
+                            theme={theme}
+                            type="email"
+                            value={email}
+                            required={true}
+                            onChange={(event) => setEmail(event.target.value)}
+                        />
+                    </div>
+                    <div>
+                        <InputField
+                            label="Mot de passe"
+                            error="*"
+                            theme={theme}
+                            type="password"
+                            value={password}
+                            required={true}
+                            onChange={(event) => setPassword(event.target.value)}
+                        />
+                        <Checkbox theme={theme} onChange={() => { setChecked(!checked) }} label={
+                            <p>J'ai lu et j'accept les <Link text="conditions d'utilisation" onClick={() => { navigate("/terms") }} /> et la <Link text="politique de confidentialité" onClick={() => { navigate("/privacy") }} /> de Supchat.</p>
+                        } />
+                    </div>
+                    <div>
+                        <Button type="submit" text="S'enregistrer" theme={theme} disabled={!checked ? true : false} />
+                        <p>Déjà un compte ? <Link text="Se connecter maintenant !" onClick={() => { navigate("/login") }} /></p>
+                    </div>
                 </form>
             </div>
         </div>

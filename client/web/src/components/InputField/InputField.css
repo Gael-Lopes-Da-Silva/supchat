@@ -12,6 +12,14 @@
     text-align: left;
 }
 
+.input-field.light label {
+    color: #333;
+}
+
+.input-field.dark label {
+    color: #fffceb;
+}
+
 .input-field span {
     color: red;
     margin-left: 0.4rem;
