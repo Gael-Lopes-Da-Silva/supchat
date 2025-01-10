@@ -30,10 +30,6 @@ pool.getConnection().then((connection) => {
         credentials: true,
     }));
 
-    app.get("/", (request, response) => {
-        response.sendFile("index.html", { root: "public" });
-    });
-
     app.use("/users/", UsersRouter);
     app.use("/status/", StatusRouter);
     app.use("/permissions/", PermissionsRouter);
