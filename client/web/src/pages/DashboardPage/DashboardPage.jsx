@@ -2,8 +2,6 @@ import * as react from 'react';
 import * as reactdom from 'react-router-dom';
 import * as Fa from 'react-icons/fa6';
 
-import $ from 'jquery';
-
 import { authentificationHook } from '../../hooks/Authentification';
 
 import {
@@ -176,14 +174,18 @@ const DashboardPage = () => {
             }).catch((error) => { if (process.env.REACT_APP_ENV === "dev") console.error(error); });
         }).catch((error) => { if (process.env.REACT_APP_ENV === "dev") console.error(error); });
 
+        setWorkspaceName("");
+        setWorkspaceDescription("");
+        setWorkspaceIsPrivate(false);
         hideAllModal();
     }
 
     const handleJoinWorkspace = (event) => {
         event.preventDefault();
 
+        
 
-
+        setWorkspaceInvitation("");
         hideAllModal();
     }
 
@@ -295,7 +297,7 @@ const DashboardPage = () => {
                     </main>
                     <footer></footer>
                 </div>
-            } top={mousePosition && mousePosition.y - 60} left={mousePosition && mousePosition.x} />
+            } bottom={105} left={185} />
             <Popup ref={popupRefs.pinned} theme={theme} display={popupVisibility.pinned} content={
                 <div>
                     <header></header>
@@ -331,7 +333,7 @@ const DashboardPage = () => {
                     </main>
                     <footer></footer>
                 </div>
-            } top={mousePosition && mousePosition.y} left={mousePosition && mousePosition.x} />
+            } top={100} left={127} />
             <div className="dashboard-left" style={{ display: !guiVisibility.leftPanel && "none" }}>
                 <div className='dashboard-left-workspaces'>
                     <div className='dashboard-left-workspaces-icons'>

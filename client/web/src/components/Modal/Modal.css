@@ -17,7 +17,7 @@
     flex-direction: column;
     border-radius: 1rem;
     border: solid 3px #333;
-    box-shadow: #333 5px 5px 0px;
+    box-shadow: #333 5px 5px 0px, rgba(0, 0, 0, 0.35) 0px 5px 15px;
     padding: 1rem;
     gap: 1rem;
 }
