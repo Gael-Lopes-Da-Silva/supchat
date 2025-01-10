@@ -22,6 +22,7 @@ services:
         working_dir: /app
         volumes:
             - ./server:/app
+            - /usr/src/app/node_modules
         ports:
             - "3000:3000"
         networks:
@@ -42,8 +43,9 @@ services:
         tty: true
         volumes:
             - ./client/web:/app
+            - /usr/src/app/node_modules
         ports:
-            - "5000:5000"
+            - "5001:5000"
         networks:
             - network
         depends_on:
