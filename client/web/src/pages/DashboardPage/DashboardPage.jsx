@@ -75,13 +75,14 @@ const DashboardPage = () => {
     react.useEffect(() => {
         authentificationHook(navigate);
 
-        const user = JSON.parse(localStorage.getItem('user'))?.data;
+        const storedUser = JSON.parse(localStorage.getItem("user"));
 
-        if (!user || !user.id) {
-            navigate("/login", { state: { expired: true } })
+        if (!storedUser || !storedUser.data) {
+            navigate("/login", { state: { expired: true } });
+            return;
         }
-
-        setUser(user);
+    
+        setUser(storedUser.data);
 
         readWorkspaceMember({
             user_id: user.id,
