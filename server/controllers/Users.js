@@ -4,53 +4,73 @@ import pool from "../database/db.js";
 import { ERRORS, createErrorResponse } from "../app/ErrorHandler.js";
 
 export const createUser = async (request) => {
-    if (!request.body.username) return createErrorResponse(ERRORS.USERNAME_NOT_PROVIDED);
-    if (!request.body.email) return createErrorResponse(ERRORS.EMAIL_NOT_PROVIDED);
-    if (!request.body.password) return createErrorResponse(ERRORS.PASSWORD_NOT_PROVIDED);
+    const { username, email, password } = request.body;
 
-    if (request.body.username) {
-        const [user] = await pool.query("SELECT * FROM users WHERE username = ?", [request.body.username]);
-        if (user) return createErrorResponse(ERRORS.USERNAME_ALREADY_USED);
-    }
+    if (!username) return createErrorResponse(ERRORS.USERNAME_NOT_PROVIDED);
+    if (!email) return createErrorResponse(ERRORS.EMAIL_NOT_PROVIDED);
+    if (!password) return createErrorResponse(ERRORS.PASSWORD_NOT_PROVIDED);
 
-    if (request.body.email) {
-        const [user] = await pool.query("SELECT * FROM users WHERE email = ?", [request.body.email]);
-        if (user) return createErrorResponse(ERRORS.EMAIL_ALREADY_USED);
-    }
+    const [existingUser] = await pool.query("SELECT * FROM users WHERE email = ?", [email]);  // [existingUser] c un peu comme existingUser[0]
+    if (existingUser) return createErrorResponse(ERRORS.EMAIL_ALREADY_USED);
 
-    if (request.body.status_id) {
-        const [status] = await pool.query("SELECT * FROM status WHERE id = ?", [request.body.status_id]);
-        if (!status) return createErrorResponse(ERRORS.STATUS_NOT_FOUND);
-    }
-
-    return pool.query("INSERT INTO users (username, email, password, status_id, link_google, link_facebook, confirm_token, password_reset_token) VALUES (?, ?, ?, ?, ?, ?, ?, ?)", [
-        request.body.username,
-        request.body.email,
-        bcrypt.hashSync(request.body.password, 10),
-        request.body.status_id || 1,
-        request.body.link_google || false,
-        request.body.link_facebook || false,
-        request.body.confirm_token || null,
-        request.body.password_reset_token || null,
+    const hashedPassword = bcrypt.hashSync(password, 10);
+    return pool.query("INSERT INTO users (username, email, password) VALUES (?, ?, ?)", [
+        username,
+        email,
+        hashedPassword,
     ]);
-}
+};
 
-export const loginUser = async (request) => {
-    if (!request.body.email) return createErrorResponse(ERRORS.EMAIL_NOT_PROVIDED);
-
-    const [user] = await pool.query("SELECT * FROM users WHERE email = ?", [request.body.email]);
-    if (!user) return createErrorResponse(ERRORS.USER_NOT_FOUND);
-
-    if (request.body.password) {
-        const match = await bcrypt.compare(request.body.password, user.password);
-        if (!match) return createErrorResponse(ERRORS.WRONG_PASSWORD);
-        if (match && user.confirm_token !== null) return createErrorResponse(ERRORS.USER_NOT_CONFIRMED);
-        return user;
+export const loginUser = async (req, res) => {
+    const { email, password } = req.body;
+  
+    if (!email) {
+      const error = createErrorResponse(ERRORS.EMAIL_NOT_PROVIDED);
+      return res.status(400).json(error);
     }
+  
+    if (!password) {
+      const error = createErrorResponse(ERRORS.PASSWORD_NOT_PROVIDED);
+      return res.status(400).json(error);
+    }
+  
+    try {
+      const [user] = await pool.query("SELECT * FROM users WHERE email = ?", [email]);
+  
+      if (!user) {
+        const error = createErrorResponse(ERRORS.USER_NOT_FOUND);
+        return res.status(404).json(error);
+      }
+  
+      const match = await bcrypt.compare(password, user.password);
+      if (!match) {
+        const error = createErrorResponse(ERRORS.WRONG_PASSWORD);
+        return res.status(401).json(error);
+      }
+  
+      const token = jwt.sign(
+        { id: user.id, email: user.email, username: user.username },
+        process.env.JWT_SECRET,
+        { expiresIn: "1h" }
+      );
+  
+      return res.status(200).json({
+        token,
+        user: {
+          id: user.id,
+          username: user.username,
+          email: user.email,
+        },
+      });
+    } catch (err) {
+      console.error("Erreur lors de la connexion :", err.message);
+      const error = createErrorResponse(ERRORS.INTERNAL_SERVER_ERROR, err.message);
+      return res.status(500).json(error);
+    }
+  };
 
-    return (user.link_google == true || user.link_facebook == true) ? user : createErrorResponse(ERRORS.USER_NOT_LINKED_TO_SOCIALS);
-}
 
+  
 export const readUser = async (request) => {
     if (request.params.id) {
         const [user] = await pool.query("SELECT * FROM users WHERE id = ?", [request.params.id]);

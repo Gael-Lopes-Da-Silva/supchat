@@ -23,16 +23,15 @@ VALUES
     ('mobile_do_not_disturb');
 
 -- USERS
+
 CREATE TABLE users (
     id INT AUTO_INCREMENT PRIMARY KEY,
     username VARCHAR(50) NOT NULL UNIQUE,
     email VARCHAR(100) NOT NULL UNIQUE,
-    password TEXT NOT NULL,
+    password TEXT DEFAULT NULL,
     status_id INT NOT NULL,
-    link_google TINYINT(1) DEFAULT 0,
-    link_facebook TINYINT(1) DEFAULT 0,
-    confirm_token TEXT NULL,
-    password_reset_token TEXT NULL,
+    provider_id VARCHAR(255) DEFAULT NULL,
+    provider VARCHAR(50) DEFAULT 'local',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NULL,
     deleted_at TIMESTAMP NULL,

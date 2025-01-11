@@ -1,3 +1,8 @@
+import dotenv from "dotenv";
+
+dotenv.config();
+import "./passport/GoogleStrategy.js";
+import "./passport/FacebookStrategy.js";
 import express from "express";
 import cors from "cors";
 
@@ -16,12 +21,12 @@ import ChannelPermissionsRouter from "./routes/ChannelPermissions.js";
 import RolesRouter from "./routes/Roles.js";
 import RolePermissionsRouter from "./routes/RolePermissions.js";
 
+const PORT = process.env.PORT 
 const app = express();
-const PORT = 3000;
 
 pool.getConnection().then((connection) => {
     console.log("Connected to database!");
-
+    
     app.use(express.urlencoded({ extended: true }));
     app.use(express.json());
     app.use(cors({
