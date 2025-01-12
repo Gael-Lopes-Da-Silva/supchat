@@ -12,23 +12,39 @@ export const createUser = async (request) => {
       if (!email) return createErrorResponse(ERRORS.EMAIL_NOT_PROVIDED);
       if (!password) return createErrorResponse(ERRORS.PASSWORD_NOT_PROVIDED);
 
-      const [existingEmail] = await pool.query("SELECT * FROM users WHERE email = ?", [email]);
-      if (existingEmail) return createErrorResponse(ERRORS.EMAIL_ALREADY_USED);
+      const [existingLocalUser] = await pool.query(
+        "SELECT * FROM users WHERE email = ? AND provider = 'local'",
+        [email]
+      );
 
-      const [existingUsername] = await pool.query("SELECT * FROM users WHERE username = ?", [username]);
+      if (existingLocalUser) return createErrorResponse(ERRORS.EMAIL_ALREADY_USED);
+
+      const [existingUsername] = await pool.query(
+        "SELECT * FROM users WHERE username = ?",
+        [username]
+      );
       if (existingUsername) return createErrorResponse(ERRORS.USERNAME_ALREADY_USED);
 
       const hashedPassword = bcrypt.hashSync(password, 10);
 
       const result = await pool.query(
-          "INSERT INTO users (username, email, password, status_id) VALUES (?, ?, ?, ?)",
-          [username, email, hashedPassword,2] // obligé d'envoyer le status en bdd pour l'instant on verra après
+        "INSERT INTO users (username, email, password, status_id) VALUES (?, ?, ?, ?)",
+        [username, email, hashedPassword,2]
       );
 
-      return { error: 0, result };
+      return { 
+        error: 0, 
+        status: 201, 
+        message: "Utilisateur local créé avec succès.", 
+        result 
+      };
   } catch (error) {
       console.error("Error createUser:", error.message);
-      throw error;
+      return createErrorResponse({
+        code: ERRORS.INTERNAL_SERVER_ERROR.code,
+        message: error.message,
+        status: 500,
+      });
   }
 };
 
@@ -46,7 +62,10 @@ export const loginUser = async (req) => {
   }
 
   try {
-    const [user] = await pool.query("SELECT * FROM users WHERE email = ?", [email]);
+    const [user] = await pool.query(
+      "SELECT * FROM users WHERE email = ? AND provider = 'local'",
+      [email]
+    );
 
     if (!user) {
       return createErrorResponse(ERRORS.USER_NOT_FOUND);
@@ -76,12 +95,15 @@ export const loginUser = async (req) => {
     };
   } catch (err) {
     console.error("Erreur lors de la connexion :", err.message);
-    return createErrorResponse(ERRORS.INTERNAL_SERVER_ERROR);
+    return createErrorResponse({
+      code: ERRORS.INTERNAL_SERVER_ERROR.code,
+      message: err.message,
+      status: 500,
+    });
   }
 };
 
 
-  
 export const readUser = async (request) => {
     if (request.params.id) {
         const [user] = await pool.query("SELECT * FROM users WHERE id = ?", [request.params.id]);
