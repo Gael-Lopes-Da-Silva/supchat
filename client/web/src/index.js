@@ -7,7 +7,5 @@ import './index.css';
 
 const root = reactdom.createRoot(document.getElementById('root'));
 root.render(
-    <react.StrictMode>
         <App />
-    </react.StrictMode>
 );

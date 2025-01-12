@@ -77,7 +77,7 @@ const LoginPage = () => {
 
         try {
             const data = await loginUser({ email, password });
-
+                console.log("data", data);
             if (data.error !== 0) {
                 switch (data.error) {
                     case 9:
@@ -99,7 +99,7 @@ const LoginPage = () => {
             localStorage.setItem(
                 'user',
                 JSON.stringify({
-                    data: data.result,
+                    data: data.user,
                     token: data.token,
                 })
             );

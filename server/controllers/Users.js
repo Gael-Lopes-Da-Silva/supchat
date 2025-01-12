@@ -1,73 +1,84 @@
 import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
 
 import pool from "../database/db.js";
 import { ERRORS, createErrorResponse } from "../app/ErrorHandler.js";
 
 export const createUser = async (request) => {
-    const { username, email, password } = request.body;
+  try {
+      const { username, email, password } = request.body;
 
-    if (!username) return createErrorResponse(ERRORS.USERNAME_NOT_PROVIDED);
-    if (!email) return createErrorResponse(ERRORS.EMAIL_NOT_PROVIDED);
-    if (!password) return createErrorResponse(ERRORS.PASSWORD_NOT_PROVIDED);
+      if (!username) return createErrorResponse(ERRORS.USERNAME_NOT_PROVIDED);
+      if (!email) return createErrorResponse(ERRORS.EMAIL_NOT_PROVIDED);
+      if (!password) return createErrorResponse(ERRORS.PASSWORD_NOT_PROVIDED);
 
-    const [existingUser] = await pool.query("SELECT * FROM users WHERE email = ?", [email]);  // [existingUser] c un peu comme existingUser[0]
-    if (existingUser) return createErrorResponse(ERRORS.EMAIL_ALREADY_USED);
+      const [existingEmail] = await pool.query("SELECT * FROM users WHERE email = ?", [email]);
+      if (existingEmail) return createErrorResponse(ERRORS.EMAIL_ALREADY_USED);
 
-    const hashedPassword = bcrypt.hashSync(password, 10);
-    return pool.query("INSERT INTO users (username, email, password) VALUES (?, ?, ?)", [
-        username,
-        email,
-        hashedPassword,
-    ]);
+      const [existingUsername] = await pool.query("SELECT * FROM users WHERE username = ?", [username]);
+      if (existingUsername) return createErrorResponse(ERRORS.USERNAME_ALREADY_USED);
+
+      const hashedPassword = bcrypt.hashSync(password, 10);
+
+      const result = await pool.query(
+          "INSERT INTO users (username, email, password, status_id) VALUES (?, ?, ?, ?)",
+          [username, email, hashedPassword,2]
+      );
+
+      return { error: 0, result };
+  } catch (error) {
+      console.error("Error createUser:", error.message);
+      throw error;
+  }
 };
 
-export const loginUser = async (req, res) => {
-    const { email, password } = req.body;
-  
-    if (!email) {
-      const error = createErrorResponse(ERRORS.EMAIL_NOT_PROVIDED);
-      return res.status(400).json(error);
+
+
+export const loginUser = async (req) => {
+  const { email, password } = req.body;
+
+  if (!email) {
+    return createErrorResponse(ERRORS.EMAIL_NOT_PROVIDED);
+  }
+
+  if (!password) {
+    return createErrorResponse(ERRORS.PASSWORD_NOT_PROVIDED);
+  }
+
+  try {
+    const [user] = await pool.query("SELECT * FROM users WHERE email = ?", [email]);
+
+    if (!user) {
+      return createErrorResponse(ERRORS.USER_NOT_FOUND);
     }
-  
-    if (!password) {
-      const error = createErrorResponse(ERRORS.PASSWORD_NOT_PROVIDED);
-      return res.status(400).json(error);
+
+    const match = await bcrypt.compare(password, user.password);
+    if (!match) {
+      return createErrorResponse(ERRORS.WRONG_PASSWORD);
     }
-  
-    try {
-      const [user] = await pool.query("SELECT * FROM users WHERE email = ?", [email]);
-  
-      if (!user) {
-        const error = createErrorResponse(ERRORS.USER_NOT_FOUND);
-        return res.status(404).json(error);
-      }
-  
-      const match = await bcrypt.compare(password, user.password);
-      if (!match) {
-        const error = createErrorResponse(ERRORS.WRONG_PASSWORD);
-        return res.status(401).json(error);
-      }
-  
-      const token = jwt.sign(
-        { id: user.id, email: user.email, username: user.username },
-        process.env.JWT_SECRET,
-        { expiresIn: "1h" }
-      );
-  
-      return res.status(200).json({
-        token,
-        user: {
-          id: user.id,
-          username: user.username,
-          email: user.email,
-        },
-      });
-    } catch (err) {
-      console.error("Erreur lors de la connexion :", err.message);
-      const error = createErrorResponse(ERRORS.INTERNAL_SERVER_ERROR, err.message);
-      return res.status(500).json(error);
-    }
-  };
+
+    const token = jwt.sign(
+      { id: user.id, email: user.email, username: user.username, status: user.status_id },
+      process.env.JWT_SECRET,
+      { expiresIn: "1h" }
+    );
+
+    return {
+      error: 0,
+      token,
+      user: {
+        id: user.id,
+        username: user.username,
+        email: user.email,
+        status: user.status_id,
+        provider: user.provider,
+      },
+    };
+  } catch (err) {
+    console.error("Erreur lors de la connexion :", err.message);
+    return createErrorResponse(ERRORS.INTERNAL_SERVER_ERROR);
+  }
+};
 
 
   

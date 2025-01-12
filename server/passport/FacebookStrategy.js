@@ -7,10 +7,10 @@ dotenv.config();
 passport.use(
   new FacebookStrategy(
     {
-      clientID: process.env.FACEBOOK_APP_ID,   // VEUILLEZ ME MP SUR DISCORD OU TEAMS POUR LE .ENV (zak)
-      clientSecret: process.env.FACEBOOK_APP_SECRET, 
-      callbackURL: "http://localhost:5001/users/auth/facebook/callback",
-      profileFields: ['id', 'displayName', 'photos', 'email'], 
+      clientID: process.env.FACEBOOK_APP_ID, 
+      clientSecret: process.env.FACEBOOK_APP_SECRET,
+      callbackURL: "http://localhost:3000/users/auth/facebook/callback",
+      profileFields: ['id', 'displayName', 'photos', 'email'],
     },
     async (accessToken, refreshToken, profile, done) => {
       try {
@@ -18,8 +18,7 @@ passport.use(
         console.log("Profile:", profile);
 
         const facebookId = profile.id;
-        const email = profile.emails ? profile.emails[0]?.value : null; 
-      
+        const email = profile.emails ? profile.emails[0]?.value : null;
         const username = profile.displayName || `facebook_${facebookId}`;
 
         if (!facebookId || !email) {
@@ -29,31 +28,31 @@ passport.use(
         const connection = await db.getConnection();
         try {
           const rows = await connection.query(
-            "SELECT * FROM users WHERE provider_id = ?",
-            [facebookId]
+            "SELECT * FROM users WHERE provider_id = ? AND provider = ?",
+            [facebookId, "facebook"]
           );
 
           if (rows.length > 0) {
-            console.log("Utilisateur existant :", rows[0]);
+            console.log("Utilisateur existant (Facebook) :", rows[0]);
             return done(null, rows[0]);
-          } else {
-            console.log("Création d'un nouvel utilisateur...");
-
-            const result = await connection.query(
-              "INSERT INTO users (username, email, provider_id, provider) VALUES (?, ?, ?, ?)",
-              [username, email, facebookId, "facebook"]
-            );
-
-            const newUser = {
-              id: result.insertId,
-              username,
-              email,
-              provider_id: facebookId,
-            };
-
-            console.log("Nouvel utilisateur créé :", newUser);
-            return done(null, newUser);
           }
+
+          console.log("Création d'un nouvel utilisateur (Facebook)...");
+
+          const result = await connection.query(
+            "INSERT INTO users (username, email, provider_id, provider,status_id) VALUES (?, ?, ?, ?, ?)",
+            [username, email, facebookId, "facebook", 2]
+          );
+
+          const newUser = {
+            id: result.insertId,
+            username,
+            email,
+            provider_id: facebookId,
+          };
+
+          console.log("Nouvel utilisateur créé :", newUser);
+          return done(null, newUser);
         } finally {
           connection.release();
         }
@@ -64,21 +63,5 @@ passport.use(
     }
   )
 );
-
-
-
-passport.serializeUser((user, done) => {
-  done(null, user.id);
-});
-
-passport.deserializeUser(async (id, done) => {
-  const connection = await db.getConnection();
-  const rows = await connection.query("SELECT * FROM users WHERE id = ?", [id]);
-  if (rows.length > 0) {
-    done(null, rows[0]);
-  } else {
-    done(null, null);
-  }
-});
 
 export default passport;

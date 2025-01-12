@@ -53,29 +53,43 @@ router.get(
 
         const token = jsonwebtoken.sign(userPayload, process.env.JWT_SECRET, { expiresIn: "1h" });
 
-        res.redirect(`http://localhost:3000/login?token=${token}`);
+        res.redirect(`http://localhost:5000/login?token=${token}`);
     }
 );
 
 // createUser
-router.post("/", (req, res) => {
-    createUser(req)
-        .then((result) => {
-            if (!result.error) {
-                res.status(201).json(result);
-            } else {
-                res.status(400).json({ error: result.error, error_message: result.error_message });
-            }
-        })
-        .catch((error) => {
-            res.status(500).json({ error: 1, error_message: error.message });
-        });
-});
+router.post("/", async (req, res) => {
+    try {
+      const result = await createUser(req);
+  
+      if (result.error) {
+        res.status(400).json(result);
+      } else {
+        res.status(201).json(result);
+      }
+    } catch (error) {
+      console.error("Erreur interne lors de la création de l'utilisateur :", error.message);
+      res.status(500).json(createErrorResponse(ERRORS.INTERNAL_SERVER_ERROR));
+    }
+  });
+  
 
 // loginUser
-router.post("/login", (req, res) => {
-    loginUser(req, res);
+router.post("/login", async (req, res) => {
+    try {
+      const result = await loginUser(req);
+  
+      if (result.error) {
+        res.status(400).json(result); 
+      } else {
+        res.status(200).json(result);
+      }
+    } catch (error) {
+      console.error("Erreur interne lors de la connexion :", error.message);
+      res.status(500).json(createErrorResponse(ERRORS.INTERNAL_SERVER_ERROR));
+    }
   });
+  
 
 // readUser
 router.get("/", (req, res) => {

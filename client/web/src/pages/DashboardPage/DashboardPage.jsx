@@ -76,7 +76,6 @@ const DashboardPage = () => {
         authentificationHook(navigate);
 
         const storedUser = JSON.parse(localStorage.getItem("user"));
-
         if (!storedUser || !storedUser.data) {
             navigate("/login", { state: { expired: true } });
             return;
