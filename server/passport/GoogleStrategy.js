@@ -9,64 +9,76 @@ dotenv.config();
 passport.use(
   new GoogleStrategy(
     {
-      clientID: process.env.GOOGLE_CLIENT_ID,  // VEUILLEZ ME MP SUR DISCORD OU TEAMS POUR LE .ENV (zak)
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET, 
-      callbackURL: "http://localhost:3000/users/auth/google/callback", 
+      clientID: process.env.GOOGLE_CLIENT_ID,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+      callbackURL: "http://localhost:3000/users/auth/google/callback",
     },
     async (accessToken, refreshToken, profile, done) => {
       try {
         console.log("Access Token:", accessToken);
         console.log("Profile:", profile);
 
-        const googleId = profile.id; 
-        const email = profile.emails[0]?.value; 
-        const username = profile.displayName || `google_${googleId}`; 
+        const googleId = profile.id;
+        const email = profile.emails[0]?.value;
+        const username = profile.displayName || `google_${googleId}`;
 
         if (!googleId || !email) {
           throw new Error("Impossible de récupérer les informations utilisateur Google.");
         }
 
-        
         const connection = await db.getConnection();
         try {
-          
-          const rows = await connection.query(
-            "SELECT * FROM users WHERE provider_id = ?",
+          // Vérifiez si un utilisateur existe déjà avec le même `provider_id` et `provider = google`
+          const existingGoogleUser = await connection.query(
+            "SELECT * FROM users WHERE provider_id = ? AND provider = 'google'",
             [googleId]
           );
 
-          if (rows.length > 0) {
-            console.log("Utilisateur existant :", rows[0]);
-            return done(null, rows[0]); 
-          } else {
-            console.log("Création d'un nouvel utilisateur...");
-
-            
-            const result = await connection.query(
-              "INSERT INTO users (username, email, provider_id, provider, status_id) VALUES (?, ?, ?, ?, ?)",
-              [username, email, googleId, "google", 2]
-            );
-            
-            const newUser = {
-              id: result.insertId,
-              username,
-              email,
-              provider_id: googleId,
-            };
-
-            console.log("Nouvel utilisateur créé :", newUser);
-            return done(null, newUser); 
+          if (existingGoogleUser.length > 0) {
+            console.log("Utilisateur Google existant :", existingGoogleUser[0]);
+            return done(null, existingGoogleUser[0]);
           }
+
+          // Vérifiez si un utilisateur existe avec le même email mais un `provider` différent
+          const existingUserWithEmail = await connection.query(
+            "SELECT * FROM users WHERE email = ? AND provider != 'google'",
+            [email]
+          );
+
+          if (existingUserWithEmail.length > 0) {
+            console.log(
+              "Un utilisateur existe avec cet email mais un autre provider :",
+              existingUserWithEmail[0]
+            );
+          }
+
+          // Création d'un nouvel utilisateur Google (peu importe si l'email existe déjà pour un autre provider)
+          const result = await connection.query(
+            "INSERT INTO users (username, email, provider_id, provider, status_id) VALUES (?, ?, ?, ?, ?)",
+            [username, email, googleId, "google", 2]
+          );
+
+          const newUser = {
+            id: result.insertId,
+            username,
+            email,
+            provider_id: googleId,
+            provider: "google",
+          };
+
+          console.log("Nouvel utilisateur Google créé :", newUser);
+          return done(null, newUser);
         } finally {
-          connection.release(); 
+          connection.release();
         }
       } catch (error) {
         console.error("Erreur dans GoogleStrategy :", error.message);
-        return done(error); 
+        return done(error);
       }
     }
   )
 );
+
 
 
 passport.serializeUser((user, done) => {

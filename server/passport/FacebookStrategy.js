@@ -1,16 +1,16 @@
-import passport from 'passport';
-import { Strategy as FacebookStrategy } from 'passport-facebook';
-import db from '../database/db.js';
-import dotenv from 'dotenv';
+import passport from "passport";
+import { Strategy as FacebookStrategy } from "passport-facebook";
+import db from "../database/db.js";
+import dotenv from "dotenv";
 
 dotenv.config();
 passport.use(
   new FacebookStrategy(
     {
-      clientID: process.env.FACEBOOK_APP_ID, 
+      clientID: process.env.FACEBOOK_APP_ID,
       clientSecret: process.env.FACEBOOK_APP_SECRET,
       callbackURL: "http://localhost:3000/users/auth/facebook/callback",
-      profileFields: ['id', 'displayName', 'photos', 'email'],
+      profileFields: ["id", "displayName", "photos", "email"],
     },
     async (accessToken, refreshToken, profile, done) => {
       try {
@@ -18,11 +18,13 @@ passport.use(
         console.log("Profile:", profile);
 
         const facebookId = profile.id;
-        const email = profile.emails ? profile.emails[0]?.value : null;
+        const email = profile.emails ? profile.emails[0].value : null;
         const username = profile.displayName || `facebook_${facebookId}`;
 
         if (!facebookId || !email) {
-          throw new Error("Impossible de récupérer les informations utilisateur Facebook.");
+          throw new Error(
+            "Impossible de récupérer les informations utilisateur Facebook."
+          );
         }
 
         const connection = await db.getConnection();
