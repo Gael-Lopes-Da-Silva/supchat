@@ -28,7 +28,6 @@ passport.use(
 
         const connection = await db.getConnection();
         try {
-          // Vérifiez si un utilisateur existe déjà avec le même `provider_id` et `provider = google`
           const existingGoogleUser = await connection.query(
             "SELECT * FROM users WHERE provider_id = ? AND provider = 'google'",
             [googleId]
@@ -39,7 +38,6 @@ passport.use(
             return done(null, existingGoogleUser[0]);
           }
 
-          // Vérifiez si un utilisateur existe avec le même email mais un `provider` différent
           const existingUserWithEmail = await connection.query(
             "SELECT * FROM users WHERE email = ? AND provider != 'google'",
             [email]
@@ -52,7 +50,6 @@ passport.use(
             );
           }
 
-          // Création d'un nouvel utilisateur Google (peu importe si l'email existe déjà pour un autre provider)
           const result = await connection.query(
             "INSERT INTO users (username, email, provider_id, provider, status_id) VALUES (?, ?, ?, ?, ?)",
             [username, email, googleId, "google", 2]
