@@ -22,7 +22,7 @@ export const createUser = async (request) => {
 
       const result = await pool.query(
           "INSERT INTO users (username, email, password, status_id) VALUES (?, ?, ?, ?)",
-          [username, email, hashedPassword,2]
+          [username, email, hashedPassword,2] // obligé d'envoyer le status en bdd pour l'instant on verra après
       );
 
       return { error: 0, result };
