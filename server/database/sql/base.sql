@@ -35,7 +35,7 @@ CREATE TABLE users (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NULL,
     deleted_at TIMESTAMP NULL,
-    FOREIGN KEY (status_id) REFERENCES status(id)
+    FOREIGN KEY (status_id) REFERENCES status(id),
     UNIQUE KEY unique_email_provider (email, provider)
 );
 
