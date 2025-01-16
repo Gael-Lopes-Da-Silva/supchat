@@ -69,28 +69,37 @@ const DashboardPage = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // authentificationHook(navigate);
-
     const storedUser = JSON.parse(localStorage.getItem("user"));
+  
     if (!storedUser || !storedUser.data) {
       navigate("/login", { state: { expired: true } });
       return;
     }
-
-    setUser(storedUser.data);
-
+  
+    setUser(storedUser.data); 
+  }, [navigate]);
+  
+  useEffect(() => {
+    if (!user || !user.id) {
+      return; 
+    }
+  
     readWorkspaceMember({
       user_id: user.id,
     })
       .then((data) => {
+
         const workspacePromises = data.result.map(async (workspaceMember) => {
           return readWorkspace({ id: workspaceMember.workspace_id })
-            .then((data) => ({ id: data.result.id, data: data.result }))
+            .then((data) => ({
+              id: data.result.id,
+              data: data.result,
+            }))
             .catch((error) => {
               if (process.env.REACT_APP_ENV === "dev") console.error(error);
             });
         });
-
+  
         Promise.all(workspacePromises).then((results) => {
           const newWorkspaces = {};
           results.forEach((workspace) => {
@@ -104,18 +113,15 @@ const DashboardPage = () => {
       .catch((error) => {
         if (process.env.REACT_APP_ENV === "dev") console.error(error);
       });
-
+  
     const showUserList = localStorage.getItem("gui.dashboard.show_user_list");
-    if (showUserList !== null)
-      updateGuiState("userList", showUserList === "true");
-
+    if (showUserList !== null) updateGuiState("userList", showUserList === "true");
+  
     if (localStorage.getItem("gui.theme")) {
       setTheme(localStorage.getItem("gui.theme"));
     }
-
-    document.addEventListener("click", handleOutsideClicks);
-  }, [navigate]);
-
+  }, [user]);
+  
   const updateGuiState = (key, value) => {
     setGuiVisibility((prev) => ({ ...prev, [key]: value }));
   };
