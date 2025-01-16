@@ -1,6 +1,6 @@
 import passport from "passport";
 import { Strategy as GoogleStrategy } from "passport-google-oauth20";
-import db from "../database/db.js";
+import db from "../../database/db.js";
 import dotenv from "dotenv";
 
 dotenv.config();
@@ -52,7 +52,7 @@ passport.use(
 
           const result = await connection.query(
             "INSERT INTO users (username, email, provider_id, provider, status_id) VALUES (?, ?, ?, ?, ?)",
-            [username, email, googleId, "google", 2]
+            [username, email, googleId, "google", 1]
           );
 
           const newUser = {

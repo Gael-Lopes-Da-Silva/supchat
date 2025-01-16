@@ -6,7 +6,7 @@ import Button from "../../components/Button/Button";
 import Checkbox from "../../components/Checkbox/Checkbox";
 import Link from "../../components/Link/Link";
 import logo from "../../assets/logo.png";
-import { createUser } from "../../services/Users";
+import { createUser, confirmUserEmail } from "../../services/Users";
 
 import "./RegisterPage.css";
 
@@ -21,23 +21,35 @@ const RegisterPage = () => {
 
   useEffect(() => {
     const query = new URLSearchParams(window.location.search);
-    const confirmToken = query.get("token");
+    const token = query.get("token");
 
-    if (confirmToken) {
-      toast.info("Votre compte a été confirmé. Vous pouvez vous connecter.");
-      navigate("/login", { state: { confirmed: true } });
+    if (token) {
+        confirmUserEmail(token)
+            .then((response) => {
+                if (response.error === 0) {
+                    toast.success(response.message, { position: "top-center" });
+                } else {
+                    toast.error("La confirmation a échoué. Réessayez.", { position: "top-center" });
+                }
+            })
+            .catch(() => {
+                toast.error("Erreur lors de la confirmation de l'email.", { position: "top-center" });
+            })
+            .finally(() => {
+                navigate("/login");
+            });
     }
 
     if (localStorage.getItem("user")) {
-      navigate("/dashboard");
+        navigate("/dashboard");
     }
 
     const savedTheme = localStorage.getItem("gui.theme");
     if (savedTheme) {
-      setTheme(savedTheme);
+        setTheme(savedTheme);
     }
-  }, [navigate]);
-
+}, [navigate]);
+  
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
@@ -70,7 +82,7 @@ const RegisterPage = () => {
         setPassword("");
         setChecked(false);
 
-        toast.success("Votre compte est créé avec succès. Vous pouvez maintenant vous connecter.", {
+        toast.success("Votre compte a été créé. Veuillez vérifier votre boîte mail pour confirmer votre adresse email avant de vous connecter.", {
             position: "top-center",
         });
 

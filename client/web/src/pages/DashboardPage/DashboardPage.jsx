@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import * as Fa from "react-icons/fa6";
@@ -68,7 +69,7 @@ const DashboardPage = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    authentificationHook(navigate);
+    // authentificationHook(navigate);
 
     const storedUser = JSON.parse(localStorage.getItem("user"));
     if (!storedUser || !storedUser.data) {

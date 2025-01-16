@@ -4,47 +4,38 @@ import jwt from "jsonwebtoken";
 import pool from "../database/db.js";
 import { ERRORS, createErrorResponse } from "../app/ErrorHandler.js";
 
+import crypto from 'crypto';
+import { sendConfirmationEmail } from '../services/email/emailService.js'; 
+
 export const createUser = async (request) => {
   try {
-      const { username, email, password } = request.body;
+    const { username, email, password } = request.body;
 
-      if (!username) return createErrorResponse(ERRORS.USERNAME_NOT_PROVIDED);
-      if (!email) return createErrorResponse(ERRORS.EMAIL_NOT_PROVIDED);
-      if (!password) return createErrorResponse(ERRORS.PASSWORD_NOT_PROVIDED);
+    if (!username) return createErrorResponse(ERRORS.USERNAME_NOT_PROVIDED);
+    if (!email) return createErrorResponse(ERRORS.EMAIL_NOT_PROVIDED);
+    if (!password) return createErrorResponse(ERRORS.PASSWORD_NOT_PROVIDED);
 
-      const [existingLocalUser] = await pool.query(
-        "SELECT * FROM users WHERE email = ? AND provider = 'local'",
-        [email]
-      );
+    const [existingEmail] = await pool.query(
+      "SELECT * FROM users WHERE email = ? AND provider = 'local'",
+      [email]
+    );
+    if (existingEmail) return createErrorResponse(ERRORS.EMAIL_ALREADY_USED);
 
-      if (existingLocalUser) return createErrorResponse(ERRORS.EMAIL_ALREADY_USED);
+    const hashedPassword = bcrypt.hashSync(password, 10);
+    const confirmToken = crypto.randomBytes(32).toString('hex'); 
 
-      const [existingUsername] = await pool.query(
-        "SELECT * FROM users WHERE username = ?",
-        [username]
-      );
-      if (existingUsername) return createErrorResponse(ERRORS.USERNAME_ALREADY_USED);
+    const result = await pool.query(
+      "INSERT INTO users (username, email, password, status_id, confirm_token) VALUES (?, ?, ?, ?, ?)",
+      [username, email, hashedPassword, 2, confirmToken]
+    );
 
-      const hashedPassword = bcrypt.hashSync(password, 10);
+    
+    await sendConfirmationEmail(email, confirmToken);
 
-      const result = await pool.query(
-        "INSERT INTO users (username, email, password, status_id) VALUES (?, ?, ?, ?)",
-        [username, email, hashedPassword,2]
-      );
-
-      return { 
-        error: 0, 
-        status: 201, 
-        message: "Utilisateur local créé avec succès.", 
-        result 
-      };
+    return { error: 0, result };
   } catch (error) {
-      console.error("Error createUser:", error.message);
-      return createErrorResponse({
-        code: ERRORS.INTERNAL_SERVER_ERROR.code,
-        message: error.message,
-        status: 500,
-      });
+    console.error("Error createUser:", error.message);
+    throw error;
   }
 };
 
@@ -63,12 +54,16 @@ export const loginUser = async (req) => {
 
   try {
     const [user] = await pool.query(
-      "SELECT * FROM users WHERE email = ? AND provider = 'local'",
+      "SELECT * FROM users WHERE email = ? AND provider = 'local'", 
       [email]
     );
 
     if (!user) {
       return createErrorResponse(ERRORS.USER_NOT_FOUND);
+    }
+
+    if (user.status_id !== 1) {
+      return createErrorResponse(ERRORS.USER_NOT_CONFIRMED); 
     }
 
     const match = await bcrypt.compare(password, user.password);
@@ -95,11 +90,32 @@ export const loginUser = async (req) => {
     };
   } catch (err) {
     console.error("Erreur lors de la connexion :", err.message);
-    return createErrorResponse({
-      code: ERRORS.INTERNAL_SERVER_ERROR.code,
-      message: err.message,
-      status: 500,
-    });
+    return createErrorResponse(ERRORS.INTERNAL_SERVER_ERROR);
+  }
+};
+
+export const confirmUser = async (token) => {
+  if (!token) {
+    return createErrorResponse(ERRORS.TOKEN_NOT_PROVIDED);
+  }
+
+  try {
+    const [user] = await pool.query('SELECT * FROM users WHERE confirm_token = ?', [token]);
+
+    if (!user) {
+      return createErrorResponse(ERRORS.TOKEN_NOT_MATCHED);
+    }
+
+    await pool.query('UPDATE users SET confirm_token = NULL, status_id = 1 WHERE id = ?', [user.id]);
+
+    return {
+      error: 0,
+      message: 'Compte confirmé avec succès',
+      userId: user.id, 
+    };
+  } catch (error) {
+    console.error('Erreur lors de la confirmation du compte:', error.message);
+    throw new Error('Erreur serveur');
   }
 };
 

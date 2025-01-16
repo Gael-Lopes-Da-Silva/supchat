@@ -9,9 +9,30 @@ import {
     readUser,
     updateUser,
     deleteUser,
+    confirmUser,
 } from "../controllers/Users.js";
 
 const router = express.Router();
+
+// mail confirmatoion
+router.get('/confirm', async (req, res) => {
+    const { token } = req.query;
+
+    try {
+        const result = await confirmUser(token);
+
+        if (result.error) {
+            return res.status(400).json(result);
+        }
+
+        res.redirect(`http://localhost:5000/login?confirmed=true`);
+    } catch (error) {
+        console.error('Erreur lors de la confirmation du compte:', error.message);
+        res.status(500).json({ error: 1, error_message: 'Erreur serveur' });
+    }
+});
+
+  
 
 // OAuth Google
 router.get(

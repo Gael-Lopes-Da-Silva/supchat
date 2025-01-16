@@ -72,3 +72,15 @@ export const restoreUser = async (id) => {
 
     return await response.json();
 };
+
+export const confirmUserEmail = async (token) => {
+    const response = await fetch(`http://localhost:3000/users/confirm?token=${token}`, {
+        method: "GET",
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+        },
+    });
+
+    return await response.json();
+};

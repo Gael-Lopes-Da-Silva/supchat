@@ -1,6 +1,6 @@
 import passport from "passport";
 import { Strategy as FacebookStrategy } from "passport-facebook";
-import db from "../database/db.js";
+import db from "../../database/db.js";
 import dotenv from "dotenv";
 
 dotenv.config();
@@ -43,7 +43,7 @@ passport.use(
 
           const result = await connection.query(
             "INSERT INTO users (username, email, provider_id, provider,status_id) VALUES (?, ?, ?, ?, ?)",
-            [username, email, facebookId, "facebook", 2]
+            [username, email, facebookId, "facebook", 1]
           );
 
           const newUser = {

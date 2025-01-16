@@ -27,16 +27,17 @@ VALUES
 CREATE TABLE users (
     id INT AUTO_INCREMENT PRIMARY KEY,
     username VARCHAR(50) NOT NULL UNIQUE,
-    email VARCHAR(100) NOT NULL UNIQUE,
+    email VARCHAR(100) NOT NULL,
     password TEXT DEFAULT NULL,
     status_id INT NOT NULL,
     provider_id VARCHAR(255) DEFAULT NULL,
     provider VARCHAR(50) DEFAULT 'local',
+    confirm_token VARCHAR(255) DEFAULT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NULL,
     deleted_at TIMESTAMP NULL,
     FOREIGN KEY (status_id) REFERENCES status(id),
-    UNIQUE KEY unique_email_provider (email, provider)
+    UNIQUE KEY unique_email_provider (email, provider) 
 );
 
 -- WORKSPACES
