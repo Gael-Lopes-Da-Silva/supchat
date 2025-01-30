@@ -139,8 +139,9 @@ const LoginPage = () => {
   };
 
   const handleFacebook = () => {
-    window.location.href = `https://www.facebook.com/v15.0/dialog/oauth?client_id=${process.env.REACT_APP_FACEBOOK_APP_ID}&redirect_uri=${process.env.REACT_APP_API_URL}users/auth/facebook/callback&scope=email`;
-  };
+    window.location.href = `${process.env.REACT_APP_API_URL}users/auth/facebook`;
+};
+
 
   return (
     <div className={`login-container ${theme}`}>
