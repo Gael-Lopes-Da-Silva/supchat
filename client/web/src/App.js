@@ -1,14 +1,14 @@
 import * as reactdom from 'react-router-dom';
 import * as reacttoastify from 'react-toastify';
 
-import IndexPage from './pages/IndexPage/IndexPage'
+import DashboardPage from './pages/DashboardPage/DashboardPage';
+import IndexPage from './pages/IndexPage/IndexPage';
 import LoginPage from './pages/LoginPage/LoginPage';
-import TermsPage from './pages/TermsPage/TermsPage';
 import PrivaryPage from './pages/PrivacyPage/PrivacyPage';
 import RegisterPage from './pages/RegisterPage/RegisterPage';
-import DashboardPage from './pages/DashboardPage/DashboardPage';
-import SettingsPage from './pages/SettingsPage/SettingsPage';
 import ResetPasswordPage from './pages/ResetPasswordPage/ResetPasswordPage';
+import SettingsPage from './pages/SettingsPage/SettingsPage';
+import TermsPage from './pages/TermsPage/TermsPage';
 
 const App = () => {
     return (

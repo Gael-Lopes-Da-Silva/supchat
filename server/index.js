@@ -1,34 +1,30 @@
-import dotenv from "dotenv";
-
-dotenv.config();
-import "./services/passport/GoogleStrategy.js";
-import "./services/passport/FacebookStrategy.js";
-import express from "express";
 import cors from "cors";
+import express from "express";
 
 import pool from "./database/db.js";
 
-import UsersRouter from "./routes/Users.js";
-import StatusRouter from "./routes/Status.js";
+import ChannelMembersRouter from "./routes/ChannelMembers.js";
+import ChannelPermissionsRouter from "./routes/ChannelPermissions.js";
+import ChannelsRouter from "./routes/Channels.js";
 import PermissionsRouter from "./routes/Permissions.js";
-import WorkspacesRouter from "./routes/Workspaces.js";
+import RolePermissionsRouter from "./routes/RolePermissions.js";
+import RolesRouter from "./routes/Roles.js";
+import StatusRouter from "./routes/Status.js";
+import UsersRouter from "./routes/Users.js";
 import WorkspaceInvitationsRouter from "./routes/WorkspaceInvitations.js";
 import WorkspaceMembersRouter from "./routes/WorkspaceMembers.js";
 import WorkspacePermissionsRouter from "./routes/WorkspacePermissions.js";
-import ChannelsRouter from "./routes/Channels.js";
-import ChannelMembersRouter from "./routes/ChannelMembers.js";
-import ChannelPermissionsRouter from "./routes/ChannelPermissions.js";
-import RolesRouter from "./routes/Roles.js";
-import RolePermissionsRouter from "./routes/RolePermissions.js";
+import WorkspacesRouter from "./routes/Workspaces.js";
 
-const PORT = process.env.PORT 
+import "./services/passport/FacebookStrategy.js";
+import "./services/passport/GoogleStrategy.js";
+
+const PORT = process.env.PORT
 const app = express();
-
-
 
 pool.getConnection().then((connection) => {
     console.log("Connected to database!");
-    
+
     app.use(express.urlencoded({ extended: true }));
     app.use(express.json());
     app.use(cors({
@@ -62,7 +58,7 @@ pool.getConnection().then((connection) => {
     console.error({
         when: "Index > ConnectDB",
         error: 1,
-        error_message: error.message,
+        error_message: error,
     });
 
     pool.end();

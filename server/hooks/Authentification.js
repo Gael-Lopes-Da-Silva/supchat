@@ -1,5 +1,4 @@
 import jsonwebtoken from "jsonwebtoken";
-import dotenv from "dotenv/config";
 
 export function authentification(request, response, next) {
     let token = "";
@@ -10,17 +9,13 @@ export function authentification(request, response, next) {
         token = request.headers.authorization;
     }
 
-    if (token == "" || token == null) {
-        return response.status(401).json({
-            when: "Authentification > CheckToken",
-            error: 1,
-            error_message: "A token is needed",
-        });
-    }
+    if (token == "" || token == null) return response.status(401).json({
+        when: "Authentification > CheckToken",
+        error: 1,
+        error_message: "A token is needed",
+    });
 
-    const secret = process.env.SECRET;
-
-    jsonwebtoken.verify(token, secret, (error, user) => {
+    jsonwebtoken.verify(token, process.env.SECRET, (error, user) => {
         if (error) return response.status(401).json({
             when: "Authentification > CheckToken",
             error: 1,

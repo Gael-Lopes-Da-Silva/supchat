@@ -19,3 +19,4 @@ yarn-error.*
 .env*.local
 *.tsbuildinfo
 app-example
+package-lock.json

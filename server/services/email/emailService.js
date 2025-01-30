@@ -1,26 +1,23 @@
 import nodemailer from 'nodemailer';
-import dotenv from "dotenv";
-dotenv.config();
 
 export const transporter = nodemailer.createTransport({
     host: process.env.SMTP_HOST,
     port: process.env.SMTP_PORT,
     secure: true,
     auth: {
-      user: process.env.SMTP_USER,
-      pass: process.env.SMTP_PASS,
+        user: process.env.SMTP_USER,
+        pass: process.env.SMTP_PASSWORD,
     },
-  });
+});
 
-  export const sendConfirmationEmail = (to, token) => {
-
+export const sendConfirmationEmail = (to, token) => {
     const confirmationLink = `http://localhost:3000/users/confirm?token=${token}`;
-    console.log(confirmationLink);
+
     const mailOptions = {
-      from: `"Supchat" <${process.env.SMTP_USER}>`,
-      to,
-      subject: 'Confirmation de création de compte - Supchat',
-      html: `
+        from: `"Supchat" <${process.env.SMTP_USER}>`,
+        to,
+        subject: 'Confirmation de création de compte - Supchat',
+        html: `
         <h1>Bienvenue sur Supchat !</h1>
         <p>Veuillez confirmer votre adresse email en cliquant sur le lien ci-dessous :</p>
         <a href="${confirmationLink}">Confirmer mon compte</a>
@@ -28,6 +25,5 @@ export const transporter = nodemailer.createTransport({
       `,
     };
 
-  
-  return transporter.sendMail(mailOptions);
+    return transporter.sendMail(mailOptions);
 };

@@ -10,17 +10,3 @@ Description
 
 Usage
 ------------------------------------------------------------------
-
-
-Setup
-------------------------------------------------------------------
-
-Setup your `.env` file like this:
-```
-DB_HOST=localhost
-DB_USER=supchat
-DB_PASSWORD=supchat
-DB_NAME=supchat
-
-SECRET=YOURSECRETKEY
-```

@@ -1,5 +1,4 @@
 import mariadb from "mariadb";
-import dotenv from "dotenv/config";
 
 const pool = mariadb.createPool({
     host: process.env.DB_HOST,
@@ -10,6 +9,10 @@ const pool = mariadb.createPool({
     bigIntAsNumber: true,
     bigNumberStrings: true,
     supportBigNumbers: true,
+    connectTimeout: 10000,
+    waitForConnections: true,
+    connectionLimit: 10,
+    queueLimit: 0,
 });
 
 export default pool;

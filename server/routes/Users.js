@@ -1,62 +1,295 @@
 import express from "express";
-import passport from "passport";
 import jsonwebtoken from "jsonwebtoken";
-import dotenv from "dotenv/config";
+import passport from "passport";
 
 import {
     createUser,
-    loginUser,
-    readUser,
-    updateUser,
     deleteUser,
+    readUser,
+    restoreUser,
+    updateUser,
+    loginUser,
     confirmUser,
 } from "../controllers/Users.js";
 
 const router = express.Router();
 
-// mail confirmatoion
-router.get('/confirm', async (req, res) => {
-    const { token } = req.query;
-
-    try {
-        const result = await confirmUser(token);
-
-        if (result.error) {
-            return res.status(400).json(result);
+// POST /users
+//
+// body:
+//   username: string (required)
+//   email: string (required)
+//   password: string (required)
+//   status_id: number (optional)
+//   confirm_token: string (optional)
+//   password_reset_token: string (optional)
+// return:
+//   result: [user]
+router.post("/", (request, response) => {
+    createUser(request).then((result) => {
+        if (!result.error && result !== "") {
+            response.status(201).json({
+                when: "Users > CreateUser",
+                result: result,
+                error: 0,
+            });
+        } else {
+            response.status(404).json({
+                when: "Users > CreateUser",
+                error: result.error || 1,
+                error_message: result.error_message || "Could not create user",
+            });
         }
-
-        res.redirect(`http://localhost:5000/login?confirmed=true`);
-    } catch (error) {
-        console.error('Erreur lors de la confirmation du compte:', error.message);
-        res.status(500).json({ error: 1, error_message: 'Erreur serveur' });
-    }
+    }).catch((error) => {
+        response.status(500).json({
+            when: "Users > CreateUser",
+            error: 1,
+            error_message: error.message,
+        });
+    });
 });
 
-  
+// GET /users
+//
+// query:
+//   username: string (optional)
+//   email: string (optional)
+//   password: string (optional)
+//   status_id: number (optional)
+//   confirm_token: string (optional)
+//   password_reset_token: string (optional)
+// return:
+//   result: [user]
+router.get("/", (request, response) => {
+    readUser(request).then((result) => {
+        if (!result.error && result !== "") {
+            response.status(202).json({
+                when: "Users > ReadUser",
+                result: result,
+                error: 0,
+            });
+        } else {
+            response.status(404).json({
+                when: "Users > ReadUser",
+                error: result.error || 1,
+                error_message: result.error_message || "Could not read user",
+            });
+        }
+    }).catch((error) => {
+        response.status(500).json({
+            when: "Users > ReadUser",
+            error: 1,
+            error_message: error.message,
+        });
+    });
+});
 
-// OAuth Google
-router.get(
-    "/auth/google",
-    passport.authenticate("google", { scope: ["profile", "email"], prompt: "select_account" })
-);
+// GET /users/:id
+//
+// param:
+//   id: number (required)
+// return:
+//   result: [user]
+router.get("/:id", (request, response) => {
+    readUser(request).then((result) => {
+        if (!result.error && result !== "") {
+            response.status(202).json({
+                when: "Users > ReadUser",
+                result: result,
+                error: 0,
+            });
+        } else {
+            response.status(404).json({
+                when: "Users > ReadUser",
+                error: result.error || 1,
+                error_message: result.error_message || "Could not read user",
+            });
+        }
+    }).catch((error) => {
+        response.status(500).json({
+            when: "Users > ReadUser",
+            error: 1,
+            error_message: error.message,
+        });
+    });
+});
 
-router.get(
-    "/auth/google/callback",
-    passport.authenticate("google", { session: false, failureRedirect: "/" }),
-    (req, res) => {
-        const userPayload = {
-            id: req.user.id.toString(),
-            username: req.user.username,
-            provider: req.user.provider,
-        };
+// PUT /users/:id
+//
+// param:
+//   id: number (required)
+// body:
+//   username: string (optional)
+//   email: string (optional)
+//   password: string (optional)
+//   status_id: number (optional)
+//   confirm_token: string (optional)
+//   password_reset_token: string (optional)
+// return:
+//   result: [user]
+router.put("/:id", (request, response) => {
+    updateUser(request).then((result) => {
+        if (!result.error && result !== "") {
+            response.status(202).json({
+                when: "Users > UpdateUser",
+                result: result,
+                error: 0,
+            });
+        } else {
+            response.status(404).json({
+                when: "Users > UpdateUser",
+                error: result.error || 1,
+                error_message: result.error_message || "Could not update user",
+            });
+        }
+    }).catch((error) => {
+        response.status(500).json({
+            when: "Users > UpdateUser",
+            error: 1,
+            error_message: error.message,
+        });
+    });
+});
 
-        const token = jsonwebtoken.sign(userPayload, process.env.JWT_SECRET, { expiresIn: "1h" });
+// DELETE /users/:id
+//
+// param:
+//   id: number (required)
+// return:
+//   result: [user]
+router.delete("/:id", (request, response) => {
+    deleteUser(request).then((result) => {
+        if (!result.error && result !== "") {
+            response.status(202).json({
+                when: "Users > DeleteUser",
+                result: result,
+                error: 0,
+            });
+        } else {
+            response.status(404).json({
+                when: "Users > DeleteUser",
+                error: result.error || 1,
+                error_message: result.error_message || "Could not delete user",
+            });
+        }
+    }).catch((error) => {
+        response.status(500).json({
+            when: "Users > DeleteUser",
+            error: 1,
+            error_message: error.message,
+        });
+    });
+});
 
-        res.redirect(`http://localhost:5000/login?token=${token}`);
-    }
-);
+// PATCH /users/:id
+//
+// param:
+//   id: number (required)
+// return:
+//   result: [user]
+router.patch("/:id", (request, response) => {
+    restoreUser(request).then((result) => {
+        if (!result.error && result !== "") {
+            response.status(202).json({
+                when: "Users > RestoreUser",
+                result: result,
+                error: 0,
+            });
+        } else {
+            response.status(404).json({
+                when: "Users > RestoreUser",
+                error: result.error || 1,
+                error_message: result.error_message || "Could not restore user",
+            });
+        }
+    }).catch((error) => {
+        response.status(500).json({
+            when: "Users > RestoreUser",
+            error: 1,
+            error_message: error.message,
+        });
+    });
+});
 
-// OAuth Facebook
+
+// POST /users/login
+//
+// body:
+//   email: string (required)
+//   password: string (required)
+// return:
+//   token: string
+//   result: [user]
+router.post("/login", (request, response) => {
+    loginUser(request).then((result) => {
+        if (!result.error && result !== "") {
+            response.status(202).json({
+                when: "Users > LoginUser",
+                token: result.token,
+                result: result.user,
+                error: 0,
+            });
+        } else {
+            response.status(404).json({
+                when: "Users > LoginUser",
+                error: result.error || 1,
+                error_message: result.error_message || "Could not login user",
+            });
+        }
+    }).catch((error) => {
+        response.status(500).json({
+            when: "Users > LoginUser",
+            error: 1,
+            error_message: error.message,
+        });
+    });
+});
+
+// POST /users/confirm
+//
+// body:
+//   token: string (required)
+// return:
+//   result: [user]
+router.post('/confirm', async (request, response) => {
+    confirmUser(request).then((result) => {
+        if (!result.error && result !== "") {
+            // response.redirect(`http://localhost:5000/login?confirmed=true`);
+            response.status(202).json({
+                when: "Users > ConfirmUser",
+                result: result.user,
+                error: 0,
+            });
+        } else {
+            response.status(404).json({
+                when: "Users > ConfirmUser",
+                error: result.error || 1,
+                error_message: result.error_message || "Could not confirm user",
+            });
+        }
+    }).catch((error) => {
+        response.status(500).json({
+            when: "Users > ConfirmUser",
+            error: 1,
+            error_message: error.message,
+        });
+    });
+});
+
+
+router.get("/auth/google", passport.authenticate("google", { scope: ["profile", "email"], prompt: "select_account" }));
+router.get("/auth/google/callback", passport.authenticate("google", { session: false, failureRedirect: "/" }), (req, res) => {
+    const userPayload = {
+        id: req.user.id.toString(),
+        username: req.user.username,
+        provider: req.user.provider,
+    };
+
+    const token = jsonwebtoken.sign(userPayload, process.env.JWT_SECRET, { expiresIn: "1h" });
+
+    res.redirect(`http://localhost:5000/login?token=${token}`);
+});
+
 router.get(
     "/auth/facebook/callback",
     passport.authenticate("facebook", { session: false, failureRedirect: "/" }),
@@ -72,106 +305,5 @@ router.get(
         res.redirect(`http://localhost:5000/login?token=${token}`);
     }
 );
-
-// createUser
-router.post("/", async (req, res) => {
-    try {
-      const result = await createUser(req);
-  
-      if (result.error) {
-        res.status(400).json(result);
-      } else {
-        res.status(201).json(result);
-      }
-    } catch (error) {
-      console.error("Erreur interne lors de la création de l'utilisateur :", error.message);
-      res.status(500).json(createErrorResponse(ERRORS.INTERNAL_SERVER_ERROR));
-    }
-  });
-  
-
-// loginUser
-router.post("/login", async (req, res) => {
-    try {
-      const result = await loginUser(req);
-  
-      if (result.error) {
-        res.status(400).json(result); 
-      } else {
-        res.status(200).json(result);
-      }
-    } catch (error) {
-      console.error("Erreur interne lors de la connexion :", error.message);
-      res.status(500).json(createErrorResponse(ERRORS.INTERNAL_SERVER_ERROR));
-    }
-  });
-  
-
-// readUser
-router.get("/", (req, res) => {
-    readUser(req)
-        .then((result) => {
-            if (!result.error) {
-                res.status(200).json(result);
-            } else {
-                res.status(404).json({ error: result.error, error_message: result.error_message });
-            }
-        })
-        .catch((error) => {
-            res.status(500).json({ error: 1, error_message: error.message });
-        });
-});
-
-//readUser (par id..)
-router.get("/:id", (req, res) => {
-    readUser(req)
-        .then((result) => {
-            if (!result.error) {
-                res.status(200).json(result);
-            } else {
-                res.status(404).json({ error: result.error, error_message: result.error_message });
-            }
-        })
-        .catch((error) => {
-            res.status(500).json({ error: 1, error_message: error.message });
-        });
-});
-
-// updateUser
-router.put("/:id", (req, res) => {
-    updateUser(req)
-        .then((result) => {
-            if (!result.error) {
-                res.status(200).json(result);
-            } else {
-                res.status(400).json({ error: result.error, error_message: result.error_message });
-            }
-        })
-        .catch((error) => {
-            res.status(500).json({ error: 1, error_message: error.message });
-        });
-});
-
-// deleteUser
-router.delete("/:id", (req, res) => {
-    deleteUser(req)
-        .then((result) => {
-            if (!result.error) {
-                res.status(200).json(result);
-            } else {
-                res.status(404).json({ error: result.error, error_message: result.error_message });
-            }
-        })
-        .catch((error) => {
-            res.status(500).json({ error: 1, error_message: error.message });
-        });
-});
-
-// Gael, la restauration d’un utilisateur (via un deleted_at nul) n’est pas vrmt demandé comme une feature dans moodle donc pas besoin de route PATCH 
-// (je sais parce que j'ai fait analyser mon pote GPT :D)
-
-// En ce qui concerne la reinitialisation de mot de passe,
-//je vois pas non plus de explicitement demandé dans moodle donc au pire on le fera en BONUS dès qu'on aura fini l'essentiel si ça te va :)
-
 
 export default router;
