@@ -278,6 +278,7 @@ router.post('/confirm', async (request, response) => {
 
 
 router.get("/auth/google", passport.authenticate("google", { scope: ["profile", "email"], prompt: "select_account" }));
+
 router.get("/auth/google/callback", passport.authenticate("google", { session: false, failureRedirect: "/" }), (req, res) => {
     const userPayload = {
         id: req.user.id.toString(),
@@ -289,6 +290,12 @@ router.get("/auth/google/callback", passport.authenticate("google", { session: f
 
     res.redirect(`http://localhost:5000/login?token=${token}`);
 });
+
+router.get(
+    "/auth/facebook",
+    passport.authenticate("facebook", { scope: ["email", "public_profile"] })
+);
+
 
 router.get(
     "/auth/facebook/callback",
