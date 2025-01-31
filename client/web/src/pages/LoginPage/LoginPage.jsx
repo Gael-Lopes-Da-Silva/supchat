@@ -14,6 +14,7 @@ import logo from "../../assets/logo.png";
 
 import {
     loginUser,
+    updateUser,
 } from "../../services/Users";
 
 import "./LoginPage.css";
@@ -64,9 +65,9 @@ const LoginPage = () => {
         loginUser({
             email: email,
             password: password,
-        }).then((result) => {
-            if (result.error !== 0) {
-                switch (result.error) {
+        }).then((data) => {
+            if (data.error !== 0) {
+                switch (data.error) {
                     case 9:
                         toast.error("E-mail non valide.", {
                             position: "top-center",
@@ -94,7 +95,7 @@ const LoginPage = () => {
                 return;
             }
 
-            if (!result.token) {
+            if (!data.token) {
                 toast.error("Erreur lors de la connexion. Veuillez réessayer.", {
                     position: "top-center",
                 });
@@ -102,9 +103,26 @@ const LoginPage = () => {
                 return;
             }
 
-            const decodedToken = jwtDecode(result.token);
+            if (data.result.password_reset_token !== null) {
+                updateUser(data.result.id, {
+                    password_reset_token: null,
+                }).catch((error) => {
+                    toast.error("Une erreur inattendue est survenue.", {
+                        position: "top-center",
+                    });
+
+                    if (process.env.REACT_APP_DEBUG) {
+                        console.trace({
+                            from: "loginUser() -> LoginPage.jsx",
+                            error: error,
+                        });
+                    }
+                });
+            }
+
+            const decodedToken = jwtDecode(data.token);
             localStorage.setItem("user", JSON.stringify({
-                token: result.token,
+                token: data.token,
                 data: decodedToken,
             }));
 

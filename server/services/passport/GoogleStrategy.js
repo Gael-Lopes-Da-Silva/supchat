@@ -46,8 +46,8 @@ passport.use(new GoogleStrategy({
             }
 
             const result = await connection.query(
-                "INSERT INTO users (username, email, provider_id, provider, status_id) VALUES (?, ?, ?, ?, ?)",
-                [username, email, googleId, "google", 1]
+                "INSERT INTO users (username, email, provider_id, provider) VALUES (?, ?, ?, ?)",
+                [username, email, googleId, "google"]
             );
 
             const newUser = {

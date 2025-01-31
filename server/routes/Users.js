@@ -53,6 +53,7 @@ router.post("/", (request, response) => {
 //   username: string (optional)
 //   email: string (optional)
 //   password: string (optional)
+//   provider: string (optional)
 //   confirm_token: string (optional)
 //   password_reset_token: string (optional)
 // return:

@@ -123,7 +123,8 @@ const ResetPasswordPage = () => {
         event.preventDefault();
 
         readUser({
-            email: email
+            email: email,
+            provider: "local",
         }).then((data) => {
             const [user] = data.result;
             if (!user) {

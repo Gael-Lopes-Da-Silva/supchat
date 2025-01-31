@@ -39,8 +39,8 @@ passport.use(new FacebookStrategy({
             console.log("Création d'un nouvel utilisateur (Facebook)...");
 
             const result = await connection.query(
-                "INSERT INTO users (username, email, provider_id, provider,status_id) VALUES (?, ?, ?, ?, ?)",
-                [username, email, facebookId, "facebook", 1]
+                "INSERT INTO users (username, email, provider_id, provider) VALUES (?, ?, ?, ?)",
+                [username, email, facebookId, "facebook"]
             );
 
             const newUser = {
@@ -48,6 +48,7 @@ passport.use(new FacebookStrategy({
                 username,
                 email,
                 provider_id: facebookId,
+                provider: "facebook",
             };
 
             console.log("Nouvel utilisateur créé :", newUser);

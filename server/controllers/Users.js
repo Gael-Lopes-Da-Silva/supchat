@@ -59,6 +59,11 @@ export const readUser = async (request) => {
             where.push("password_reset_token = ?");
             params.push(request.query.password_reset_token);
         }
+        
+        if (request.query.provier) {
+            where.push("provider = ?");
+            params.push(request.query.provier);
+        }
 
         if (where.length > 0) {
             query += " WHERE " + where.join(" AND ");
