@@ -1,5 +1,5 @@
 export const readRole = async (query) => {
-    const response = await fetch(`${process.env.API_URL}roles?` + new URLSearchParams(query), {
+    const response = await fetch(`${process.env.REACT_APP_API_URL}roles?` + new URLSearchParams(query), {
         method: "GET",
         headers: {
             'Accept': 'application/json',

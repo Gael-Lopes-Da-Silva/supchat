@@ -21,7 +21,7 @@ export const createUser = async (request) => {
         if (user) return createErrorResponse(ERRORS.EMAIL_ALREADY_USED);
     }
 
-    return pool.query("INSERT INTO users (username, email, password, confirm_token, reset_password_token) VALUES (?, ?, ?, ?, ?)", [
+    return pool.query("INSERT INTO users (username, email, password, confirm_token, password_reset_token) VALUES (?, ?, ?, ?, ?)", [
         request.body.username,
         request.body.email,
         bcrypt.hashSync(request.body.password, 10),
@@ -74,6 +74,10 @@ export const updateUser = async (request) => {
     const [user] = await pool.query("SELECT * FROM users WHERE id = ?", [request.params.id]);
     if (!user) return createErrorResponse(ERRORS.USER_NOT_FOUND);
     if (user.deleted_at !== null) return createErrorResponse(ERRORS.USER_DELETED);
+    
+    if (request.body.password_reset_token === "random") {
+        request.body.password_reset_token = crypto.randomBytes(32).toString('hex');
+    }
 
     return pool.query("UPDATE users SET username = ?, email = ?, password = ?, confirm_token = ?, password_reset_token = ?, updated_at = NOW() WHERE id = ?", [
         request.body.username || user.username,
@@ -110,11 +114,11 @@ export const loginUser = async (request) => {
     if (!request.body.email) return createErrorResponse(ERRORS.EMAIL_NOT_PROVIDED);
     if (!request.body.password) return createErrorResponse(ERRORS.PASSWORD_NOT_PROVIDED);
 
-    const [user] = await pool.query("SELECT * FROM users WHERE email = ? AND provider = 'local'", [email]);
+    const [user] = await pool.query("SELECT * FROM users WHERE email = ? AND provider = 'local'", [request.body.email]);
     if (!user) return createErrorResponse(ERRORS.USER_NOT_FOUND);
     if (user.confirm_token !== null) return createErrorResponse(ERRORS.USER_NOT_CONFIRMED);
 
-    const match = await bcrypt.compare(password, user.password);
+    const match = await bcrypt.compare(request.body.password, user.password);
     if (!match) return createErrorResponse(ERRORS.WRONG_PASSWORD);
 
     return {

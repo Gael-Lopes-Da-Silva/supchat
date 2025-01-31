@@ -40,7 +40,7 @@ const LoginPage = () => {
                 window.history.replaceState({}, document.title, "/");
                 navigate("/dashboard");
             } catch (error) {
-                if (process.env.DEBUG) {
+                if (process.env.REACT_APP_DEBUG) {
                     console.trace({
                         from: "jwtDecode() -> LoginPage.jsx",
                         error: error,
@@ -114,7 +114,7 @@ const LoginPage = () => {
                 position: "top-center",
             });
 
-            if (process.env.DEBUG) {
+            if (process.env.REACT_APP_DEBUG) {
                 console.trace({
                     from: "loginUser() -> LoginPage.jsx",
                     error: error,
@@ -124,11 +124,11 @@ const LoginPage = () => {
     };
 
     const handleGoogle = () => {
-        window.location.href = `${process.env.API_URL}users/auth/google`;
+        window.location.href = `${process.env.REACT_APP_API_URL}users/auth/google`;
     };
 
     const handleFacebook = () => {
-        window.location.href = `https://www.facebook.com/v15.0/dialog/oauth?client_id=${process.env.FACEBOOK_CLIENT_ID}&redirect_uri=${process.env.API_URL}users/auth/facebook/callback&scope=email`;
+        window.location.href = `https://www.facebook.com/v15.0/dialog/oauth?client_id=${process.env.REACT_APP_FACEBOOK_CLIENT_ID}&redirect_uri=${process.env.REACT_APP_API_URL}users/auth/facebook/callback&scope=email`;
     };
 
     return (

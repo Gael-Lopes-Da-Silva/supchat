@@ -1,5 +1,5 @@
 export const createWorkspaceMember = async (body) => {
-    const response = await fetch(`${process.env.API_URL}workspaces/members`, {
+    const response = await fetch(`${process.env.REACT_APP_API_URL}workspaces/members`, {
         method: "POST",
         headers: {
             'Accept': 'application/json',
@@ -12,13 +12,13 @@ export const createWorkspaceMember = async (body) => {
 };
 
 export const readWorkspaceMember = async (query) => {
-    const response = query.id ? await fetch(`${process.env.API_URL}workspaces/members/` + query.id, {
+    const response = query.id ? await fetch(`${process.env.REACT_APP_API_URL}workspaces/members/` + query.id, {
         method: "GET",
         headers: {
             'Accept': 'application/json',
             'Content-Type': 'application/json'
         },
-    }) : await fetch(`${process.env.API_URL}workspaces/members?` + new URLSearchParams(query), {
+    }) : await fetch(`${process.env.REACT_APP_API_URL}workspaces/members?` + new URLSearchParams(query), {
         method: "GET",
         headers: {
             'Accept': 'application/json',
@@ -30,7 +30,7 @@ export const readWorkspaceMember = async (query) => {
 };
 
 export const updateWorkspaceMember = async (id, body) => {
-    const response = await fetch(`${process.env.API_URL}workspaces/members/` + id, {
+    const response = await fetch(`${process.env.REACT_APP_API_URL}workspaces/members/` + id, {
         method: "PUT",
         headers: {
             'Accept': 'application/json',
@@ -43,7 +43,7 @@ export const updateWorkspaceMember = async (id, body) => {
 };
 
 export const deleteWorkspaceMember = async (id) => {
-    const response = await fetch(`${process.env.API_URL}workspaces/members/` + id, {
+    const response = await fetch(`${process.env.REACT_APP_API_URL}workspaces/members/` + id, {
         method: "DELETE",
         headers: {
             'Accept': 'application/json',
@@ -55,7 +55,7 @@ export const deleteWorkspaceMember = async (id) => {
 };
 
 export const restoreWorkspaceMember = async (id) => {
-    const response = await fetch(`${process.env.API_URL}workspaces/members/` + id, {
+    const response = await fetch(`${process.env.REACT_APP_API_URL}workspaces/members/` + id, {
         method: "PATCH",
         headers: {
             'Accept': 'application/json',

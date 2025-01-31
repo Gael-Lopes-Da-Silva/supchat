@@ -1,5 +1,5 @@
 export const createChannelPermission = async (body) => {
-    const response = await fetch(`${process.env.API_URL}channels/permissions`, {
+    const response = await fetch(`${process.env.REACT_APP_API_URL}channels/permissions`, {
         method: "POST",
         headers: {
             'Accept': 'application/json',
@@ -12,13 +12,13 @@ export const createChannelPermission = async (body) => {
 };
 
 export const readChannelPermission = async (query) => {
-    const response = query.id ? await fetch(`${process.env.API_URL}channels/permissions/` + query.id, {
+    const response = query.id ? await fetch(`${process.env.REACT_APP_API_URL}channels/permissions/` + query.id, {
         method: "GET",
         headers: {
             'Accept': 'application/json',
             'Content-Type': 'application/json'
         },
-    }) : await fetch(`${process.env.API_URL}channels/permissions?` + new URLSearchParams(query), {
+    }) : await fetch(`${process.env.REACT_APP_API_URL}channels/permissions?` + new URLSearchParams(query), {
         method: "GET",
         headers: {
             'Accept': 'application/json',
@@ -30,7 +30,7 @@ export const readChannelPermission = async (query) => {
 };
 
 export const deleteChannelPermission = async (user_id, channel_id, permission_id) => {
-    const response = await fetch(`${process.env.API_URL}channels/permissions/user/` + user_id + '/channel/' + channel_id + '/permission/' + permission_id, {
+    const response = await fetch(`${process.env.REACT_APP_API_URL}channels/permissions/user/` + user_id + '/channel/' + channel_id + '/permission/' + permission_id, {
         method: "DELETE",
         headers: {
             'Accept': 'application/json',

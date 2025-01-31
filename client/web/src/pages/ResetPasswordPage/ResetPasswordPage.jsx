@@ -1,56 +1,68 @@
-import * as react from 'react';
-import * as reactdom from 'react-router-dom';
-import * as reactdevices from 'react-device-detect';
-import * as reacttoastify from 'react-toastify';
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 
+import Button from '../../components/Button/Button';
+import InputField from '../../components/InputField/InputField';
+import Link from '../../components/Link/Link';
+
+import * as PasswordReset from "../../emails/PasswordReset";
+import * as PostPasswordReset from "../../emails/PostPasswordReset";
+
+import {
+    sendEmail,
+} from '../../services/Services/Email';
 import {
     readUser,
     updateUser,
 } from '../../services/Users';
 
-import InputField from '../../components/InputField/InputField';
-import Button from '../../components/Button/Button';
-import Link from '../../components/Link/Link';
 import logo from "../../assets/logo.png";
 
 import './ResetPasswordPage.css';
 
 const ResetPasswordPage = () => {
-    const [email, setEmail] = react.useState('');
-    const [password, setPassword] = react.useState('');
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [checkPassword, setCheckPassword] = useState('');
+    const [checkMail, setCheckMail] = useState(false);
+    const [theme, setTheme] = useState('light');
+    const [user, setUser] = useState('');
 
-    const [checkPassword, setCheckPassword] = react.useState('');
-    const [checkMail, setCheckMail] = react.useState(false);
-    
-    const [theme, setTheme] = react.useState('light');
+    const navigate = useNavigate();
 
-    const [user, setUser] = react.useState('');
-
-    const navigate = reactdom.useNavigate();
-
-    react.useEffect(() => {
+    useEffect(() => {
         const query = new URLSearchParams(window.location.search);
-        if (query.get("token") !== null) {
+        const password_reset_token = query.get("password_reset_token");
+
+        if (password_reset_token) {
             setCheckMail(true);
 
             readUser({
-                reset_password_token: query.get("token")
+                password_reset_token: password_reset_token
             }).then((data) => {
                 const [user] = data.result;
-                if (!user) {
-                    navigate("/login");
-                }
-
+                if (!user) navigate("/login");
+                
                 setUser(user);
             }).catch((error) => {
-                if (process.env.REACT_APP_ENV === "dev") console.error(error);
+                toast.error("Une erreur inattendue est survenue.", {
+                    position: "top-center",
+                });
+
+                if (process.env.REACT_APP_DEBUG) {
+                    console.trace({
+                        from: "readUser() -> ResetPasswordPage.jsx",
+                        error: error,
+                    });
+                }
             });
         }
 
         if (localStorage.getItem('user')) {
             navigate("/dashboard");
         }
-        
+
         if (localStorage.getItem('gui.theme')) {
             setTheme(localStorage.getItem('gui.theme'));
         }
@@ -60,52 +72,128 @@ const ResetPasswordPage = () => {
         event.preventDefault();
 
         if (password !== checkPassword) {
-            reacttoastify.toast.error("Les mots de passes sont différent.", {
+            toast.error("Les mots de passes sont différent.", {
                 position: "top-center",
             });
+
             return;
         }
 
-        updateUser(user && user.id, {
+        updateUser(user.id, {
             password: password,
             reset_password_token: null,
-        }).then((data) => {
-            // TODO: Envoyer un mail pour informer du changement de mot de passe
-            navigate("/login", { state: { password_reseted: true } })
+        }).then((_) => {
+            sendEmail({
+                to: user.email,
+                subject: PostPasswordReset.subject(),
+                content: PostPasswordReset.content(),
+            }).catch((error) => {
+                toast.error("Une erreur inattendue est survenue.", {
+                    position: "top-center",
+                });
+
+                if (process.env.REACT_APP_DEBUG) {
+                    console.trace({
+                        from: "sendEmail() -> ResetPasswordPage.jsx",
+                        error: error,
+                    });
+                }
+            });
+
+            toast.success("Votre nouveau mot de passe a été enregistré.", {
+                position: "top-center",
+            });
+
+            navigate("/login")
         }).catch((error) => {
-            if (process.env.REACT_APP_ENV === "dev") console.error(error);
+            toast.error("Une erreur inattendue est survenue.", {
+                position: "top-center",
+            });
+
+            if (process.env.REACT_APP_DEBUG) {
+                console.trace({
+                    from: "updateUser() -> ResetPasswordPage.jsx",
+                    error: error,
+                });
+            }
         });
     };
 
     const handleCheckEmail = async (event) => {
         event.preventDefault();
-        const token = Math.random().toString(36);
 
         readUser({
             email: email
         }).then((data) => {
             const [user] = data.result;
             if (!user) {
-                reacttoastify.toast.error("E-mail non valide.", {
+                toast.error("E-mail non valide.", {
                     position: "top-center",
                 });
+
                 return;
             }
 
             updateUser(user.id, {
-                reset_password_token: token,
-            }).then((data) => {
-                // TODO: Envoyer un mail avec le lien de réinitialisation de mot de passe
-                reacttoastify.toast.success("Veuillez réinitialiser votre mot de passe à cette adresse: " + window.location.protocol + '//' + window.location.host + "/reset_password?token=" + token, {
+                password_reset_token: "random",
+            }).then((_) => {
+                readUser({
+                    email: email
+                }).then((data) => {
+                    const [user] = data.result;
+
+                    sendEmail({
+                        to: user.email,
+                        subject: PasswordReset.subject(),
+                        content: PasswordReset.content(user.password_reset_token),
+                    }).catch((error) => {
+                        toast.error("Une erreur inattendue est survenue.", {
+                            position: "top-center",
+                        });
+
+                        if (process.env.REACT_APP_DEBUG) {
+                            console.trace({
+                                from: "sendMail() -> ResetPasswordPage.jsx",
+                                error: error,
+                            });
+                        }
+                    });
+
+                    toast.success("Un mail de modification de mot de passe vous a été envoyer, veuillez vérifer votre boîte mail.", {
+                        position: "top-center",
+                    });
+                    
+                    navigate("/login");
+                });
+            }).catch((error) => {
+                toast.error("Une erreur inattendue est survenue.", {
                     position: "top-center",
                 });
-            }).catch((error) => { if (process.env.REACT_APP_ENV === "dev") console.error(error); });
-        }).catch((error) => { if (process.env.REACT_APP_ENV === "dev") console.error(error); });
+
+                if (process.env.REACT_APP_DEBUG) {
+                    console.trace({
+                        from: "updateUser() -> ResetPasswordPage.jsx",
+                        error: error,
+                    });
+                }
+            });
+        }).catch((error) => {
+            toast.error("Une erreur inattendue est survenue.", {
+                position: "top-center",
+            });
+
+            if (process.env.REACT_APP_DEBUG) {
+                console.trace({
+                    from: "readUser() -> ResetPasswordPage.jsx",
+                    error: error,
+                });
+            }
+        });
     }
 
     return (
         <div className={`reset-password-container ${theme}`}>
-            <a className='reset-password-logo' href='/' style={reactdevices.isMobile ? { display: 'none' } : {}}>
+            <a className='reset-password-logo' href='/'>
                 <img src={logo} alt="Supchat logo" />
                 <p>Supchat</p>
             </a>
@@ -126,7 +214,7 @@ const ResetPasswordPage = () => {
                         </div>
                         <div>
                             <Button type="submit" text="Enregistrer" theme={theme} />
-                            <p>Pas de compte ? <Link text="En créer un maintenant !" onClick={() => {navigate("/register")}} /></p>
+                            <p>Pas de compte ? <Link text="En créer un maintenant !" onClick={() => { navigate("/register") }} /></p>
                         </div>
                     </form>
                 </div>

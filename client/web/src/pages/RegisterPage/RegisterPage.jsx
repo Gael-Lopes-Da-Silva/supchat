@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 
@@ -8,6 +8,7 @@ import InputField from "../../components/InputField/InputField";
 import Link from "../../components/Link/Link";
 
 import * as ConfirmationEmail from "../../emails/Confirmation";
+import * as PostConfirmationEmail from "../../emails/PostConfirmation";
 
 import {
     sendEmail,
@@ -38,13 +39,30 @@ const RegisterPage = () => {
         if (confirm_token) {
             readUser({
                 confirm_token: confirm_token,
-            }).then((result) => {
-                if (result.lenght !== 0) {
-                    const [user] = result;
+            }).then((data) => {
+                if (data.result.lenght !== 0) {
+                    const [user] = data.result;
 
                     updateUser(user.id, {
                         confirm_token: null,
-                    }).then((_) => {
+                    }).then((data) => {
+                        sendEmail({
+                            to: user.email,
+                            subject: PostConfirmationEmail.subject(),
+                            content: PostConfirmationEmail.content(),
+                        }).catch((error) => {
+                            toast.error("Une erreur inattendue est survenue.", {
+                                position: "top-center",
+                            });
+
+                            if (process.env.REACT_APP_DEBUG) {
+                                console.trace({
+                                    from: "sendMail() -> RegisterPage.jsx",
+                                    error: error,
+                                });
+                            }
+                        });
+
                         toast.success("Votre compte a bien été confirmé. Maintenant, veuillez vous authentifier.", {
                             position: "top-center",
                         });
@@ -55,7 +73,7 @@ const RegisterPage = () => {
                             position: "top-center",
                         });
 
-                        if (process.env.DEBUG) {
+                        if (process.env.REACT_APP_DEBUG) {
                             console.trace({
                                 from: "updateUser() -> RegisterPage.jsx",
                                 error: error,
@@ -63,12 +81,12 @@ const RegisterPage = () => {
                         }
                     });
                 }
-            }).error((error) => {
+            }).catch((error) => {
                 toast.error("Une erreur inattendue est survenue.", {
                     position: "top-center",
                 });
 
-                if (process.env.DEBUG) {
+                if (process.env.REACT_APP_DEBUG) {
                     console.trace({
                         from: "readUser() -> RegisterPage.jsx",
                         error: error,
@@ -94,9 +112,9 @@ const RegisterPage = () => {
             username: username,
             email: email,
             password: password,
-        }).then((result) => {
-            if (result.error !== 0) {
-                switch (result.error) {
+        }).then((data) => {
+            if (data.error !== 0) {
+                switch (data.error) {
                     case 4:
                         toast.error("Ce pseudo est déjà utilisé par un autre utilisateur.", {
                             position: "top-center",
@@ -117,40 +135,37 @@ const RegisterPage = () => {
                 return;
             }
 
-            setUsername("");
-            setEmail("");
-            setPassword("");
-            setChecked(false);
-
             readUser({
-                id: result.insertId,
-            }).then((result) => {
+                id: data.result.insertId,
+            }).then((data) => {
                 sendEmail({
                     to: email,
                     subject: ConfirmationEmail.subject(),
-                    body: ConfirmationEmail.body(result.confirm_token),
-                }).then((result) => {
-                    toast.success("Votre compte a été créé. Veuillez vérifier votre boîte mail afin de confirmer votre compte et de pouvoir vous authentifier.", {
-                        position: "top-center",
-                    });
+                    content: ConfirmationEmail.content(data.result.confirm_token),
                 }).catch((error) => {
                     toast.error("Une erreur inattendue est survenue.", {
                         position: "top-center",
                     });
 
-                    if (process.env.DEBUG) {
+                    if (process.env.REACT_APP_DEBUG) {
                         console.trace({
                             from: "sendMail() -> RegisterPage.jsx",
                             error: error,
                         });
                     }
                 });
+
+                toast.success("Votre compte a été créé. Veuillez vérifier votre boîte mail afin de confirmer votre compte et de pouvoir vous authentifier.", {
+                    position: "top-center",
+                });
+
+                navigate("/login");
             }).catch((error) => {
                 toast.error("Une erreur inattendue est survenue.", {
                     position: "top-center",
                 });
 
-                if (process.env.DEBUG) {
+                if (process.env.REACT_APP_DEBUG) {
                     console.trace({
                         from: "readUser() -> RegisterPage.jsx",
                         error: error,
@@ -162,7 +177,7 @@ const RegisterPage = () => {
                 position: "top-center",
             });
 
-            if (process.env.DEBUG) {
+            if (process.env.REACT_APP_DEBUG) {
                 console.trace({
                     from: "createUser() -> RegisterPage.jsx",
                     error: error,
@@ -218,6 +233,7 @@ const RegisterPage = () => {
                         <Checkbox
                             theme={theme}
                             onChange={() => setChecked(!checked)}
+                            required={true}
                             label={
                                 <p>
                                     J'ai lu et j'accepte les{" "}
