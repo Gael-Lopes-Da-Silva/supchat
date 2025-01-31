@@ -9,7 +9,6 @@ import ChannelsRouter from "./routes/Channels.js";
 import PermissionsRouter from "./routes/Permissions.js";
 import RolePermissionsRouter from "./routes/RolePermissions.js";
 import RolesRouter from "./routes/Roles.js";
-import StatusRouter from "./routes/Status.js";
 import UsersRouter from "./routes/Users.js";
 import WorkspaceInvitationsRouter from "./routes/WorkspaceInvitations.js";
 import WorkspaceMembersRouter from "./routes/WorkspaceMembers.js";
@@ -36,7 +35,6 @@ pool.getConnection().then((connection) => {
     }));
 
     app.use("/users/", UsersRouter);
-    app.use("/status/", StatusRouter);
     app.use("/permissions/", PermissionsRouter);
 
     app.use("/workspaces/invitations/", WorkspaceInvitationsRouter);

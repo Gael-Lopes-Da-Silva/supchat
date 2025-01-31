@@ -21,11 +21,6 @@ export const createUser = async (request) => {
         if (user) return createErrorResponse(ERRORS.EMAIL_ALREADY_USED);
     }
 
-    if (request.body.status_id) {
-        const [status] = await pool.query("SELECT * FROM status WHERE id = ?", [request.body.status_id]);
-        if (!status) return createErrorResponse(ERRORS.STATUS_NOT_FOUND);
-    }
-
     return pool.query("INSERT INTO users (username, email, password, confirm_token, reset_password_token) VALUES (?, ?, ?, ?, ?)", [
         request.body.username,
         request.body.email,

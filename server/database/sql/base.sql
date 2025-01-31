@@ -1,28 +1,9 @@
--- STATUS
-CREATE TABLE status (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(50) NOT NULL UNIQUE
-);
-
-INSERT INTO status (name)
-VALUES
-    ('offline'),
-    ('online'),
-    ('inactive'),
-    ('do_not_disturb'),
-    ('mobile_offline'),
-    ('mobile_online'),
-    ('mobile_inactive'),
-    ('mobile_do_not_disturb');
-
 -- USERS
-
 CREATE TABLE users (
     id INT AUTO_INCREMENT PRIMARY KEY,
     username VARCHAR(50) NOT NULL UNIQUE,
     email VARCHAR(100) NOT NULL,
     password TEXT DEFAULT NULL,
-    status_id INT NOT NULL,
     provider_id VARCHAR(255) DEFAULT NULL,
     provider VARCHAR(50) DEFAULT 'local',
     confirm_token VARCHAR(255) DEFAULT NULL,
