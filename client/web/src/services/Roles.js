@@ -1,5 +1,5 @@
 export const readRole = async (query) => {
-    const response = await fetch('http://localhost:3000/roles?' + new URLSearchParams(query), {
+    const response = await fetch(`${process.env.API_URL}roles?` + new URLSearchParams(query), {
         method: "GET",
         headers: {
             'Accept': 'application/json',

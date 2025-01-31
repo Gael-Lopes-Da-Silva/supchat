@@ -1,5 +1,5 @@
-export const createChannel = async(body) => {
-    const response = await fetch('http://localhost:3000/channels', {
+export const createChannel = async (body) => {
+    const response = await fetch(`${process.env.API_URL}channels`, {
         method: "POST",
         headers: {
             'Accept': 'application/json',
@@ -12,7 +12,13 @@ export const createChannel = async(body) => {
 };
 
 export const readChannel = async (query) => {
-    const response = await fetch('http://localhost:3000/channels?' + new URLSearchParams(query), {
+    const response = query.id ? await fetch(`${process.env.API_URL}channels/` + query.id, {
+        method: "GET",
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+        },
+    }) : await fetch(`${process.env.API_URL}channels?` + new URLSearchParams(query), {
         method: "GET",
         headers: {
             'Accept': 'application/json',
@@ -24,7 +30,7 @@ export const readChannel = async (query) => {
 };
 
 export const updateChannel = async (id, body) => {
-    const response = await fetch('http://localhost:3000/channels/' + id, {
+    const response = await fetch(`${process.env.API_URL}channels/` + id, {
         method: "PUT",
         headers: {
             'Accept': 'application/json',
@@ -37,7 +43,7 @@ export const updateChannel = async (id, body) => {
 };
 
 export const deleteChannel = async (id) => {
-    const response = await fetch('http://localhost:3000/channels/' + id, {
+    const response = await fetch(`${process.env.API_URL}channels/` + id, {
         method: "DELETE",
         headers: {
             'Accept': 'application/json',
@@ -49,7 +55,7 @@ export const deleteChannel = async (id) => {
 };
 
 export const restoreChannel = async (id) => {
-    const response = await fetch('http://localhost:3000/channels/' + id, {
+    const response = await fetch(`${process.env.API_URL}channels/` + id, {
         method: "PATCH",
         headers: {
             'Accept': 'application/json',

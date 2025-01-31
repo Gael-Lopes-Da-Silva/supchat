@@ -7,13 +7,18 @@ import Checkbox from "../../components/Checkbox/Checkbox";
 import InputField from "../../components/InputField/InputField";
 import Link from "../../components/Link/Link";
 
-import logo from "../../assets/logo.png";
+import * as ConfirmationEmail from "../../emails/Confirmation";
 
+import {
+    sendEmail,
+} from "../../services/Services/Email";
 import {
     createUser,
     readUser,
     updateUser,
 } from "../../services/Users";
+
+import logo from "../../assets/logo.png";
 
 import "./RegisterPage.css";
 
@@ -28,20 +33,48 @@ const RegisterPage = () => {
 
     useEffect(() => {
         const query = new URLSearchParams(window.location.search);
-        const token = query.get("token");
+        const confirm_token = query.get("confirm_token");
 
-        if (token) {
-            // confirmUser({token: token}).then((response) => {
-            //     if (response.error === 0) {
-            //         toast.success(response.message, { position: "top-center" });
-            //     } else {
-            //         toast.error("La confirmation a échoué. Réessayez.", { position: "top-center" });
-            //     }
-            // }).catch(() => {
-            //     toast.error("Erreur lors de la confirmation de l'email.", { position: "top-center" });
-            // }).finally(() => {
-            //     navigate("/login");
-            // });
+        if (confirm_token) {
+            readUser({
+                confirm_token: confirm_token,
+            }).then((result) => {
+                if (result.lenght !== 0) {
+                    const [user] = result;
+
+                    updateUser(user.id, {
+                        confirm_token: null,
+                    }).then((_) => {
+                        toast.success("Votre compte a bien été confirmé. Maintenant, veuillez vous authentifier.", {
+                            position: "top-center",
+                        });
+
+                        navigate("/login");
+                    }).catch((error) => {
+                        toast.error("Une erreur inattendue est survenue.", {
+                            position: "top-center",
+                        });
+
+                        if (process.env.DEBUG) {
+                            console.trace({
+                                from: "updateUser() -> RegisterPage.jsx",
+                                error: error,
+                            });
+                        }
+                    });
+                }
+            }).error((error) => {
+                toast.error("Une erreur inattendue est survenue.", {
+                    position: "top-center",
+                });
+
+                if (process.env.DEBUG) {
+                    console.trace({
+                        from: "readUser() -> RegisterPage.jsx",
+                        error: error,
+                    });
+                }
+            });
         }
 
         if (localStorage.getItem("user")) {
@@ -56,11 +89,14 @@ const RegisterPage = () => {
 
     const handleSubmit = async (event) => {
         event.preventDefault();
-        try {
-            const data = await createUser({ username, email, password });
 
-            if (data.error !== 0) {
-                switch (data.error) {
+        createUser({
+            username: username,
+            email: email,
+            password: password,
+        }).then((result) => {
+            if (result.error !== 0) {
+                switch (result.error) {
                     case 4:
                         toast.error("Ce pseudo est déjà utilisé par un autre utilisateur.", {
                             position: "top-center",
@@ -86,17 +122,54 @@ const RegisterPage = () => {
             setPassword("");
             setChecked(false);
 
-            toast.success("Votre compte a été créé. Veuillez vérifier votre boîte mail pour confirmer votre adresse email avant de vous connecter.", {
+            readUser({
+                id: result.insertId,
+            }).then((result) => {
+                sendEmail({
+                    to: email,
+                    subject: ConfirmationEmail.subject(),
+                    body: ConfirmationEmail.body(result.confirm_token),
+                }).then((result) => {
+                    toast.success("Votre compte a été créé. Veuillez vérifier votre boîte mail afin de confirmer votre compte et de pouvoir vous authentifier.", {
+                        position: "top-center",
+                    });
+                }).catch((error) => {
+                    toast.error("Une erreur inattendue est survenue.", {
+                        position: "top-center",
+                    });
+
+                    if (process.env.DEBUG) {
+                        console.trace({
+                            from: "sendMail() -> RegisterPage.jsx",
+                            error: error,
+                        });
+                    }
+                });
+            }).catch((error) => {
+                toast.error("Une erreur inattendue est survenue.", {
+                    position: "top-center",
+                });
+
+                if (process.env.DEBUG) {
+                    console.trace({
+                        from: "readUser() -> RegisterPage.jsx",
+                        error: error,
+                    });
+                }
+            });
+        }).catch((error) => {
+            toast.error("Une erreur inattendue est survenue.", {
                 position: "top-center",
             });
 
-            navigate("/login");
-        } catch (err) {
-            console.error("Erreur inconnue lors de l'inscription :", err);
-            toast.error("Une erreur inattendue est survenue.", { position: "top-center" });
-        }
+            if (process.env.DEBUG) {
+                console.trace({
+                    from: "createUser() -> RegisterPage.jsx",
+                    error: error,
+                });
+            }
+        });
     };
-
 
     return (
         <div className={`register-container ${theme}`}>

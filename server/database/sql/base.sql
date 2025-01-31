@@ -7,7 +7,7 @@ CREATE TABLE users (
     provider_id VARCHAR(255) DEFAULT NULL,
     provider VARCHAR(50) DEFAULT 'local',
     confirm_token VARCHAR(255) DEFAULT NULL,
-    password_reset_token VARCHAR(255) DEFAULT NULL,
+    reset_password_token VARCHAR(255) DEFAULT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NULL,
     deleted_at TIMESTAMP NULL,

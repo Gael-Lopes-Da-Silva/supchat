@@ -1,5 +1,5 @@
-export const createWorkspacePermission = async(body) => {
-    const response = await fetch('http://localhost:3000/workspaces/permissions', {
+export const createWorkspacePermission = async (body) => {
+    const response = await fetch(`${process.env.API_URL}workspaces/permissions`, {
         method: "POST",
         headers: {
             'Accept': 'application/json',
@@ -12,7 +12,13 @@ export const createWorkspacePermission = async(body) => {
 };
 
 export const readWorkspacePermission = async (query) => {
-    const response = await fetch('http://localhost:3000/workspaces/permissions?' + new URLSearchParams(query), {
+    const response = query.id ? await fetch(`${process.env.API_URL}workspaces/permissions/` + query.id, {
+        method: "GET",
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+        },
+    }) : await fetch(`${process.env.API_URL}workspaces/permissions?` + new URLSearchParams(query), {
         method: "GET",
         headers: {
             'Accept': 'application/json',
@@ -24,7 +30,7 @@ export const readWorkspacePermission = async (query) => {
 };
 
 export const deleteWorkspacePermission = async (user_id, workspace_id, permission_id) => {
-    const response = await fetch('http://localhost:3000/workspaces/permissions/user/' + user_id + '/workspace/' + workspace_id + '/permission/' + permission_id, {
+    const response = await fetch(`${process.env.API_URL}workspaces/permissions/user/` + user_id + '/workspace/' + workspace_id + '/permission/' + permission_id, {
         method: "DELETE",
         headers: {
             'Accept': 'application/json',

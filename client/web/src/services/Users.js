@@ -1,5 +1,5 @@
 export const createUser = async (body) => {
-    const response = await fetch('http://localhost:3000/users', {
+    const response = await fetch(`${process.env.API_URL}users`, {
         method: "POST",
         headers: {
             'Accept': 'application/json',
@@ -12,7 +12,13 @@ export const createUser = async (body) => {
 };
 
 export const readUser = async (query) => {
-    const response = await fetch('http://localhost:3000/users?' + new URLSearchParams(query), {
+    const response = query.id ? await fetch(`${process.env.API_URL}users/` + query.id, {
+        method: "GET",
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+        },
+    }) : await fetch(`${process.env.API_URL}users?` + new URLSearchParams(query), {
         method: "GET",
         headers: {
             'Accept': 'application/json',
@@ -24,7 +30,7 @@ export const readUser = async (query) => {
 };
 
 export const updateUser = async (id, body) => {
-    const response = await fetch('http://localhost:3000/users/' + id, {
+    const response = await fetch(`${process.env.API_URL}users/` + id, {
         method: "PUT",
         headers: {
             'Accept': 'application/json',
@@ -37,7 +43,7 @@ export const updateUser = async (id, body) => {
 };
 
 export const deleteUser = async (id) => {
-    const response = await fetch('http://localhost:3000/users/' + id, {
+    const response = await fetch(`${process.env.API_URL}users/` + id, {
         method: "DELETE",
         headers: {
             'Accept': 'application/json',
@@ -49,7 +55,7 @@ export const deleteUser = async (id) => {
 };
 
 export const restoreUser = async (id) => {
-    const response = await fetch('http://localhost:3000/users/' + id, {
+    const response = await fetch(`${process.env.API_URL}users/` + id, {
         method: "PATCH",
         headers: {
             'Accept': 'application/json',
@@ -62,7 +68,7 @@ export const restoreUser = async (id) => {
 
 
 export const loginUser = async (body) => {
-    const response = await fetch('http://localhost:3000/users/login', {
+    const response = await fetch(`${process.env.API_URL}users/login`, {
         method: "POST",
         headers: {
             'Accept': 'application/json',
