@@ -11,7 +11,8 @@ import logo from "../../assets/logo.png";
 
 import {
     createUser,
-    confirmUser,
+    readUser,
+    updateUser,
 } from "../../services/Users";
 
 import "./RegisterPage.css";
@@ -30,17 +31,17 @@ const RegisterPage = () => {
         const token = query.get("token");
 
         if (token) {
-            confirmUser({token: token}).then((response) => {
-                if (response.error === 0) {
-                    toast.success(response.message, { position: "top-center" });
-                } else {
-                    toast.error("La confirmation a échoué. Réessayez.", { position: "top-center" });
-                }
-            }).catch(() => {
-                toast.error("Erreur lors de la confirmation de l'email.", { position: "top-center" });
-            }).finally(() => {
-                navigate("/login");
-            });
+            // confirmUser({token: token}).then((response) => {
+            //     if (response.error === 0) {
+            //         toast.success(response.message, { position: "top-center" });
+            //     } else {
+            //         toast.error("La confirmation a échoué. Réessayez.", { position: "top-center" });
+            //     }
+            // }).catch(() => {
+            //     toast.error("Erreur lors de la confirmation de l'email.", { position: "top-center" });
+            // }).finally(() => {
+            //     navigate("/login");
+            // });
         }
 
         if (localStorage.getItem("user")) {
@@ -53,8 +54,8 @@ const RegisterPage = () => {
         }
     }, [navigate]);
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
+    const handleSubmit = async (event) => {
+        event.preventDefault();
         try {
             const data = await createUser({ username, email, password });
 

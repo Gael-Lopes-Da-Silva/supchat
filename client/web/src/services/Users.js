@@ -73,16 +73,3 @@ export const loginUser = async (body) => {
 
     return await response.json();
 };
-
-export const confirmUser = async (body) => {
-    const response = await fetch('http://localhost:3000/users/confirm', {
-        method: "POST",
-        headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(body)
-    });
-
-    return await response.json();
-};
