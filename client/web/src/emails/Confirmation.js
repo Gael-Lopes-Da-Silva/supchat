@@ -5,7 +5,7 @@ export const content = (confirm_token) => `
 <p>Merci de vous être inscrit sur <strong>Supchat</strong> !</p>
 <p>Veuillez confirmer votre adresse e-mail en cliquant sur le bouton ci-dessous :</p>
 
-<a href="http://localhost:5000/register?confirm_token=${confirm_token}" style="display: inline-block; padding: 12px 24px; background-color: #007bff; color: #fff; text-decoration: none; font-weight: bold; border-radius: 5px;">
+<a href="${process.env.REACT_APP_BASE_URL}register?confirm_token=${confirm_token}" style="display: inline-block; padding: 12px 24px; background-color: #007bff; color: #fff; text-decoration: none; font-weight: bold; border-radius: 5px;">
     Confirmer mon compte
 </a>
 

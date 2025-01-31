@@ -1,17 +1,21 @@
-/* eslint-disable react-hooks/exhaustive-deps */
 import { useEffect, useRef, useState } from "react";
-import * as Fa from "react-icons/fa6";
 import { useNavigate } from "react-router-dom";
 
-
-import { readWorkspaceMember } from "../../services/WorkspaceMembers";
-import { createWorkspace, readWorkspace } from "../../services/Workspaces";
+import * as Fa from "react-icons/fa6";
 
 import Button from "../../components/Button/Button";
 import Checkbox from "../../components/Checkbox/Checkbox";
 import InputField from "../../components/InputField/InputField";
 import Modal from "../../components/Modal/Modal";
 import Popup from "../../components/Popup/Popup";
+
+import {
+    readWorkspaceMember,
+} from "../../services/WorkspaceMembers";
+import {
+    createWorkspace,
+    readWorkspace,
+} from "../../services/Workspaces";
 
 import "./DashboardPage.css";
 
