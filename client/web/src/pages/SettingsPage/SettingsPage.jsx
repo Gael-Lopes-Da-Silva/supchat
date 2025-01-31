@@ -10,6 +10,7 @@ import "./SettingsPage.css"
 
 const SettingsPage = () => {
     const [user, setUser] = react.useState('');
+    const [theme, setTheme] = react.useState(localStorage.getItem('gui.theme') ?? 'light');
 
     const [guiVisibility, setGuiVisibility] = react.useState({
         settingsMenu: {
@@ -18,18 +19,10 @@ const SettingsPage = () => {
         },
     });
 
-    const [theme, setTheme] = react.useState('light');
-
     const navigate = reactdom.useNavigate();
 
     react.useEffect(() => {
-        authentificationHook();
-
         setUser(JSON.parse(localStorage.getItem('user')).data);
-
-        if (localStorage.getItem('gui.theme')) {
-            setTheme(localStorage.getItem('gui.theme'));
-        }
     }, []);
 
     const updateGuiState = (key, value) => {

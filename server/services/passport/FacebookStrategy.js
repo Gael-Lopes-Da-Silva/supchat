@@ -11,9 +11,6 @@ passport.use(new FacebookStrategy({
     profileFields: ["id", "displayName", "photos", "email"],
 }, async (accessToken, refreshToken, profile, done) => {
     try {
-        console.log("Access Token:", accessToken);
-        console.log("Profile:", profile);
-
         const facebookId = profile.id;
         const email = profile.emails ? profile.emails[0].value : null;
         const username = profile.displayName || `facebook_${facebookId}`;
@@ -32,11 +29,8 @@ passport.use(new FacebookStrategy({
             );
 
             if (rows.length > 0) {
-                console.log("Utilisateur existant (Facebook) :", rows[0]);
                 return done(null, rows[0]);
             }
-
-            console.log("Création d'un nouvel utilisateur (Facebook)...");
 
             const result = await connection.query(
                 "INSERT INTO users (username, email, provider_id, provider) VALUES (?, ?, ?, ?)",
@@ -51,13 +45,11 @@ passport.use(new FacebookStrategy({
                 provider: "facebook",
             };
 
-            console.log("Nouvel utilisateur créé :", newUser);
             return done(null, newUser);
         } finally {
             connection.release();
         }
     } catch (error) {
-        console.error("Erreur dans FacebookStrategy :", error.message);
         return done(error);
     }
 }));

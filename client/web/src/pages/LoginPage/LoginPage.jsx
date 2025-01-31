@@ -22,7 +22,7 @@ import "./LoginPage.css";
 const LoginPage = () => {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
-    const [theme, setTheme] = useState("light");
+    const [theme] = useState(localStorage.getItem("gui.theme") ?? "light");
 
     const navigate = useNavigate();
 
@@ -52,10 +52,6 @@ const LoginPage = () => {
 
         if (localStorage.getItem("user")) {
             navigate("/dashboard");
-        }
-
-        if (localStorage.getItem("gui.theme")) {
-            setTheme(localStorage.getItem("gui.theme"));
         }
     }, [navigate]);
 

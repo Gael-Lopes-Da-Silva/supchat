@@ -20,6 +20,7 @@ import {
 import "./DashboardPage.css";
 
 const DashboardPage = () => {
+    const [theme] = useState(localStorage.getItem("gui.theme") ?? "light");
     const [user, setUser] = useState("");
     const [workspaces, setWorkspaces] = useState({});
     const [selectedWorkspace, setSelectedWorkspace] = useState({});
@@ -29,7 +30,6 @@ const DashboardPage = () => {
     const [workspaceDescription, setWorkspaceDescription] = useState("");
     const [workspaceIsPrivate, setWorkspaceIsPrivate] = useState(false);
     const [workspaceInvitation, setWorkspaceInvitation] = useState("");
-    const [theme, setTheme] = useState("light");
     const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
     const [guiVisibility, setGuiVisibility] = useState({
         userList: false,
@@ -83,40 +83,33 @@ const DashboardPage = () => {
 
         readWorkspaceMember({
             user_id: user.id,
-        })
-            .then((data) => {
-
-                const workspacePromises = data.result.map(async (workspaceMember) => {
-                    return readWorkspace({ id: workspaceMember.workspace_id })
-                        .then((data) => ({
-                            id: data.result.id,
-                            data: data.result,
-                        }))
-                        .catch((error) => {
-                            if (process.env.REACT_APP_ENV === "dev") console.error(error);
-                        });
-                });
-
-                Promise.all(workspacePromises).then((results) => {
-                    const newWorkspaces = {};
-                    results.forEach((workspace) => {
-                        if (workspace) {
-                            newWorkspaces[workspace.id] = workspace.data;
-                        }
+        }).then((data) => {
+            const workspacePromises = data.result.map(async (workspaceMember) => {
+                return readWorkspace({ id: workspaceMember.workspace_id })
+                    .then((data) => ({
+                        id: data.result.id,
+                        data: data.result,
+                    }))
+                    .catch((error) => {
+                        if (process.env.REACT_APP_ENV === "dev") console.error(error);
                     });
-                    setWorkspaces(newWorkspaces);
-                });
-            })
-            .catch((error) => {
-                if (process.env.REACT_APP_ENV === "dev") console.error(error);
             });
+
+            Promise.all(workspacePromises).then((results) => {
+                const newWorkspaces = {};
+                results.forEach((workspace) => {
+                    if (workspace) {
+                        newWorkspaces[workspace.id] = workspace.data;
+                    }
+                });
+                setWorkspaces(newWorkspaces);
+            });
+        }).catch((error) => {
+            if (process.env.REACT_APP_ENV === "dev") console.error(error);
+        });
 
         const showUserList = localStorage.getItem("gui.dashboard.show_user_list");
         if (showUserList !== null) updateGuiState("userList", showUserList === "true");
-
-        if (localStorage.getItem("gui.theme")) {
-            setTheme(localStorage.getItem("gui.theme"));
-        }
     }, [user]);
 
     const updateGuiState = (key, value) => {
@@ -141,27 +134,6 @@ const DashboardPage = () => {
 
     const hideAllModal = () => {
         updateModalState("workspace", false);
-    };
-
-    const handleOutsideClicks = (event) => {
-        const isOutsideDashboard =
-            dashboardContainerRef.current &&
-            !dashboardContainerRef.current.contains(event.target);
-
-        const isOutsideModal = Object.values(modalRefs).every(
-            (modalRef) =>
-                !modalRef?.current || !modalRef.current.contains(event.target)
-        );
-
-        const isOutsidePopups = Object.values(popupRefs).every(
-            (popupRef) =>
-                !popupRef?.current || !popupRef.current.contains(event.target)
-        );
-
-        if (!isOutsideDashboard && isOutsideModal && isOutsidePopups) {
-            hideAllPopup();
-            hideAllModal();
-        }
     };
 
     const handleCreateWorkspace = (event) => {
@@ -233,7 +205,22 @@ const DashboardPage = () => {
     };
 
     return (
-        <div ref={dashboardContainerRef} className={`dashboard-container ${theme}`}>
+        <div ref={dashboardContainerRef} onClick={(event) => {
+            const isOutsideDashboard = dashboardContainerRef.current && !dashboardContainerRef.current.contains(event.target);
+
+            const isOutsideModal = Object.values(modalRefs).every(
+                (modalRef) => !modalRef?.current || !modalRef.current.contains(event.target)
+            );
+
+            const isOutsidePopups = Object.values(popupRefs).every(
+                (popupRef) => !popupRef?.current || !popupRef.current.contains(event.target)
+            );
+
+            if (!isOutsideDashboard && isOutsideModal && isOutsidePopups) {
+                hideAllPopup();
+                hideAllModal();
+            }
+        }} className={`dashboard-container ${theme}`}>
             <Modal
                 ref={modalRefs.workspace}
                 display={modalVisibility.workspace}

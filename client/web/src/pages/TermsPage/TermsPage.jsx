@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import Link from '../../components/Link/Link';
@@ -6,15 +6,9 @@ import Link from '../../components/Link/Link';
 import './TermsPage.css';
 
 const TermsPage = () => {
-    const [theme, setTheme] = useState('light');
+    const [theme] = useState(localStorage.getItem('gui.theme') ?? 'light');
 
     const navigate = useNavigate();
-
-    useEffect(() => {
-        if (localStorage.getItem('gui.theme')) {
-            setTheme(localStorage.getItem('gui.theme'));
-        }
-    }, []);
 
     return (
         <div className={`terms-container ${theme}`}>

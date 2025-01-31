@@ -26,8 +26,8 @@ const ResetPasswordPage = () => {
     const [password, setPassword] = useState('');
     const [checkPassword, setCheckPassword] = useState('');
     const [checkMail, setCheckMail] = useState(false);
-    const [theme, setTheme] = useState('light');
     const [user, setUser] = useState('');
+    const [theme] = useState(localStorage.getItem('gui.theme') ?? "light");
 
     const navigate = useNavigate();
 
@@ -43,7 +43,7 @@ const ResetPasswordPage = () => {
             }).then((data) => {
                 const [user] = data.result;
                 if (!user) navigate("/login");
-                
+
                 setUser(user);
             }).catch((error) => {
                 toast.error("Une erreur inattendue est survenue.", {
@@ -61,10 +61,6 @@ const ResetPasswordPage = () => {
 
         if (localStorage.getItem('user')) {
             navigate("/dashboard");
-        }
-
-        if (localStorage.getItem('gui.theme')) {
-            setTheme(localStorage.getItem('gui.theme'));
         }
     }, [navigate]);
 
@@ -163,7 +159,7 @@ const ResetPasswordPage = () => {
                     toast.success("Un mail de modification de mot de passe vous a été envoyer, veuillez vérifer votre boîte mail.", {
                         position: "top-center",
                     });
-                    
+
                     navigate("/login");
                 });
             }).catch((error) => {

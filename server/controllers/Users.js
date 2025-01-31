@@ -60,9 +60,9 @@ export const readUser = async (request) => {
             params.push(request.query.password_reset_token);
         }
         
-        if (request.query.provier) {
+        if (request.query.provider) {
             where.push("provider = ?");
-            params.push(request.query.provier);
+            params.push(request.query.provider);
         }
 
         if (where.length > 0) {

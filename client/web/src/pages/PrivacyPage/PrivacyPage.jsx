@@ -1,15 +1,9 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 
 import './PrivacyPage.css';
 
 const PrivacyPage = () => {
-    const [theme, setTheme] = useState('light');
-
-    useEffect(() => {
-        if (localStorage.getItem('gui.theme')) {
-            setTheme(localStorage.getItem('gui.theme'));
-        }
-    }, []);
+    const [theme] = useState(localStorage.getItem('gui.theme') ?? "light");
 
     return (
         <div className={`privacy-container ${theme}`}>

@@ -7,7 +7,7 @@ const IndexPage = () => {
     const navigate = useNavigate();
 
     useEffect(() => {
-        navigate(localStorage.getItem('token') ? "/dashboard" : "/login");
+        navigate(localStorage.getItem("user") ? "/dashboard" : "/login");
     }, [navigate]);
 
     return null;

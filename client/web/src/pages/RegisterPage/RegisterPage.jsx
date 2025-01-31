@@ -28,7 +28,7 @@ const RegisterPage = () => {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [checked, setChecked] = useState(false);
-    const [theme, setTheme] = useState("light");
+    const [theme] = useState(localStorage.getItem("gui.theme") ?? "light");
 
     const navigate = useNavigate();
 
@@ -45,7 +45,7 @@ const RegisterPage = () => {
 
                     updateUser(user.id, {
                         confirm_token: null,
-                    }).then((data) => {
+                    }).then((_) => {
                         sendEmail({
                             to: user.email,
                             subject: PostConfirmationEmail.subject(),
@@ -80,6 +80,8 @@ const RegisterPage = () => {
                             });
                         }
                     });
+                } else {
+                    navigate("/login");
                 }
             }).catch((error) => {
                 toast.error("Une erreur inattendue est survenue.", {
@@ -97,11 +99,6 @@ const RegisterPage = () => {
 
         if (localStorage.getItem("user")) {
             navigate("/dashboard");
-        }
-
-        const savedTheme = localStorage.getItem("gui.theme");
-        if (savedTheme) {
-            setTheme(savedTheme);
         }
     }, [navigate]);
 

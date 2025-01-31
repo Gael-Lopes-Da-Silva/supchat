@@ -10,9 +10,6 @@ passport.use(new GoogleStrategy({
     callbackURL: "http://localhost:3000/users/auth/google/callback",
 }, async (accessToken, refreshToken, profile, done) => {
     try {
-        console.log("Access Token:", accessToken);
-        console.log("Profile:", profile);
-
         const googleId = profile.id;
         const email = profile.emails[0]?.value;
         const username = profile.displayName || `google_${googleId}`;
@@ -29,7 +26,6 @@ passport.use(new GoogleStrategy({
             );
 
             if (existingGoogleUser.length > 0) {
-                console.log("Utilisateur Google existant :", existingGoogleUser[0]);
                 return done(null, existingGoogleUser[0]);
             }
 
@@ -37,13 +33,6 @@ passport.use(new GoogleStrategy({
                 "SELECT * FROM users WHERE email = ? AND provider != 'google'",
                 [email]
             );
-
-            if (existingUserWithEmail.length > 0) {
-                console.log(
-                    "Un utilisateur existe avec cet email mais un autre provider :",
-                    existingUserWithEmail[0]
-                );
-            }
 
             const result = await connection.query(
                 "INSERT INTO users (username, email, provider_id, provider) VALUES (?, ?, ?, ?)",
@@ -58,13 +47,11 @@ passport.use(new GoogleStrategy({
                 provider: "google",
             };
 
-            console.log("Nouvel utilisateur Google créé :", newUser);
             return done(null, newUser);
         } finally {
             connection.release();
         }
     } catch (error) {
-        console.error("Erreur dans GoogleStrategy :", error.message);
         return done(error);
     }
 }));
