@@ -1,16 +1,17 @@
 export const subject = () => "[Supchat] Confirmation de votre compte";
 export const content = (confirm_token) => `
-<p>Bonjour,</p>
+<p>Bonjour 👋,</p>
 
-<p>Merci de vous être inscrit sur <strong>Supchat</strong> !</p>
-<p>Veuillez confirmer votre adresse e-mail en cliquant sur le bouton ci-dessous :</p>
+<p>Bienvenue sur <strong>Supchat</strong> ! 🎉 Nous sommes ravis de vous voir parmi nous.</p>
+
+<p>Pour activer votre compte et commencer à discuter, cliquez sur le bouton ci-dessous :</p>
 
 <a href="${process.env.REACT_APP_BASE_URL}register?confirm_token=${confirm_token}" style="display: inline-block; padding: 12px 24px; background-color: #007bff; color: #fff; text-decoration: none; font-weight: bold; border-radius: 5px;">
-    Confirmer mon compte
+    Activer mon compte
 </a>
 
-<p>Si vous n'avez pas créé de compte, ignorez simplement cet e-mail.</p>
+<p>Si vous n’êtes pas à l’origine de cette inscription, pas de souci ! Vous pouvez simplement ignorer cet e-mail. 🚀</p>
 
-<p>Cordialement,</p>
-<p><strong>L'équipe Supchat</strong></p>
+<p>À bientôt sur Supchat ! 🚀</p>
+<p>— L’équipe Supchat</p>
 `;
