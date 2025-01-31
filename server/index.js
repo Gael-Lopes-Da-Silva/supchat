@@ -16,6 +16,8 @@ import WorkspaceMembersRouter from "./routes/WorkspaceMembers.js";
 import WorkspacePermissionsRouter from "./routes/WorkspacePermissions.js";
 import WorkspacesRouter from "./routes/Workspaces.js";
 
+import EmailRouter from "./routes/Services/Email.js";
+
 import "./services/passport/FacebookStrategy.js";
 import "./services/passport/GoogleStrategy.js";
 
@@ -48,6 +50,8 @@ pool.getConnection().then((connection) => {
 
     app.use("/roles/permissions/", RolePermissionsRouter);
     app.use("/roles/", RolesRouter);
+
+    app.use("/email/", EmailRouter);
 
     app.listen(PORT, () =>
         console.log(`Server running on http://localhost:${PORT} !`)

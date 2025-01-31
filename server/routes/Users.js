@@ -5,11 +5,10 @@ import passport from "passport";
 import {
     createUser,
     deleteUser,
+    loginUser,
     readUser,
     restoreUser,
     updateUser,
-    loginUser,
-    confirmUser,
 } from "../controllers/Users.js";
 
 const router = express.Router();
@@ -20,7 +19,6 @@ const router = express.Router();
 //   username: string (required)
 //   email: string (required)
 //   password: string (required)
-//   status_id: number (optional)
 //   confirm_token: string (optional)
 //   password_reset_token: string (optional)
 // return:
@@ -55,7 +53,6 @@ router.post("/", (request, response) => {
 //   username: string (optional)
 //   email: string (optional)
 //   password: string (optional)
-//   status_id: number (optional)
 //   confirm_token: string (optional)
 //   password_reset_token: string (optional)
 // return:
@@ -122,7 +119,6 @@ router.get("/:id", (request, response) => {
 //   username: string (optional)
 //   email: string (optional)
 //   password: string (optional)
-//   status_id: number (optional)
 //   confirm_token: string (optional)
 //   password_reset_token: string (optional)
 // return:
@@ -245,72 +241,31 @@ router.post("/login", (request, response) => {
     });
 });
 
-// POST /users/confirm
-//
-// body:
-//   token: string (required)
-// return:
-//   result: [user]
-router.post('/confirm', async (request, response) => {
-    confirmUser(request).then((result) => {
-        if (!result.error && result !== "") {
-            // response.redirect(`http://localhost:5000/login?confirmed=true`);
-            response.status(202).json({
-                when: "Users > ConfirmUser",
-                result: result.user,
-                error: 0,
-            });
-        } else {
-            response.status(404).json({
-                when: "Users > ConfirmUser",
-                error: result.error || 1,
-                error_message: result.error_message || "Could not confirm user",
-            });
-        }
-    }).catch((error) => {
-        response.status(500).json({
-            when: "Users > ConfirmUser",
-            error: 1,
-            error_message: error.message,
-        });
-    });
-});
-
+// NOTE: Pas besoin d'une route pour confirmer. Tout est faisable avec un read et un update (plus chiant mais plus lisible)
 
 router.get("/auth/google", passport.authenticate("google", { scope: ["profile", "email"], prompt: "select_account" }));
-
-router.get("/auth/google/callback", passport.authenticate("google", { session: false, failureRedirect: "/" }), (req, res) => {
+router.get("/auth/google/callback", passport.authenticate("google", { session: false, failureRedirect: "/" }), (request, response) => {
     const userPayload = {
-        id: req.user.id.toString(),
-        username: req.user.username,
-        provider: req.user.provider,
+        id: request.user.id.toString(),
+        username: request.user.username,
+        provider: request.user.provider,
     };
 
     const token = jsonwebtoken.sign(userPayload, process.env.JWT_SECRET, { expiresIn: "1h" });
-
-    res.redirect(`http://localhost:5000/login?token=${token}`);
+    response.redirect(`http://localhost:5000/login?token=${token}`);
 });
 
-router.get(
-    "/auth/facebook",
-    passport.authenticate("facebook", { scope: ["email", "public_profile"] })
-);
+router.get("/auth/facebook", passport.authenticate("facebook", { scope: ["email", "public_profile"] }));
+router.get("/auth/facebook/callback", passport.authenticate("facebook", { session: false, failureRedirect: "/" }), (request, response) => {
+    const userPayload = {
+        id: request.user.id.toString(),
+        username: request.user.username,
+        provider: request.user.provider,
+    };
 
-
-router.get(
-    "/auth/facebook/callback",
-    passport.authenticate("facebook", { session: false, failureRedirect: "/" }),
-    (req, res) => {
-        const userPayload = {
-            id: req.user.id.toString(),
-            username: req.user.username,
-            provider: req.user.provider,
-        };
-
-        const token = jsonwebtoken.sign(userPayload, process.env.JWT_SECRET, { expiresIn: "1h" });
-
-        res.redirect(`http://localhost:5000/login?token=${token}`);
-    }
+    const token = jsonwebtoken.sign(userPayload, process.env.JWT_SECRET, { expiresIn: "1h" });
+    response.redirect(`http://localhost:5000/login?token=${token}`);
+}
 );
 
 export default router;

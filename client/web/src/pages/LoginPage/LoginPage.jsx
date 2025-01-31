@@ -54,19 +54,12 @@ const LoginPage = () => {
             });
         }
 
-<<<<<<< Updated upstream
-  const handleFacebook = () => {
-    window.location.href = `${process.env.REACT_APP_API_URL}users/auth/facebook`;
-};
-
-=======
         if (isExpired) {
             localStorage.removeItem("user");
             toast.info("Votre connexion a expiré. Veuillez vous réauthentifier.", {
                 position: "top-center",
             });
         }
->>>>>>> Stashed changes
 
         if (isConfirmed) {
             toast.info("Votre compte a été confirmé. Vous pouvez maintenant vous authentifier.", {

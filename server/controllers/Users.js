@@ -5,7 +5,6 @@ import jwt from "jsonwebtoken";
 import pool from "../database/db.js";
 
 import { ERRORS, createErrorResponse } from "../app/ErrorHandler.js";
-import { sendConfirmationEmail } from '../services/email/emailService.js';
 
 export const createUser = async (request) => {
     if (!request.body.username) return createErrorResponse(ERRORS.USERNAME_NOT_PROVIDED);
@@ -27,15 +26,11 @@ export const createUser = async (request) => {
         if (!status) return createErrorResponse(ERRORS.STATUS_NOT_FOUND);
     }
 
-    const confirmToken = crypto.randomBytes(32).toString('hex');
-    await sendConfirmationEmail(request.body.email, confirmToken);
-
-    return pool.query("INSERT INTO users (username, email, password, status_id, confirm_token, reset_password_token) VALUES (?, ?, ?, ?, ?, ?)", [
+    return pool.query("INSERT INTO users (username, email, password, confirm_token, reset_password_token) VALUES (?, ?, ?, ?, ?)", [
         request.body.username,
         request.body.email,
         bcrypt.hashSync(request.body.password, 10),
-        request.body.status_id || 1,
-        request.body.confirm_token || confirmToken,
+        request.body.confirm_token || crypto.randomBytes(32).toString('hex'),
         request.body.password_reset_token || null,
     ]);
 };
@@ -58,13 +53,6 @@ export const readUser = async (request) => {
         if (request.query.email) {
             where.push("email = ?");
             params.push(request.query.email);
-        }
-
-        if (request.query.status_id) {
-            const [status] = await pool.query("SELECT * FROM status WHERE id = ?", [request.query.status_id]);
-            if (!status) return createErrorResponse(ERRORS.STATUS_NOT_FOUND);
-            where.push("status_id = ?");
-            params.push(request.query.status_id);
         }
 
         if (request.query.confirm_token) {
@@ -92,18 +80,10 @@ export const updateUser = async (request) => {
     if (!user) return createErrorResponse(ERRORS.USER_NOT_FOUND);
     if (user.deleted_at !== null) return createErrorResponse(ERRORS.USER_DELETED);
 
-    if (request.body.status_id) {
-        const [status] = await pool.query("SELECT * FROM status WHERE id = ?", [request.body.status_id]);
-        if (!status) return createErrorResponse(ERRORS.STATUS_NOT_FOUND);
-    }
-
-    return pool.query("UPDATE users SET username = ?, email = ?, password = ?, status_id = ?, link_google = ?, link_facebook = ?, confirm_token = ?, password_reset_token = ?, updated_at = NOW() WHERE id = ?", [
+    return pool.query("UPDATE users SET username = ?, email = ?, password = ?, confirm_token = ?, password_reset_token = ?, updated_at = NOW() WHERE id = ?", [
         request.body.username || user.username,
         request.body.email || user.email,
         request.body.password ? bcrypt.hashSync(request.body.password, 10) : user.password,
-        request.body.status_id || user.status_id,
-        request.body.link_google || user.link_google,
-        request.body.link_facebook || user.link_facebook,
         request.body.confirm_token !== undefined ? request.body.confirm_token : user.confirm_token,
         request.body.password_reset_token !== undefined ? request.body.password_reset_token : user.password_reset_token,
         request.params.id
@@ -146,13 +126,4 @@ export const loginUser = async (request) => {
         token: jwt.sign(user, process.env.JWT_SECRET, { expiresIn: "1h" }),
         user: user,
     };
-};
-
-export const confirmUser = async (request) => {
-    if (!request.body.token) return createErrorResponse(ERRORS.TOKEN_NOT_PROVIDED);
-
-    const [user] = await pool.query('SELECT * FROM users WHERE confirm_token = ?', [request.body.confirm_token]);
-    if (!user) return createErrorResponse(ERRORS.TOKEN_NOT_MATCHED);
-
-    return pool.query('UPDATE users SET confirm_token = NULL WHERE id = ?', [user.id]);
 };
