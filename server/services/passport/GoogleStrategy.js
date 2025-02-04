@@ -29,11 +29,6 @@ passport.use(new GoogleStrategy({
                 return done(null, existingGoogleUser[0]);
             }
 
-            const existingUserWithEmail = await connection.query(
-                "SELECT * FROM users WHERE email = ? AND provider != 'google'",
-                [email]
-            );
-
             const result = await connection.query(
                 "INSERT INTO users (username, email, provider_id, provider) VALUES (?, ?, ?, ?)",
                 [username, email, googleId, "google"]

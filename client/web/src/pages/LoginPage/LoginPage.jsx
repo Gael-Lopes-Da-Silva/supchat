@@ -156,7 +156,7 @@ const LoginPage = () => {
                 <p>Supchat</p>
             </a>
             <div className="login-box">
-                <h1>Connexion</h1>
+                <h1>Connexion</h1>   
                 <form onSubmit={handleSubmit}>
                     <div>
                         <InputField

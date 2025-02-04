@@ -1,25 +1,23 @@
--- PROVIDERS
--- CREATE TABLE providers (
---     user_id INT NOT NULL,
---     provider_id VARCHAR(255) DEFAULT NULL,
---     provider VARCHAR(50) DEFAULT 'local',
---     FOREIGN KEY (user_id) REFERENCES users(id)
--- );
 
 -- USERS
 CREATE TABLE users (
-    id INT AUTO_INCREMENT PRIMARY KEY,
+    id INT AUTO_INCREMENT PRIMARY KEY, 
     username VARCHAR(50) NOT NULL UNIQUE,
     email VARCHAR(100) NOT NULL,
     password TEXT DEFAULT NULL,
-    provider_id VARCHAR(255) DEFAULT NULL,
-    provider VARCHAR(50) DEFAULT 'local',
     confirm_token VARCHAR(255) DEFAULT NULL,
     password_reset_token VARCHAR(255) DEFAULT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NULL,
-    deleted_at TIMESTAMP NULL,
-    UNIQUE KEY unique_email_provider (email, provider)
+    deleted_at TIMESTAMP NULL
+); 
+
+/* PROVIDERS */
+CREATE TABLE providers (
+    user_id INT NOT NULL,  
+    provider_id VARCHAR(255) DEFAULT NULL,
+    provider VARCHAR(50) DEFAULT 'local',
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
 -- WORKSPACES
