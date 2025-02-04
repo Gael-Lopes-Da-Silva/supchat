@@ -22,7 +22,7 @@ services:
 
     supchat_api:
         image: docker.io/library/node:latest
-        container_name: supchat_server
+        container_name: supchat_api
         working_dir: /app
         tty: true
         volumes:
