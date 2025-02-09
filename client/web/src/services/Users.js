@@ -1,81 +1,150 @@
-export const createUser = async (body) => {
-    const response = await fetch(`${process.env.REACT_APP_API_URL}users`, {
+export const createUser = async (userData) => {
+    return fetch(`${process.env.REACT_APP_API_URL}users`, {
         method: "POST",
         headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json'
+            "Content-Type": "application/json",
         },
-        body: JSON.stringify(body),
+        body: JSON.stringify(userData),
+    })
+    .then((response) => response.json())
+    .then((data) => {
+        return data;
+    })
+    .catch((error) => {
+        return { error: true, message: "Erreur serveur" };
     });
-
-    return await response.json();
 };
 
 export const readUser = async (query) => {
-    const response = query.id ? await fetch(`${process.env.REACT_APP_API_URL}users/` + query.id, {
-        method: "GET",
-        headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json'
-        },
-    }) : await fetch(`${process.env.REACT_APP_API_URL}users?` + new URLSearchParams(query), {
-        method: "GET",
-        headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json'
-        },
-    });
+    let url;
 
-    return await response.json();
+    if (query.id) {
+        url = `${process.env.REACT_APP_API_URL}users/${query.id}`;
+    } else if (query.confirm_token) {
+        url = `${process.env.REACT_APP_API_URL}users?confirm_token=${query.confirm_token}`;
+    } else {
+        return { error: true, message: "Paramètre requis manquant." };
+    }
+
+    return fetch(url, {
+        method: "GET",
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+        },
+    })
+    .then((response) => response.json())
+    .catch((error) => {
+        return { error: true, message: "Erreur serveur" };
+    });
 };
 
-export const updateUser = async (id, body) => {
-    const response = await fetch(`${process.env.REACT_APP_API_URL}users/` + id, {
+export const updateUser = async (userId, updatedData) => {
+    if (!userId) {
+        return { error: true, message: "ID utilisateur manquant" };
+    }
+
+    const url = `${process.env.REACT_APP_API_URL}users/${userId}`;
+
+    return fetch(url, {
         method: "PUT",
         headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json'
+            "Content-Type": "application/json",
         },
-        body: JSON.stringify(body),
+        body: JSON.stringify(updatedData),
+    })
+    .then((response) => {
+        if (!response.ok) {
+            return { error: true, message: `Erreur HTTP ${response.status}` };
+        }
+        return response.json();
+    })
+    .catch((error) => {
+        return { error: true, message: "Erreur serveur" };
     });
-
-    return await response.json();
 };
 
 export const deleteUser = async (id) => {
-    const response = await fetch(`${process.env.REACT_APP_API_URL}users/` + id, {
+    return fetch(`${process.env.REACT_APP_API_URL}users/${id}`, {
         method: "DELETE",
         headers: {
             'Accept': 'application/json',
             'Content-Type': 'application/json'
         },
+    })
+    .then((response) => response.json())
+    .catch((error) => {
+        return { error: true, message: "Erreur serveur" };
     });
-
-    return await response.json();
 };
 
 export const restoreUser = async (id) => {
-    const response = await fetch(`${process.env.REACT_APP_API_URL}users/` + id, {
+    return fetch(`${process.env.REACT_APP_API_URL}users/${id}`, {
         method: "PATCH",
         headers: {
             'Accept': 'application/json',
             'Content-Type': 'application/json'
         },
+    })
+    .then((response) => response.json())
+    .catch((error) => {
+        return { error: true, message: "Erreur serveur" };
     });
-
-    return await response.json();
 };
 
-
 export const loginUser = async (body) => {
-    const response = await fetch(`${process.env.REACT_APP_API_URL}users/login`, {
+    return fetch(`${process.env.REACT_APP_API_URL}users/login`, {
         method: "POST",
         headers: {
             'Accept': 'application/json',
             'Content-Type': 'application/json'
         },
         body: JSON.stringify(body),
+    })
+    .then((response) => response.json())
+    .catch((error) => {
+        return { error: true, message: "Erreur serveur" };
     });
+};
 
-    return await response.json();
+export const getUserProviders = async (userId) => {
+    return fetch(`${process.env.REACT_APP_API_URL}users/${userId}/providers`, {
+        method: "GET",
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+        },
+    })
+    .then((response) => {
+        if (!response.ok) {
+            return { error: true, message: `Erreur récupération des providers: ${response.statusText}` };
+        }
+        return response.json();
+    })
+    .catch((error) => {
+        return { error: true, message: "Erreur serveur" };
+    });
+};
+
+export const linkProvider = async (userId, provider, providerId) => {
+    return fetch(`${process.env.REACT_APP_API_URL}users/link-provider`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+            user_id: userId,
+            provider,
+            provider_id: providerId,
+        }),
+    })
+    .then((response) => {
+        if (!response.ok) {
+            return { error: true, message: `Erreur lors de la liaison du provider: ${response.statusText}` };
+        }
+        return response.json();
+    })
+    .catch((error) => {
+        return { error: true, message: "Erreur serveur" };
+    });
 };

@@ -5,12 +5,14 @@
     "type": "module",
     "private": true,
     "scripts": {
-        "start": "nodemon index.js"
+        "start": "nodemon index.js",
+        "dev": "nodemon --legacy-watch server.js"
     },
     "dependencies": {
         "bcrypt": "^5.1.1",
         "cors": "^2.8.5",
         "express": "^4.21.0",
+        "express-session": "^1.18.1",
         "google-auth-library": "^9.15.0",
         "jsonwebtoken": "^9.0.2",
         "mariadb": "^3.4.0",

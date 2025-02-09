@@ -1,4 +1,5 @@
 export const ERRORS = {
+    //Utilisateur
     USERNAME_NOT_PROVIDED: { code: 1, message: "Username not provided" },
     EMAIL_NOT_PROVIDED: { code: 2, message: "Email not provided" },
     PASSWORD_NOT_PROVIDED: { code: 3, message: "Password not provided" },
@@ -9,45 +10,63 @@ export const ERRORS = {
     USER_DELETED: { code: 12, message: "User deleted" },
     USER_ALREADY_DELETED: { code: 13, message: "User already deleted" },
     USER_NOT_DELETED: { code: 14, message: "User not deleted" },
-    NAME_NOT_PROVIDED: { code: 15, message: "Name not provided" },
-    DESCRIPTION_NOT_PROVIDED: { code: 16, message: "Description not provided" },
-    IS_PRIVATE_NOT_PROVIDED: { code: 17, message: "Is_private not provided" },
-    USER_ID_NOT_PROVIDED: { code: 18, message: "User_id not provided" },
+    USER_NOT_CONFIRMED: { code: 54, message: "User not confirmed" },
+
+    // Authentification & Sécurité
+    INVALID_TOKEN: { code: 55, message: "Invalid token" },
+    EXPIRED_TOKEN: { code: 56, message: "Token expired" },
+    ACCESS_DENIED: { code: 57, message: "Access denied" },
+    UNAUTHORIZED_ACTION: { code: 58, message: "Unauthorized action" },
+    ACCOUNT_SUSPENDED: { code: 59, message: "Account suspended" },
+    TOO_MANY_ATTEMPTS: { code: 60, message: "Too many login attempts, please try again later" },
+    INVALID_CREDENTIALS: { code: 61, message: "Invalid credentials" },
+
+    // Lien et connexion des comptes (oAuth)
+    SOCIAL_ACCOUNT_ALREADY_LINKED: { code: 62, message: "This social account is already linked to another user" },
+    SOCIAL_ACCOUNT_NOT_FOUND: { code: 63, message: "No linked social account found" },
+    LINK_FAILED: { code: 64, message: "Failed to link social account" },
+    UNLINK_FAILED: { code: 65, message: "Failed to unlink social account" },
+
+    //Données & Validation
+    INVALID_EMAIL_FORMAT: { code: 66, message: "Invalid email format" },
+    PASSWORD_TOO_WEAK: { code: 67, message: "Password too weak" },
+    DATA_MISSING: { code: 68, message: "Missing required data" },
+    DATA_CONFLICT: { code: 69, message: "Data conflict error" },
+    INVALID_INPUT: { code: 70, message: "Invalid input provided" },
+    
+    // Ressources et gestion des accès
+    RESOURCE_NOT_FOUND: { code: 71, message: "Requested resource not found" },
+    PERMISSION_DENIED: { code: 72, message: "Permission denied" },
+    OPERATION_FAILED: { code: 73, message: "Operation failed, please try again" },
+
+    // Serveur et bdd
+    INTERNAL_SERVER_ERROR: { code: 74, message: "Internal server error" },
+    DATABASE_ERROR: { code: 75, message: "Database error" },
+    SERVICE_UNAVAILABLE: { code: 76, message: "Service temporarily unavailable" },
+    
+    // Workspaces
     WORKSPACE_NOT_FOUND: { code: 20, message: "Workspace not found" },
     WORKSPACE_DELETED: { code: 21, message: "Workspace deleted" },
-    ID_NOT_PROVIDED: { code: 22, message: "Id not provided" },
     WORKSPACE_ALREADY_DELETED: { code: 23, message: "Workspace already deleted" },
     WORKSPACE_NOT_DELETED: { code: 24, message: "Workspace not deleted" },
     WORKSPACE_ID_NOT_PROVIDED: { code: 25, message: "Workspace_id not provided" },
-    PERMISSION_ID_NOT_PROVIDED: { code: 26, message: "Permission_id not provided" },
-    PERMISSION_NOT_FOUND: { code: 27, message: "Permission not found" },
-    WORKSPACE_PERMISSION_NOT_FOUND: { code: 28, message: "Workspace permission not found" },
-    ROLE_ID_NOT_PROVIDED: { code: 29, message: "Role_id not provided" },
-    ROLE_NOT_FOUND: { code: 30, message: "Role not found" },
-    USER_ALREADY_EXISTS_IN_WORKSPACE: { code: 31, message: "User already exists in this workspace" },
-    WORKSPACE_MEMBER_NOT_FOUND: { code: 32, message: "Workspace member not found" },
-    WORKSPACE_MEMBER_DELETED: { code: 33, message: "Workspace member deleted" },
-    WORKSPACE_MEMBER_ALREADY_DELETED: { code: 34, message: "Workspace member already deleted" },
-    WORKSPACE_MEMBER_NOT_DELETED: { code: 35, message: "Workspace member not deleted" },
-    WORKSPACE_INVITATION_NOT_FOUND: { code: 39, message: "Workspace invitation not found" },
-    WORKSPACE_INVITATION_DELETED: { code: 40, message: "Workspace invitation deleted" },
-    WORKSPACE_INVITATION_ALREADY_DELETED: { code: 41, message: "Workspace invitation already deleted" },
-    WORKSPACE_INVITATION_NOT_DELETED: { code: 42, message: "Workspace invitation not deleted" },
+
+    //Channels
     CHANNEL_NOT_FOUND: { code: 43, message: "Channel not found" },
     CHANNEL_DELETED: { code: 44, message: "Channel deleted" },
     CHANNEL_ALREADY_DELETED: { code: 45, message: "Channel already deleted" },
     CHANNEL_NOT_DELETED: { code: 46, message: "Channel not deleted" },
     CHANNEL_ID_NOT_PROVIDED: { code: 47, message: "Channel_id not provided" },
-    CHANNEL_PERMISSION_NOT_FOUND: { code: 48, message: "Channel permission not found" },
-    USER_ALREADY_EXIST_IN_CHANNEL: { code: 49, message: "User already exist in this channel" },
-    CHANNEL_MEMBER_NOT_FOUND: { code: 50, message: "Channel member not found" },
-    CHANNEL_MEMBER_DELETED: { code: 51, message: "Channel member deleted" },
-    CHANNEL_MEMBER_ALREADY_DELETED: { code: 52, message: "Channel member already deleted" },
-    CHANNEL_MEMBER_NOT_DELETED: { code: 53, message: "Channel member not deleted" },
-    USER_NOT_CONFIRMED: { code: 54, message: "User not confirmed" },
+
+    //rôles et permissions...
+    ROLE_ID_NOT_PROVIDED: { code: 29, message: "Role_id not provided" },
+    ROLE_NOT_FOUND: { code: 30, message: "Role not found" },
+    PERMISSION_ID_NOT_PROVIDED: { code: 26, message: "Permission_id not provided" },
+    PERMISSION_NOT_FOUND: { code: 27, message: "Permission not found" },
+    PERMISSION_DENIED: { code: 72, message: "Permission denied" },
 };
 
-export const createErrorResponse = (error) => ({
+export const createErrorResponse = (error, additionalMessage = "") => ({
     error: error.code,
-    error_message: error.message,
+    error_message: additionalMessage ? `${error.message} - ${additionalMessage}` : error.message,
 });

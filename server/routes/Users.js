@@ -3,270 +3,352 @@ import jsonwebtoken from "jsonwebtoken";
 import passport from "passport";
 
 import {
-    createUser,
-    deleteUser,
-    loginUser,
-    readUser,
-    restoreUser,
-    updateUser,
+  createUser,
+  deleteUser,
+  loginUser,
+  readUser,
+  restoreUser,
+  updateUser,
+  getUserProviders,
+  unlinkProvider,
 } from "../controllers/Users.js";
 
 const router = express.Router();
 
-// POST /users
-//
-// body:
-//   username: string (required)
-//   email: string (required)
-//   password: string (required)
-//   confirm_token: string (optional)
-//   password_reset_token: string (optional)
-// return:
-//   result: [user]
-router.post("/", (request, response) => {
-    createUser(request).then((result) => {
-        if (!result.error && result !== "") {
-            response.status(201).json({
-                when: "Users > CreateUser",
-                result: result,
-                error: 0,
-            });
-        } else {
-            response.status(404).json({
-                when: "Users > CreateUser",
-                error: result.error || 1,
-                error_message: result.error_message || "Could not create user",
-            });
-        }
-    }).catch((error) => {
-        response.status(500).json({
+router.post("/", async (request, response) => {
+  console.log("🔍 POST /users :", request.body);
+
+  createUser(request)
+    .then((result) => {
+      if (!result.error) {
+        response
+          .status(201)
+          .json({ when: "Users > CreateUser", result, error: 0 });
+      } else {
+        response
+          .status(400)
+          .json({
             when: "Users > CreateUser",
-            error: 1,
-            error_message: error.message,
+            error: result.error,
+            error_message: result.error_message,
+          });
+      }
+    })
+    .catch((error) => {
+      response
+        .status(500)
+        .json({
+          when: "Users > CreateUser",
+          error: 1,
+          error_message: error.message,
         });
     });
 });
 
-// GET /users
-//
-// query:
-//   username: string (optional)
-//   email: string (optional)
-//   password: string (optional)
-//   provider: string (optional)
-//   confirm_token: string (optional)
-//   password_reset_token: string (optional)
-// return:
-//   result: [user]
-router.get("/", (request, response) => {
-    readUser(request).then((result) => {
-        if (!result.error && result !== "") {
-            response.status(202).json({
-                when: "Users > ReadUser",
-                result: result,
-                error: 0,
-            });
-        } else {
-            response.status(404).json({
-                when: "Users > ReadUser",
-                error: result.error || 1,
-                error_message: result.error_message || "Could not read user",
-            });
-        }
-    }).catch((error) => {
-        response.status(500).json({
-            when: "Users > ReadUser",
-            error: 1,
-            error_message: error.message,
-        });
-    });
-});
-
-// GET /users/:id
-//
-// param:
-//   id: number (required)
-// return:
-//   result: [user]
-router.get("/:id", (request, response) => {
-    readUser(request).then((result) => {
-        if (!result.error && result !== "") {
-            response.status(202).json({
-                when: "Users > ReadUser",
-                result: result,
-                error: 0,
-            });
-        } else {
-            response.status(404).json({
-                when: "Users > ReadUser",
-                error: result.error || 1,
-                error_message: result.error_message || "Could not read user",
-            });
-        }
-    }).catch((error) => {
-        response.status(500).json({
-            when: "Users > ReadUser",
-            error: 1,
-            error_message: error.message,
-        });
-    });
-});
-
-// PUT /users/:id
-//
-// param:
-//   id: number (required)
-// body:
-//   username: string (optional)
-//   email: string (optional)
-//   password: string (optional)
-//   confirm_token: string (optional)
-//   password_reset_token: string (optional)
-// return:
-//   result: [user]
-router.put("/:id", (request, response) => {
-    updateUser(request).then((result) => {
-        if (!result.error && result !== "") {
-            response.status(202).json({
-                when: "Users > UpdateUser",
-                result: result,
-                error: 0,
-            });
-        } else {
-            response.status(404).json({
-                when: "Users > UpdateUser",
-                error: result.error || 1,
-                error_message: result.error_message || "Could not update user",
-            });
-        }
-    }).catch((error) => {
-        response.status(500).json({
-            when: "Users > UpdateUser",
-            error: 1,
-            error_message: error.message,
-        });
-    });
-});
-
-// DELETE /users/:id
-//
-// param:
-//   id: number (required)
-// return:
-//   result: [user]
-router.delete("/:id", (request, response) => {
-    deleteUser(request).then((result) => {
-        if (!result.error && result !== "") {
-            response.status(202).json({
-                when: "Users > DeleteUser",
-                result: result,
-                error: 0,
-            });
-        } else {
-            response.status(404).json({
-                when: "Users > DeleteUser",
-                error: result.error || 1,
-                error_message: result.error_message || "Could not delete user",
-            });
-        }
-    }).catch((error) => {
-        response.status(500).json({
-            when: "Users > DeleteUser",
-            error: 1,
-            error_message: error.message,
-        });
-    });
-});
-
-// PATCH /users/:id
-//
-// param:
-//   id: number (required)
-// return:
-//   result: [user]
-router.patch("/:id", (request, response) => {
-    restoreUser(request).then((result) => {
-        if (!result.error && result !== "") {
-            response.status(202).json({
-                when: "Users > RestoreUser",
-                result: result,
-                error: 0,
-            });
-        } else {
-            response.status(404).json({
-                when: "Users > RestoreUser",
-                error: result.error || 1,
-                error_message: result.error_message || "Could not restore user",
-            });
-        }
-    }).catch((error) => {
-        response.status(500).json({
-            when: "Users > RestoreUser",
-            error: 1,
-            error_message: error.message,
-        });
-    });
-});
-
-
-// POST /users/login
-//
-// body:
-//   email: string (required)
-//   password: string (required)
-// return:
-//   token: string
-//   result: [user]
 router.post("/login", (request, response) => {
-    loginUser(request).then((result) => {
-        if (!result.error && result !== "") {
-            response.status(202).json({
-                when: "Users > LoginUser",
-                token: result.token,
-                result: result.user,
-                error: 0,
-            });
-        } else {
-            response.status(404).json({
-                when: "Users > LoginUser",
-                error: result.error || 1,
-                error_message: result.error_message || "Could not login user",
-            });
-        }
-    }).catch((error) => {
-        response.status(500).json({
+  loginUser(request)
+    .then((result) => {
+      if (!result.error) {
+        response
+          .status(200)
+          .json({
             when: "Users > LoginUser",
-            error: 1,
-            error_message: error.message,
+            token: result.token,
+            result: result.user,
+            error: 0,
+          });
+      } else {
+        response
+          .status(400)
+          .json({
+            when: "Users > LoginUser",
+            error: result.error,
+            error_message: result.error_message,
+          });
+      }
+    })
+    .catch((error) => {
+      response
+        .status(500)
+        .json({
+          when: "Users > LoginUser",
+          error: 1,
+          error_message: error.message,
         });
     });
 });
 
-// NOTE: Pas besoin d'une route pour confirmer. Tout est faisable avec un read et un update (plus chiant mais plus lisible)
-
-router.get("/auth/google", passport.authenticate("google", { scope: ["profile", "email"], prompt: "select_account" }));
-router.get("/auth/google/callback", passport.authenticate("google", { session: false, failureRedirect: "/" }), (request, response) => {
-    const userPayload = {
-        id: request.user.id.toString(),
-        username: request.user.username,
-        provider: request.user.provider,
-    };
-
-    const token = jsonwebtoken.sign(userPayload, process.env.JWT_SECRET, { expiresIn: "1h" });
-    response.redirect(`http://localhost:5000/login?token=${token}`);
+router.get("/", (request, response) => {
+  readUser(request)
+    .then((result) => {
+      if (!result.error) {
+        response
+          .status(200)
+          .json({ when: "Users > ReadUser", result, error: 0 });
+      } else {
+        response
+          .status(404)
+          .json({
+            when: "Users > ReadUser",
+            error: result.error,
+            error_message: result.error_message,
+          });
+      }
+    })
+    .catch((error) => {
+      response
+        .status(500)
+        .json({
+          when: "Users > ReadUser",
+          error: 1,
+          error_message: error.message,
+        });
+    });
 });
 
-router.get("/auth/facebook", passport.authenticate("facebook", { scope: ["email", "public_profile"] }));
-router.get("/auth/facebook/callback", passport.authenticate("facebook", { session: false, failureRedirect: "/" }), (request, response) => {
-    const userPayload = {
-        id: request.user.id.toString(),
-        username: request.user.username,
-        provider: request.user.provider,
-    };
+router.get("/:id", (request, response) => {
+  readUser(request)
+    .then((result) => {
+      if (!result.error) {
+        response
+          .status(200)
+          .json({ when: "Users > ReadUser", result, error: 0 });
+      } else {
+        response
+          .status(404)
+          .json({
+            when: "Users > ReadUser",
+            error: result.error,
+            error_message: result.error_message,
+          });
+      }
+    })
+    .catch((error) => {
+      response
+        .status(500)
+        .json({
+          when: "Users > ReadUser",
+          error: 1,
+          error_message: error.message,
+        });
+    });
+});
 
-    const token = jsonwebtoken.sign(userPayload, process.env.JWT_SECRET, { expiresIn: "1h" });
-    response.redirect(`http://localhost:5000/login?token=${token}`);
-}
+router.put("/:id", (request, response) => {
+  updateUser(request)
+    .then((result) => {
+      if (!result.error) {
+        response
+          .status(200)
+          .json({ when: "Users > UpdateUser", result, error: 0 });
+      } else {
+        response
+          .status(400)
+          .json({
+            when: "Users > UpdateUser",
+            error: result.error,
+            error_message: result.error_message,
+          });
+      }
+    })
+    .catch((error) => {
+      response
+        .status(500)
+        .json({
+          when: "Users > UpdateUser",
+          error: 1,
+          error_message: error.message,
+        });
+    });
+});
+
+router.delete("/:id", (request, response) => {
+  deleteUser(request)
+    .then((result) => {
+      if (!result.error) {
+        response
+          .status(200)
+          .json({ when: "Users > DeleteUser", result, error: 0 });
+      } else {
+        response
+          .status(404)
+          .json({
+            when: "Users > DeleteUser",
+            error: result.error,
+            error_message: result.error_message,
+          });
+      }
+    })
+    .catch((error) => {
+      response
+        .status(500)
+        .json({
+          when: "Users > DeleteUser",
+          error: 1,
+          error_message: error.message,
+        });
+    });
+});
+
+router.patch("/:id", (request, response) => {
+  restoreUser(request)
+    .then((result) => {
+      if (!result.error) {
+        response
+          .status(200)
+          .json({ when: "Users > RestoreUser", result, error: 0 });
+      } else {
+        response
+          .status(400)
+          .json({
+            when: "Users > RestoreUser",
+            error: result.error,
+            error_message: result.error_message,
+          });
+      }
+    })
+    .catch((error) => {
+      response
+        .status(500)
+        .json({
+          when: "Users > RestoreUser",
+          error: 1,
+          error_message: error.message,
+        });
+    });
+});
+
+router.get(
+  "/auth/facebook",
+  passport.authenticate("facebook", { scope: ["email", "public_profile"] })
 );
+
+router.get(
+  "/auth/facebook/callback",
+  passport.authenticate("facebook", {
+    session: false,
+    failureRedirect: "http://localhost:5000/login?error=Erreur Facebook OAuth",
+  }),
+  (req, res) => {
+    res.redirect(`http://localhost:5000/login?token=${req.user?.token || ""}`);
+  }
+);
+
+router.get("/auth/facebook/link", (req, res, next) => {
+  const token = req.query.token;
+  if (!token) {
+    return res.redirect(
+      "http://localhost:5000/settings?error=Vous devez être connecté."
+    );
+  }
+
+  jsonwebtoken.verify(token, process.env.JWT_SECRET, (err, user) => {
+    if (err) {
+      return res.redirect(
+        "http://localhost:5000/settings?error=Token invalide."
+      );
+    }
+
+    // Stockage du user en session afin de pouvoir comparer dans la strategy si le compte est déjà lié ou pas
+    req.session.linkUser = user;
+    req.session.save((err) => {
+      if (err) {
+        console.error("Erreur lors de la sauvegarde de session :", err);
+        return res.redirect(
+          "http://localhost:5000/settings?error=Erreur serveur."
+        );
+      }
+
+      passport.authenticate("facebook-link", {
+        scope: ["email", "public_profile"],
+      })(req, res, next);
+    });
+  });
+});
+
+router.get(
+  "/auth/facebook/link/callback",
+  passport.authenticate("facebook-link", {
+    session: false,
+    failureRedirect:
+      "http://localhost:5000/settings?error=Erreur Facebook OAuth",
+  }),
+  (req, res) => {
+    res.redirect(
+      "http://localhost:5000/settings?success=Compte Facebook lié avec succès."
+    );
+  }
+);
+
+router.get(
+  "/auth/google",
+  passport.authenticate("google", { scope: ["profile", "email"] })
+);
+
+router.get(
+  "/auth/google/callback",
+  passport.authenticate("google", {
+    session: false,
+    failureRedirect: "http://localhost:5000/login?error=Erreur Google OAuth",
+  }),
+  (req, res) => {
+    res.redirect(`http://localhost:5000/login?token=${req.user?.token || ""}`);
+  }
+);
+
+router.get("/auth/google/link", (req, res, next) => {
+  const token = req.query.token;
+  if (!token) {
+    return res.redirect(
+      "http://localhost:5000/settings?error=Vous devez être connecté."
+    );
+  }
+
+  jsonwebtoken.verify(token, process.env.JWT_SECRET, (err, user) => {
+    if (err) {
+      return res.redirect(
+        "http://localhost:5000/settings?error=Token invalide."
+      );
+    }
+
+    req.session.linkUser = user;
+    req.session.save((err) => {
+      if (err) {
+        console.error("Erreur lors de la sauvegarde de session :", err);
+        return res.redirect(
+          "http://localhost:5000/settings?error=Erreur serveur."
+        );
+      }
+
+      passport.authenticate("google-link", { scope: ["profile", "email"] })(
+        req,
+        res,
+        next
+      );
+    });
+  });
+});
+
+router.get(
+  "/auth/google/link/callback",
+  passport.authenticate("google-link", {
+    session: false,
+    failureRedirect: "http://localhost:5000/settings?error=Erreur Google OAuth",
+  }),
+  (req, res) => {
+    const token = jsonwebtoken.sign(
+      { id: req.user.id, email: req.user.email, provider: "google" },
+      process.env.JWT_SECRET,
+      { expiresIn: "1h" }
+    );
+    res.redirect(
+      `http://localhost:5000/settings?success=Compte Google lié avec succès&token=${token}`
+    );
+  }
+);
+
+router.get("/:id/providers", getUserProviders);
+
+router.post("/unlink-provider", unlinkProvider);
 
 export default router;

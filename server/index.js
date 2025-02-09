@@ -2,6 +2,8 @@ import cors from "cors";
 import express from "express";
 
 import pool from "./database/db.js";
+import session from "express-session";
+import passport from "passport";
 
 import ChannelMembersRouter from "./routes/ChannelMembers.js";
 import ChannelPermissionsRouter from "./routes/ChannelPermissions.js";
@@ -23,13 +25,24 @@ import "./services/passport/GoogleStrategy.js";
 const PORT = process.env.PORT
 const app = express();
 
+app.use(express.json());
+app.use(session({
+    secret: process.env.SESSION_SECRET,
+    resave: false,
+    saveUninitialized: true,
+    cookie: { secure: false }
+}));
+
+
+
 pool.getConnection().then((connection) => {
     console.log("Connected to database!");
-
+    app.use(passport.initialize());
+    app.use(passport.session());
     app.use(express.urlencoded({ extended: true }));
     app.use(express.json());
     app.use(cors({
-        origin: "http://localhost:5000",
+        origin: ["http://localhost:5000", "http://localhost:3000"], // localhost 3000 pour le callback de google
         methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
         credentials: true,
     }));
