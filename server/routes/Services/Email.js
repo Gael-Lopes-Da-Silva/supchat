@@ -6,8 +6,6 @@ import {
 
 const router = express.Router();
 
-// NOTE: J'ai tranformé l'envoi d'email en route pour pouvoir avec la main dessus depuis les clients avec un appel à l'API
-
 // POST /email/send
 //
 // body:
