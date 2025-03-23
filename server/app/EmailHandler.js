@@ -10,7 +10,7 @@ export const sendEmail = (request) => {
             pass: process.env.SMTP_PASSWORD,
         },
     });
-
+    
     return transporter.sendMail({
         from: `"Supchat" <${process.env.SMTP_USER}>`,
         to: request.body.to,

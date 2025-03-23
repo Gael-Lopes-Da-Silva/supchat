@@ -1,6 +1,7 @@
+
 -- USERS
 CREATE TABLE users (
-    id INT AUTO_INCREMENT PRIMARY KEY,
+    id INT AUTO_INCREMENT PRIMARY KEY, 
     username VARCHAR(50) NOT NULL UNIQUE,
     email VARCHAR(100) NOT NULL,
     password TEXT DEFAULT NULL,
@@ -9,11 +10,11 @@ CREATE TABLE users (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NULL,
     deleted_at TIMESTAMP NULL
-);
+); 
 
--- PROVIDERS
+/* PROVIDERS */
 CREATE TABLE providers (
-    user_id INT NOT NULL,
+    user_id INT NOT NULL,  
     provider_id VARCHAR(255) DEFAULT NULL,
     provider VARCHAR(50) DEFAULT 'local',
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
