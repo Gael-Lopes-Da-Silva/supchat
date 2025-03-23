@@ -6,6 +6,8 @@ import {
     updateWorkspaceInvitation,
     deleteWorkspaceInvitation,
     restoreWorkspaceInvitation,
+    joinWorkspaceWithInvitation
+
 } from "../controllers/WorkspaceInvitations.js";
 
 const router = express.Router();
@@ -43,6 +45,40 @@ router.post("/", (request, response) => {
             error_message: error.message,
         });
     });
+});
+
+
+// POST /workspaces/invitations/join
+//
+// body:
+//   token: string (required)
+//   user_id: number (required)
+// return:
+//   result: { workspace_id }
+router.post("/join", (request, response) => {
+    joinWorkspaceWithInvitation(request)
+        .then((result) => {
+            if (!result.error && result !== "") {
+                response.status(200).json({
+                    when: "WorkspaceInvitations > JoinWorkspaceWithInvitation",
+                    result: result,
+                    error: 0,
+                });
+            } else {
+                response.status(400).json({
+                    when: "WorkspaceInvitations > JoinWorkspaceWithInvitation",
+                    error: result.error || 1,
+                    error_message: result.error_message || "Could not join workspace with invitation",
+                });
+            }
+        })
+        .catch((error) => {
+            response.status(500).json({
+                when: "WorkspaceInvitations > JoinWorkspaceWithInvitation",
+                error: 1,
+                error_message: error.message,
+            });
+        });
 });
 
 // GET /workspaces/invitations

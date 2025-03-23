@@ -1,26 +1,21 @@
-import { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState, useRef } from 'react';
 import { useNavigate } from "react-router-dom";
-
 import * as Fa from "react-icons/fa6";
-
-import Button from "../../components/Button/Button";
-import Checkbox from "../../components/Checkbox/Checkbox";
-import InputField from "../../components/InputField/InputField";
-import Modal from "../../components/Modal/Modal";
-import Popup from "../../components/Popup/Popup";
-
+import DashboardPopups from "../../components/DashboardPopups/DashboardPopups";
+import DashboardRight from "../../components/DashboardRight/DashboardRight";
+import DashboardLeft from "../../components/DashboardLeft/DashboardLeft";
+import WorkspaceModalManager from "../../components/DashboardModals/WorkspaceModalManager";
 import {
-    readWorkspaceMember,
-} from "../../services/WorkspaceMembers";
-import {
-    createWorkspace,
-    readWorkspace,
-} from "../../services/Workspaces";
-
+    readChannel
+} from "../../services/Channels";
+import { createWorkspaceInvitation } from "../../services/WorkspaceInvitations";
 import "./DashboardPage.css";
+import socket from '../../socket';
+
 
 const DashboardPage = () => {
     const [theme] = useState(localStorage.getItem("gui.theme") ?? "light");
+    const [connectedUsers, setConnectedUsers] = useState([]);
     const [user, setUser] = useState("");
     const [workspaces, setWorkspaces] = useState({});
     const [selectedWorkspace, setSelectedWorkspace] = useState({});
@@ -38,6 +33,7 @@ const DashboardPage = () => {
         workspaceModal: {
             createWorkspace: false,
             joinWorkspace: false,
+            createChannel: false,
         },
     });
     const [popupVisibility, setPopupVisibility] = useState({
@@ -46,10 +42,16 @@ const DashboardPage = () => {
         notifications: false,
         emojis: false,
         workspace: false,
+        joinedNotification: false,
     });
     const [modalVisibility, setModalVisibility] = useState({
         workspace: false,
     });
+
+    const [channelName, setChannelName] = useState("");
+    const [channelDescription, setChannelDescription] = useState("");
+    const [channelIsPrivate, setChannelIsPrivate] = useState(false);
+    const [joinedUsername, setJoinedUsername] = useState("");
 
     const dashboardContainerRef = useRef(null);
     const modalRefs = {
@@ -61,9 +63,123 @@ const DashboardPage = () => {
         notifications: useRef(null),
         emojis: useRef(null),
         workspace: useRef(null),
+        joinedNotification: useRef(null),
+
     };
 
     const navigate = useNavigate();
+
+
+    useEffect(() => {
+        const channelArray = Object.values(channels);
+        if (channelArray.length > 0) {
+            setSelectedChannel(channelArray[0]);
+        }
+    }, [channels]);
+
+    useEffect(() => {
+        const workspaceArray = Object.values(workspaces);
+        if (workspaceArray.length > 0 && !selectedWorkspace.id) {
+            setSelectedWorkspace(workspaceArray[0]);
+        }
+    }, [workspaces, selectedWorkspace]);
+
+
+    useEffect(() => {
+        socket.on("connectedUsers", (users) => {
+            setConnectedUsers(users);
+        });
+
+        return () => {
+            socket.off("connectedUsers");
+        };
+    }, []);
+
+
+    useEffect(() => {
+        const storedUser = JSON.parse(localStorage.getItem("user"));
+
+        if (!storedUser || !storedUser.data) {
+            navigate("/login", { state: { expired: true } });
+            return;
+        }
+
+        setUser(storedUser.data);
+
+
+        socket.emit("registerUser", storedUser.data.id);
+    }, [navigate]);
+
+
+    useEffect(() => {
+        if (selectedWorkspace.id) {
+            readChannel({ workspace_id: selectedWorkspace.id })
+                .then((data) => {
+                    const newChannels = {};
+                    data.result.forEach((channel) => {
+                        newChannels[channel.id] = channel;
+                    });
+                    setChannels(newChannels);
+                    if (data.result.length > 0) {
+                        setSelectedChannel(data.result[0]);
+                    }
+                })
+                .catch((error) => {
+                    console.error('Error reading channels:', error);
+                });
+        }
+    }, [selectedWorkspace]);
+
+    useEffect(() => {
+        socket.on("channelCreated", (newChannel) => {
+
+            if (selectedWorkspace.id === newChannel.workspace_id) {
+                setChannels((prev) => ({
+                    ...prev,
+                    [newChannel.id]: newChannel
+                }));
+            }
+        });
+
+        return () => {
+            socket.off("channelCreated");
+        };
+    }, [selectedWorkspace]);
+
+
+    socket.on("workspaceCreated", (newWorkspace) => {
+        setWorkspaces((prev) => {
+            const updated = {
+                ...prev,
+                [newWorkspace.id]: newWorkspace,
+            };
+
+            if (!selectedWorkspace.id) {
+                setSelectedWorkspace(newWorkspace);
+            }
+
+            return updated;
+        });
+    });
+
+
+    useEffect(() => {
+        socket.on("workspaceUserJoined", ({ workspace_id, username }) => {
+
+            setJoinedUsername(username);
+            setPopupVisibility((prev) => ({ ...prev, joinedNotification: true }));
+
+            setTimeout(() => {
+                setPopupVisibility((prev) => ({ ...prev, joinedNotification: false }));
+            }, 3000);
+        });
+
+        return () => {
+            socket.off("workspaceUserJoined");
+        };
+    }, []);
+
+
 
     useEffect(() => {
         const storedUser = JSON.parse(localStorage.getItem("user"));
@@ -76,41 +192,29 @@ const DashboardPage = () => {
         setUser(storedUser.data);
     }, [navigate]);
 
+
     useEffect(() => {
-        if (!user || !user.id) {
-            return;
-        }
+        if (!user || !user.id) return;
 
-        readWorkspaceMember({
-            user_id: user.id,
-        }).then((data) => {
-            const workspacePromises = data.result.map(async (workspaceMember) => {
-                return readWorkspace({ id: workspaceMember.workspace_id })
-                    .then((data) => ({
-                        id: data.result.id,
-                        data: data.result,
-                    }))
-                    .catch((error) => {
-                        if (process.env.REACT_APP_ENV === "dev") console.error(error);
-                    });
-            });
+        socket.emit("getUserWorkspaces", { user_id: user.id });
 
-            Promise.all(workspacePromises).then((results) => {
-                const newWorkspaces = {};
-                results.forEach((workspace) => {
-                    if (workspace) {
-                        newWorkspaces[workspace.id] = workspace.data;
-                    }
-                });
-                setWorkspaces(newWorkspaces);
+        socket.once("userWorkspaces", (workspaceList) => {
+            const newWorkspaces = {};
+            workspaceList.forEach((workspace) => {
+                newWorkspaces[workspace.id] = workspace;
             });
-        }).catch((error) => {
-            if (process.env.REACT_APP_ENV === "dev") console.error(error);
+            setWorkspaces(newWorkspaces);
+
+
+            if (!selectedWorkspace.id && workspaceList.length > 0) {
+                setSelectedWorkspace(workspaceList[0]);
+            }
         });
 
         const showUserList = localStorage.getItem("gui.dashboard.show_user_list");
         if (showUserList !== null) updateGuiState("userList", showUserList === "true");
     }, [user]);
+
 
     const updateGuiState = (key, value) => {
         setGuiVisibility((prev) => ({ ...prev, [key]: value }));
@@ -139,30 +243,13 @@ const DashboardPage = () => {
     const handleCreateWorkspace = (event) => {
         event.preventDefault();
 
-        createWorkspace({
+        socket.emit("createWorkspace", {
             name: workspaceName,
             description: workspaceDescription,
             is_private: workspaceIsPrivate,
             user_id: user.id,
-        })
-            .then((data) => {
-                readWorkspace({
-                    id: data.result.insertId,
-                })
-                    .then((data) => {
-                        setWorkspaces((prev) => ({
-                            ...prev,
-                            [data.result.id]: data.result,
-                        }));
-                        setSelectedWorkspace(data.result);
-                    })
-                    .catch((error) => {
-                        if (process.env.REACT_APP_ENV === "dev") console.error(error);
-                    });
-            })
-            .catch((error) => {
-                if (process.env.REACT_APP_ENV === "dev") console.error(error);
-            });
+        });
+
 
         setWorkspaceName("");
         setWorkspaceDescription("");
@@ -170,12 +257,83 @@ const DashboardPage = () => {
         hideAllModal();
     };
 
+
+
+
+    const handleGenerateInvitation = async () => {
+        if (!selectedWorkspace.id) {
+            console.error("No workspace selected");
+            return;
+        }
+
+        try {
+            const response = await createWorkspaceInvitation({
+                workspace_id: selectedWorkspace.id,
+                user_id: user.id,
+            });
+
+            if (response.result && response.result.result && response.result.result.token) {
+                alert(`Invitation link: ${response.result.result.token}`);
+            } else {
+                console.error("Token not found in response:", response);
+            }
+        } catch (error) {
+            console.error("Error generating invitation:", error);
+        }
+    };
+
+
     const handleJoinWorkspace = (event) => {
         event.preventDefault();
 
-        setWorkspaceInvitation("");
+        socket.emit("joinWorkspaceWithInvitation", {
+            token: workspaceInvitation,
+            user_id: user.id,
+            username: user.username,
+        });
+
+        socket.once("joinWorkspaceSuccess", (workspaceData) => {
+            if (!workspaceData || !workspaceData.id) {
+                console.error("Données workspace invalides", workspaceData);
+                return;
+            }
+
+
+            setWorkspaces((prev) => ({
+                ...prev,
+                [workspaceData.id]: workspaceData,
+            }));
+
+            setSelectedWorkspace(workspaceData);
+            setWorkspaceInvitation("");
+            hideAllModal();
+        });
+
+        socket.once("joinWorkspaceError", (error) => {
+            console.error("Erreur socket joinWorkspace:", error);
+        });
+    };
+
+
+    const handleCreateChannel = (event) => {
+        event.preventDefault();
+
+
+        socket.emit("createChannel", {
+            name: channelName,
+            is_private: channelIsPrivate,
+            workspace_id: selectedWorkspace.id,
+            user_id: user.id
+        });
+
+
+
+        setChannelName("");
+        setChannelDescription("");
+        setChannelIsPrivate(false);
         hideAllModal();
     };
+
 
     const getBackground = (text) => {
         let hash = 0;
@@ -221,395 +379,80 @@ const DashboardPage = () => {
                 hideAllModal();
             }
         }} className={`dashboard-container ${theme}`}>
-            <Modal
-                ref={modalRefs.workspace}
+
+            <WorkspaceModalManager
+                modalRef={modalRefs.workspace}
                 display={modalVisibility.workspace}
-                goBack={
-                    guiVisibility.workspaceModal.createWorkspace ||
-                    guiVisibility.workspaceModal.joinWorkspace
-                }
-                onClose={() => {
-                    updateModalState("workspace", false);
+                theme={theme}
+                guiVisibility={guiVisibility.workspaceModal}
+                updateGuiState={updateGuiState}
+                updateModalState={updateModalState}
+                handleCreateWorkspace={handleCreateWorkspace}
+                handleJoinWorkspace={handleJoinWorkspace}
+                handleCreateChannel={handleCreateChannel}
+                handleGenerateInvitation={handleGenerateInvitation}
+                workspaceName={workspaceName}
+                workspaceDescription={workspaceDescription}
+                workspaceIsPrivate={workspaceIsPrivate}
+                workspaceInvitation={workspaceInvitation}
+                channelName={channelName}
+                channelDescription={channelDescription}
+                channelIsPrivate={channelIsPrivate}
+                setWorkspaceName={setWorkspaceName}
+                setWorkspaceDescription={setWorkspaceDescription}
+                setWorkspaceIsPrivate={setWorkspaceIsPrivate}
+                setWorkspaceInvitation={setWorkspaceInvitation}
+                setChannelName={setChannelName}
+                setChannelDescription={setChannelDescription}
+                setChannelIsPrivate={setChannelIsPrivate}
+            />
+
+            <DashboardPopups
+                refs={popupRefs}
+                visibility={popupVisibility}
+                theme={theme}
+                mousePosition={mousePosition}
+                joinedUsername={joinedUsername}
+                onLogout={() => {
+                    localStorage.removeItem("user");
+                    navigate("/login");
                 }}
-                onGoBack={() => {
-                    updateGuiState("workspaceModal", {
-                        createWorkspace: false,
-                        joinWorkspace: false,
-                    });
-                }}
-                title="Ajouter/Rejoindre un espace de travail"
-                theme={theme}
-                content={
-                    <div>
-                        {!(
-                            guiVisibility.workspaceModal.createWorkspace ||
-                            guiVisibility.workspaceModal.joinWorkspace
-                        ) && (
-                                <main>
-                                    <button
-                                        onClick={() => {
-                                            updateGuiState("workspaceModal", {
-                                                createWorkspace: true,
-                                                joinWorkspace: false,
-                                            });
-                                        }}
-                                    >
-                                        Créer un espace de travail
-                                        <Fa.FaChevronRight />
-                                    </button>
-                                    <button
-                                        onClick={() => {
-                                            updateGuiState("workspaceModal", {
-                                                createWorkspace: false,
-                                                joinWorkspace: true,
-                                            });
-                                        }}
-                                    >
-                                        Rejoindre un espace de travail
-                                        <Fa.FaChevronRight />
-                                    </button>
-                                </main>
-                            )}
-                        {guiVisibility.workspaceModal.createWorkspace && (
-                            <form onSubmit={handleCreateWorkspace}>
-                                <div>
-                                    <InputField
-                                        label="Nom"
-                                        type="text"
-                                        theme={theme}
-                                        value={workspaceName}
-                                        required={true}
-                                        onChange={(e) => setWorkspaceName(e.target.value)}
-                                    />
-                                </div>
-                                <div>
-                                    <InputField
-                                        label="Description"
-                                        type="text"
-                                        theme={theme}
-                                        value={workspaceDescription}
-                                        required={true}
-                                        onChange={(e) => setWorkspaceDescription(e.target.value)}
-                                    />
-                                    <Checkbox
-                                        label={<p>Espace de travail privé</p>}
-                                        theme={theme}
-                                        onChange={() => {
-                                            setWorkspaceIsPrivate(!workspaceIsPrivate);
-                                        }}
-                                    />
-                                </div>
-                                <div>
-                                    <Button type="submit" text="Créer" theme={theme} />
-                                </div>
-                            </form>
-                        )}
-                        {guiVisibility.workspaceModal.joinWorkspace && (
-                            <form onSubmit={handleJoinWorkspace}>
-                                <div>
-                                    <InputField
-                                        label="Lien d'invitation ou token"
-                                        type="text"
-                                        theme={theme}
-                                        value={workspaceInvitation}
-                                        required={true}
-                                        onChange={(e) => setWorkspaceInvitation(e.target.value)}
-                                    />
-                                </div>
-                                <div>
-                                    <Button type="submit" text="Rejoindre" theme={theme} />
-                                </div>
-                            </form>
-                        )}
-                    </div>
-                }
             />
-            <Popup
-                ref={popupRefs.profile}
-                theme={theme}
-                display={popupVisibility.profile}
-                content={
-                    <div>
-                        <header></header>
-                        <main>
-                            <button
-                                onClick={() => {
-                                    localStorage.removeItem("user");
-                                    navigate("/login");
-                                }}
-                            >
-                                Deconnexion
-                            </button>
-                        </main>
-                        <footer></footer>
-                    </div>
-                }
-                bottom={105}
-                left={185}
+
+
+            <DashboardLeft
+                key={Object.keys(workspaces).length}
+                workspaces={workspaces}
+                selectedWorkspace={selectedWorkspace}
+                channels={channels}
+                selectedChannel={selectedChannel}
+                user={user}
+                guiVisibility={guiVisibility}
+                updateGuiState={updateGuiState}
+                setSelectedWorkspace={setSelectedWorkspace}
+                setChannels={setChannels}
+                setSelectedChannel={setSelectedChannel}
+                hideAllPopup={hideAllPopup}
+                updatePopupState={updatePopupState}
+                updateModalState={updateModalState}
+                setMousePosition={setMousePosition}
+                getBackground={getBackground}
+                getForeground={getForeground}
             />
-            <Popup
-                ref={popupRefs.pinned}
-                theme={theme}
-                display={popupVisibility.pinned}
-                content={
-                    <div>
-                        <header></header>
-                        <main>
-                            <p>Messages épinglés</p>
-                        </main>
-                        <footer></footer>
-                    </div>
-                }
-                top={mousePosition && mousePosition.y}
-                left={mousePosition && mousePosition.x}
-            />
-            <Popup
-                ref={popupRefs.notifications}
-                theme={theme}
-                display={popupVisibility.notifications}
-                content={
-                    <div>
-                        <header></header>
-                        <main>
-                            <p>Notifications</p>
-                        </main>
-                        <footer></footer>
-                    </div>
-                }
-                top={mousePosition && mousePosition.y}
-                left={mousePosition && mousePosition.x}
-            />
-            <Popup
-                ref={popupRefs.emojis}
-                theme={theme}
-                display={popupVisibility.emojis}
-                content={
-                    <div>
-                        <header></header>
-                        <main>
-                            <p>Emojis</p>
-                        </main>
-                        <footer></footer>
-                    </div>
-                }
-                top={mousePosition && mousePosition.y - 60}
-                left={mousePosition && mousePosition.x}
-            />
-            <Popup
-                ref={popupRefs.workspace}
-                theme={theme}
-                display={popupVisibility.workspace}
-                content={
-                    <div>
-                        <header></header>
-                        <main>
-                            <p>Configuration de l'espace de travail</p>
-                        </main>
-                        <footer></footer>
-                    </div>
-                }
-                top={100}
-                left={127}
-            />
-            <div
-                className="dashboard-left"
-                style={{ display: !guiVisibility.leftPanel && "none" }}
-            >
-                <div className="dashboard-left-workspaces">
-                    <div className="dashboard-left-workspaces-icons">
-                        {workspaces &&
-                            Object.values(workspaces).map((workspace) => (
-                                <button
-                                    key={workspace.id}
-                                    title={workspace.name}
-                                    onClick={() => {
-                                        updateGuiState("discoverWorkspaces", false);
-                                        setSelectedWorkspace(workspace);
-                                    }}
-                                    style={{
-                                        background: getBackground(workspace.name),
-                                        color: getForeground(workspace.name),
-                                    }}
-                                >
-                                    <p>{workspace.name[0].toUpperCase()}</p>
-                                    <span
-                                        style={{
-                                            display:
-                                                selectedWorkspace.id !== workspace.id ? "none" : "",
-                                        }}
-                                    ></span>
-                                </button>
-                            ))}
-                    </div>
-                    <div className="dashboard-left-workspaces-buttons">
-                        <button
-                            onClick={(event) => {
-                                event.stopPropagation();
-                                updateGuiState("workspaceModal", {
-                                    createWorkspace: false,
-                                    joinWorkspace: false,
-                                });
-                                updateModalState("workspace", true);
-                            }}
-                            title="Ajouter/Rejoindre un espace de travail"
-                        >
-                            <Fa.FaPlus />
-                        </button>
-                        <button
-                            onClick={() => {
-                                updateGuiState("discoverWorkspaces", true);
-                            }}
-                            title="Découvrir de nouveaux espaces de travail"
-                        >
-                            <Fa.FaQuestion />
-                        </button>
-                    </div>
-                </div>
-                <div className="dashboard-left-content">
-                    {selectedWorkspace.id && (
-                        <header>
-                            <div
-                                onClick={(event) => {
-                                    event.stopPropagation();
-                                    hideAllPopup();
-                                    updatePopupState("workspace", true);
-                                    setMousePosition({
-                                        x: event.clientX,
-                                        y: event.clientY,
-                                    });
-                                }}
-                            >
-                                <p>{selectedWorkspace.name}</p>
-                                <Fa.FaChevronDown />
-                            </div>
-                        </header>
-                    )}
-                    <main></main>
-                    <footer>
-                        <div
-                            onClick={(event) => {
-                                event.stopPropagation();
-                                hideAllPopup();
-                                updatePopupState("profile", true);
-                                setMousePosition({
-                                    x: event.clientX,
-                                    y: event.clientY,
-                                });
-                            }}
-                            className="dashboard-left-footer-profile"
-                            title="Menu de profil"
-                        >
-                            <div
-                                style={{
-                                    background: getBackground(user && user.username),
-                                    color: getForeground(user && user.username),
-                                }}
-                            >
-                                {user && user.username[0].toUpperCase()}
-                            </div>
-                            <p>{user && user.username}</p>
-                        </div>
-                        <div className="dashboard-left-footer-buttons">
-                            <button
-                                onClick={() => {
-                                    navigate("/settings");
-                                }}
-                                title="Paramètres utilisateur"
-                            >
-                                <Fa.FaGear />
-                            </button>
-                        </div>
-                    </footer>
-                </div>
-            </div>
+
+
             {selectedWorkspace.id && !guiVisibility.discoverWorkspaces && (
-                <div className="dashboard-right">
-                    <div className="dashboard-right-content">
-                        <header>
-                            <div className="dashboard-right-header-buttons">
-                                <button
-                                    onClick={() => {
-                                        updateGuiState("leftPanel", !guiVisibility.leftPanel);
-                                    }}
-                                    title="Afficher/Masquer le panneau de gauche"
-                                >
-                                    <Fa.FaBars />
-                                </button>
-                            </div>
-                            <div className="dashboard-right-header-buttons">
-                                <button
-                                    onClick={(event) => {
-                                        event.stopPropagation();
-                                        hideAllPopup();
-                                        updatePopupState("pinned", true);
-                                        setMousePosition({
-                                            x: event.clientX,
-                                            y: event.clientY,
-                                        });
-                                    }}
-                                    title="Mess(ages épinglés"
-                                >
-                                    <Fa.FaThumbtack />
-                                </button>
-                                <button
-                                    onClick={(event) => {
-                                        event.stopPropagation();
-                                        hideAllPopup();
-                                        updatePopupState("notifications", true);
-                                        setMousePosition({
-                                            x: event.clientX,
-                                            y: event.clientY,
-                                        });
-                                    }}
-                                    title="Notifications"
-                                >
-                                    <Fa.FaBell />
-                                </button>
-                                <button
-                                    onClick={() => {
-                                        localStorage.setItem(
-                                            "gui.dashboard.show_user_list",
-                                            !guiVisibility.userList
-                                        );
-                                        updateGuiState("userList", !guiVisibility.userList);
-                                    }}
-                                    title="Afficher/Masquer la liste des utilisateur"
-                                >
-                                    <Fa.FaUserGroup />
-                                </button>
-                            </div>
-                        </header>
-                        <main></main>
-                        <footer>
-                            <div className="dashboard-right-footer-buttons">
-                                <button title="Uploader un fichier">
-                                    <Fa.FaCirclePlus />
-                                </button>
-                            </div>
-                            <input type="text" placeholder="Envoyer un message" />
-                            <div className="dashboard-right-footer-buttons">
-                                <button
-                                    onClick={(event) => {
-                                        event.stopPropagation();
-                                        hideAllPopup();
-                                        updatePopupState("emojis", true);
-                                        setMousePosition({
-                                            x: event.clientX,
-                                            y: event.clientY,
-                                        });
-                                    }}
-                                    title="Insérer un émoji"
-                                >
-                                    <Fa.FaFaceSmile />
-                                </button>
-                            </div>
-                        </footer>
-                    </div>
-                    <div
-                        className="dashboard-right-peoples"
-                        style={{ display: !guiVisibility.userList && "none" }}
-                    ></div>
-                </div>
+                <DashboardRight
+                    selectedWorkspace={selectedWorkspace}
+                    selectedChannel={selectedChannel}
+                    user={user}
+                    connectedUsers={connectedUsers}
+                    guiVisibility={guiVisibility}
+                    updateGuiState={updateGuiState}
+                    hideAllPopup={hideAllPopup}
+                    updatePopupState={updatePopupState}
+                    setMousePosition={setMousePosition}
+                />
             )}
             {!selectedWorkspace.id && !guiVisibility.discoverWorkspaces && (
                 <div className="dashboard-right">

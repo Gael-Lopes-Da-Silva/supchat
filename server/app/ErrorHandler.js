@@ -66,7 +66,8 @@ export const ERRORS = {
     PERMISSION_DENIED: { code: 72, message: "Permission denied" },
 };
 
-export const createErrorResponse = (error, additionalMessage = "") => ({
+export const createErrorResponse = (error, additionalMessage = "") => (
+    console.log("error", error),{
     error: error.code,
     error_message: additionalMessage ? `${error.message} - ${additionalMessage}` : error.message,
 });

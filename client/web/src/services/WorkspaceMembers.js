@@ -11,6 +11,8 @@ export const createWorkspaceMember = async (body) => {
     return await response.json();
 };
 
+
+
 export const readWorkspaceMember = async (query) => {
     const response = query.id ? await fetch(`${process.env.REACT_APP_API_URL}workspaces/members/` + query.id, {
         method: "GET",

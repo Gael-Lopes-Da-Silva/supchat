@@ -11,23 +11,29 @@ export const createWorkspace = async (body) => {
     return await response.json();
 };
 
-export const readWorkspace = async (query) => {
-    const response = query.id ? await fetch(`${process.env.REACT_APP_API_URL}workspaces/` + query.id, {
-        method: "GET",
-        headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json'
-        },
-    }) : await fetch(`${process.env.REACT_APP_API_URL}workspaces?` + new URLSearchParams(query), {
-        method: "GET",
-        headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json'
-        },
-    });
+export const readWorkspace = async ({ id }) => {
+    console.log("Reading workspace with ID:", id);
+    try {
+        const response = await fetch(`${process.env.REACT_APP_API_URL}workspaces/${id}`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
 
-    return await response.json();
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+
+        const data = await response.json();
+        console.log("Workspace data fetched:", data);
+        return data;
+    } catch (error) {
+        console.error("Error fetching workspace data:", error);
+        throw error;
+    }
 };
+
 
 export const updateWorkspace = async (id, body) => {
     const response = await fetch(`${process.env.REACT_APP_API_URL}workspaces/` + id, {

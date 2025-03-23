@@ -2,32 +2,37 @@ import pool from "../database/db.js";
 import { ERRORS, createErrorResponse } from "../app/ErrorHandler.js";
 
 export const createWorkspaceMember = async (request) => {
-    if (!request.body.user_id) return createErrorResponse(ERRORS.USER_ID_NOT_PROVIDED);
-    if (!request.body.workspace_id) return createErrorResponse(ERRORS.WORKSPACE_ID_NOT_PROVIDED);
-    if (!request.body.role_id) return createErrorResponse(ERRORS.ROLE_ID_NOT_PROVIDED);
+    if (!request.body.user_id) return createErrorResponse({ code: 400, message: "USER_ID_NOT_PROVIDED" });
+    if (!request.body.workspace_id) return createErrorResponse({ code: 400, message: "WORKSPACE_ID_NOT_PROVIDED" });
+    if (!request.body.role_id) return createErrorResponse({ code: 400, message: "ROLE_ID_NOT_PROVIDED" });
 
     const [user] = await pool.query("SELECT * FROM users WHERE id = ?", [request.body.user_id]);
-    if (!user) return createErrorResponse(ERRORS.USER_NOT_FOUND);
-    if (user.deleted_at !== null) return createErrorResponse(ERRORS.USER_DELETED);
+    if (!user || user.length === 0) return createErrorResponse({ code: 404, message: "USER_NOT_FOUND" });
+    if (user.deleted_at !== null) return createErrorResponse({ code: 400, message: "USER_DELETED" });
 
     const [workspace] = await pool.query("SELECT * FROM workspaces WHERE id = ?", [request.body.workspace_id]);
-    if (!workspace) return createErrorResponse(ERRORS.WORKSPACE_NOT_FOUND);
-    if (workspace.deleted_at !== null) return createErrorResponse(ERRORS.WORKSPACE_DELETED);
+    if (!workspace || workspace.length === 0) return createErrorResponse({ code: 404, message: "WORKSPACE_NOT_FOUND" });
+    if (workspace.deleted_at !== null) return createErrorResponse({ code: 400, message: "WORKSPACE_DELETED" });
 
     const [role] = await pool.query("SELECT * FROM roles WHERE id = ?", [request.body.role_id]);
-    if (!role) return createErrorResponse(ERRORS.ROLE_NOT_FOUND);
+    if (!role || role.length === 0) return createErrorResponse({ code: 404, message: "ROLE_NOT_FOUND" });
 
-    if (await pool.query("SELECT * FROM workspace_members WHERE user_id = ? AND workspace_id = ?", [
-        request.body.user_id,
-        request.body.workspace_id
-    ])) return createErrorResponse(ERRORS.USER_ALREADY_EXISTS_IN_WORKSPACE);
+    const [existingMember] = await pool.query(
+        "SELECT * FROM workspace_members WHERE user_id = ? AND workspace_id = ?",
+        [request.body.user_id, request.body.workspace_id]
+    );
+    if (existingMember && existingMember.length > 0) {
+        return createErrorResponse({ code: 409, message: "USER_ALREADY_EXISTS_IN_WORKSPACE" });
+    }
 
-    return pool.query("INSERT INTO workspace_members (workspace_id, user_id, role_id) VALUES (?, ?, ?)", [
-        request.body.workspace_id,
-        request.body.user_id,
-        request.body.role_id
-    ]);
+    await pool.query(
+        "INSERT INTO workspace_members (workspace_id, user_id, role_id) VALUES (?, ?, ?)",
+        [request.body.workspace_id, request.body.user_id, request.body.role_id]
+    );
+
+    return { success: true };
 };
+
 
 export const readWorkspaceMember = async (request) => {
     if (request.params.id) {

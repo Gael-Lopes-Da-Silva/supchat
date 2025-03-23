@@ -11,6 +11,33 @@ export const createWorkspaceInvitation = async (body) => {
     return await response.json();
 };
 
+export const joinWorkspaceWithInvitation = async (body) => {
+
+    const response = await fetch(`${process.env.REACT_APP_API_URL}workspaces/invitations/join`, {
+        method: "POST",
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(body),
+    });
+
+    let data = {};
+
+    try {
+        data = await response.json();
+    } catch (err) {
+        console.error("Failed to parse JSON from response:", err);
+        const text = await response.text();
+        console.warn("Response as text:", text);
+    }
+    console.log("Parsed response JSON:", data);
+
+    return data;
+};
+
+
+
 export const readWorkspaceInvitation = async (query) => {
     const response = query.id ? await fetch(`${process.env.REACT_APP_API_URL}workspaces/invitations/` + query.id, {
         method: "GET",
