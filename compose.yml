@@ -86,25 +86,7 @@ services:
             CHOKIDAR_USEPOLLING: "true"
             WATCHPACK_POLLING: "true"
 
-    supchat_mobile: # pour le dev
-        image: ./client/mobile
-        container_name: supchat_mobile
-        restart: on-failure
-        tty: true
-        volumes:
-            - ./client/mobile:/app
-        ports:
-            - "6000:6000"
-        networks:
-            - network
-        depends_on:
-            - supchat_api
-        environment:
-            PORT: 6000
-            REACT_APP_API_URL: http://localhost:3000/
-            REACT_APP_BASE_URL: http://localhost:5000/
-
-    phpmyadmin: # pour le dev
+    phpmyadmin:
         image: phpmyadmin/phpmyadmin:latest
         container_name: phpmyadmin
         environment:
