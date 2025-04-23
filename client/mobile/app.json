@@ -38,8 +38,8 @@
             "typedRoutes": true
         },
         "extra": {
-            "apiUrl": "http://192.168.1.11:3000/",
-            "clientWebUrl": "http://192.168.1.11:5000/"
+            "apiUrl": "http://<IP_server_API>:3000/",
+            "clientWebUrl": "http://<IP_server_API>:5000/"
         }
     }
 }
