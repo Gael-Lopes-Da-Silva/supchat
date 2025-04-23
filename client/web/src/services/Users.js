@@ -15,13 +15,13 @@ export const createUser = async (userData) => {
     });
 };
 
-export const readUser = async (query) => {
+export const readUser = async (query, api_url) => {
     let url;
 
     if (query.id) {
-        url = `${process.env.REACT_APP_API_URL}users/${query.id}`;
+        url = `${api_url}users/${query.id}`;
     } else if (query.confirm_token) {
-        url = `${process.env.REACT_APP_API_URL}users?confirm_token=${query.confirm_token}`;
+        url = `${api_url}users?confirm_token=${query.confirm_token}`;
     } else {
         return { error: true, message: "Paramètre requis manquant." };
     }
@@ -35,16 +35,16 @@ export const readUser = async (query) => {
     })
     .then((response) => response.json())
     .catch((error) => {
-        return { error: true, message: "Erreur serveur" };
+        return { error: true, message: error.message };
     });
 };
 
-export const updateUser = async (userId, updatedData) => {
+export const updateUser = async (userId, updatedData, api_url) => {
     if (!userId) {
         return { error: true, message: "ID utilisateur manquant" };
     }
 
-    const url = `${process.env.REACT_APP_API_URL}users/${userId}`;
+    const url = `${api_url}users/${userId}`;
 
     return fetch(url, {
         method: "PUT",

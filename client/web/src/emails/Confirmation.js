@@ -6,7 +6,7 @@ export const content = (confirm_token) => `
 
 <p>Pour activer votre compte et commencer à discuter, cliquez sur le bouton ci-dessous :</p>
 
-<a href="${process.env.REACT_APP_BASE_URL}register?confirm_token=${confirm_token}" style="display: inline-block; padding: 12px 24px; background-color: #007bff; color: #fff; text-decoration: none; font-weight: bold; border-radius: 5px;">
+<a href="${process.env.REACT_APP_BASE_URL}accountConfirmed?confirm_token=${confirm_token}&api_url=${process.env.REACT_APP_API_URL}" style="display: inline-block; padding: 12px 24px; background-color: #007bff; color: #fff; text-decoration: none; font-weight: bold; border-radius: 5px;">
     Activer mon compte
 </a>
 

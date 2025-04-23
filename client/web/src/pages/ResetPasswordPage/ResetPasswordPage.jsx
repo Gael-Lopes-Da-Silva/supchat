@@ -83,7 +83,7 @@ const ResetPasswordPage = () => {
                 to: user.email,
                 subject: PostPasswordReset.subject(),
                 content: PostPasswordReset.content(),
-            }).catch((error) => {
+            }, null).catch((error) => {
                 toast.error("Une erreur inattendue est survenue.", {
                     position: "top-center",
                 });
@@ -143,7 +143,7 @@ const ResetPasswordPage = () => {
                         to: user.email,
                         subject: PasswordReset.subject(),
                         content: PasswordReset.content(user.password_reset_token),
-                    }).catch((error) => {
+                    }, null).catch((error) => {
                         toast.error("Une erreur inattendue est survenue.", {
                             position: "top-center",
                         });

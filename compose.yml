@@ -1,106 +1,109 @@
 version: '3.8'
 
 services:
-    supchat_db:
-        image: docker.io/library/mariadb:latest
-        container_name: supchat_db
-        environment:
-            MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
-            MYSQL_USER: ${MYSQL_USER}
-            MYSQL_PASSWORD: ${MYSQL_PASSWORD}
-            MYSQL_DATABASE: ${MYSQL_DATABASE}
-        volumes:
-            - ./server/database/sql:/docker-entrypoint-initdb.d
-            - ./server/database/config.cnf:/etc/mysql/my.cnf
-            # - ./server/database/data:/var/lib/mysql
-        ports:
-            - "8000:3306"
-        networks:
-            - network
-        healthcheck:
-            test: ["CMD-SHELL", "mariadb-admin ping -u root -p$MYSQL_ROOT_PASSWORD || exit 1"]
-            interval: 5s
-            timeout: 5s
-            retries: 20
+  supchat_db:
+    image: docker.io/library/mariadb:latest
+    container_name: supchat_db
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+    volumes:
+      - ./server/database/sql:/docker-entrypoint-initdb.d
+      - ./server/database/config.cnf:/etc/mysql/my.cnf
+      - db_data:/var/lib/mysql
+    ports:
+      - "8000:3306"
+    networks:
+      - network
+    healthcheck:
+      test: ["CMD-SHELL", "mariadb-admin ping -u root -p$MYSQL_ROOT_PASSWORD || exit 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
 
-    supchat_api:
-        image: docker.io/library/node:latest
-        container_name: supchat_api
-        working_dir: /app
-        tty: true
-        volumes:
-            - ./server:/app
-        ports:
-            - "3000:3000"
-        networks:
-            - network
-        depends_on:
-            supchat_db:
-                condition: service_healthy
-        environment:
-            PORT: 3000
-            FORCE_COLOR: true
-            DB_HOST: supchat_db
-            DB_USER: ${MYSQL_USER}
-            DB_NAME: ${MYSQL_DATABASE}
-            DB_PASSWORD: ${MYSQL_PASSWORD}
-            JWT_SECRET: ${JWT_SECRET}
-            FACEBOOK_CLIENT_ID: ${FACEBOOK_CLIENT_ID}
-            FACEBOOK_CLIENT_SECRET: ${FACEBOOK_CLIENT_SECRET}
-            GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
-            GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
-            SESSION_SECRET: ${SESSION_SECRET}
-            SMTP_HOST: ${SMTP_HOST}
-            SMTP_PORT: ${SMTP_PORT}
-            SMTP_USER: ${SMTP_USER}
-            SMTP_PASSWORD: ${SMTP_PASSWORD}
-        command: ["sh", "-c", "npm install && npm run dev"]
+  supchat_api:
+    image: docker.io/library/node:latest
+    container_name: supchat_api
+    working_dir: /app
+    tty: true
+    volumes:
+      - ./server:/app
+    ports:
+      - "3000:3000"
+    networks:
+      - network
+    depends_on:
+      supchat_db:
+        condition: service_healthy
+    environment:
+      PORT: 3000
+      FORCE_COLOR: true
+      DB_HOST: supchat_db
+      DB_USER: ${MYSQL_USER}
+      DB_NAME: ${MYSQL_DATABASE}
+      DB_PASSWORD: ${MYSQL_PASSWORD}
+      JWT_SECRET: ${JWT_SECRET}
+      FACEBOOK_CLIENT_ID: ${FACEBOOK_CLIENT_ID}
+      FACEBOOK_CLIENT_SECRET: ${FACEBOOK_CLIENT_SECRET}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
+      SESSION_SECRET: ${SESSION_SECRET}
+      SMTP_HOST: ${SMTP_HOST}
+      SMTP_PORT: ${SMTP_PORT}
+      SMTP_USER: ${SMTP_USER}
+      SMTP_PASSWORD: ${SMTP_PASSWORD}
+    command: ["sh", "-c", "npm install && npm run dev"]
 
-    supchat_web:
-        image: docker.io/library/node:latest
-        container_name: supchat_web
-        working_dir: /app
-        tty: true
-        volumes:
-            - ./client/web:/app
-        ports:
-            - "5000:5000"
-        networks:
-            - network
-        depends_on:
-            - supchat_api
-        environment:
-            PORT: 5000
-            FORCE_COLOR: true
-            NODE_OPTIONS: --openssl-legacy-provider
-            REACT_APP_DEBUG: true
-            REACT_APP_FACEBOOK_CLIENT_ID: ${FACEBOOK_CLIENT_ID}
-            REACT_APP_FACEBOOK_CLIENT_SECRET: ${FACEBOOK_CLIENT_SECRET}
-            REACT_APP_GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
-            REACT_APP_GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
-            REACT_APP_API_URL: http://localhost:3000/
-            REACT_APP_BASE_URL: http://localhost:5000/
-            CHOKIDAR_USEPOLLING: "true"
-            WATCHPACK_POLLING: "true"
-        command: ["sh", "-c", "npm install && npm run start | cat"]
+  supchat_web:
+    image: docker.io/library/node:latest
+    container_name: supchat_web
+    working_dir: /app
+    tty: true
+    volumes:
+      - ./client/web:/app
+    ports:
+      - "5000:5000"
+    networks:
+      - network
+    depends_on:
+      - supchat_api
+    environment:
+      PORT: 5000
+      FORCE_COLOR: true
+      NODE_OPTIONS: --openssl-legacy-provider
+      REACT_APP_DEBUG: true
+      REACT_APP_FACEBOOK_CLIENT_ID: ${FACEBOOK_CLIENT_ID}
+      REACT_APP_FACEBOOK_CLIENT_SECRET: ${FACEBOOK_CLIENT_SECRET}
+      REACT_APP_GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+      REACT_APP_GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
+      REACT_APP_API_URL: http://localhost:3000/
+      REACT_APP_BASE_URL: http://localhost:5000/
+      CHOKIDAR_USEPOLLING: "true"
+      WATCHPACK_POLLING: "true"
+    command: ["sh", "-c", "npm install && npm run start | cat"]
 
-    phpmyadmin:
-        image: phpmyadmin/phpmyadmin:latest
-        container_name: phpmyadmin
-        environment:
-            PMA_HOST: supchat_db
-            PMA_USER: ${MYSQL_USER}
-            PMA_PASSWORD: ${MYSQL_PASSWORD}
-            PMA_ARBITRARY: 1
-        restart: always
-        ports:
-            - "8080:80"
-        networks:
-            - network
-        depends_on:
-            supchat_db:
-                condition: service_healthy
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin:latest
+    container_name: phpmyadmin
+    environment:
+      PMA_HOST: supchat_db
+      PMA_USER: ${MYSQL_USER}
+      PMA_PASSWORD: ${MYSQL_PASSWORD}
+      PMA_ARBITRARY: 1
+    restart: always
+    ports:
+      - "8080:80"
+    networks:
+      - network
+    depends_on:
+      supchat_db:
+        condition: service_healthy
 
 networks:
-    network:
-        driver: bridge
+  network:
+    driver: bridge
+
+volumes:
+  db_data:

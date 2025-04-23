@@ -6,6 +6,7 @@ import IndexPage from './pages/IndexPage/IndexPage';
 import LoginPage from './pages/LoginPage/LoginPage';
 import PrivaryPage from './pages/PrivacyPage/PrivacyPage';
 import RegisterPage from './pages/RegisterPage/RegisterPage';
+import AccountConfirmedPage from './pages/RegisterPage/AccountConfirmedPage';
 import ResetPasswordPage from './pages/ResetPasswordPage/ResetPasswordPage';
 import SettingsPage from './pages/SettingsPage/SettingsPage';
 import TermsPage from './pages/TermsPage/TermsPage';
@@ -20,6 +21,7 @@ const App = () => {
                 <reactdom.Route path="/" element={<IndexPage />} />
                 <reactdom.Route path="/login" element={<LoginPage />} />
                 <reactdom.Route path="/register" element={<RegisterPage />} />
+                <reactdom.Route path="/accountConfirmed" element={<AccountConfirmedPage />} />
                 <reactdom.Route path="/terms" element={<TermsPage />} />
                 <reactdom.Route path="/privacy" element={<PrivaryPage />} />
                 <reactdom.Route path="/dashboard" element={<DashboardPage />} />

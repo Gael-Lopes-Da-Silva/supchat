@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 
@@ -8,10 +8,9 @@ import InputField from "../../components/InputField/InputField";
 import Link from "../../components/Link/Link";
 
 import * as ConfirmationEmail from "../../emails/Confirmation";
-import * as PostConfirmationEmail from "../../emails/PostConfirmation";
 
 import { sendEmail } from "../../services/Services/Email";
-import { createUser, readUser, updateUser } from "../../services/Users";
+import { createUser } from "../../services/Users";
 
 import logo from "../../assets/logo.png";
 
@@ -25,63 +24,6 @@ const RegisterPage = () => {
     const [theme] = useState(localStorage.getItem("gui.theme") ?? "light");
 
     const navigate = useNavigate();
-
-    useEffect(() => {
-        const query = new URLSearchParams(window.location.search);
-        const confirm_token = query.get("confirm_token");
-
-        if (confirm_token) {
-            readUser({ confirm_token }).then((data) => {
-                if (!data || !data.result || !data.result.result) {
-                    toast.error("Lien de confirmation invalide ou expiré.", {
-                        position: "top-center",
-                    });
-                    navigate("/login");
-                    return;
-                }
-
-                const user = data.result.result;
-
-                if (!user || !user.id) {
-                    toast.error("Erreur interne : Impossible de récupérer l'utilisateur.", {
-                        position: "top-center",
-                    });
-                    return;
-                }
-                updateUser(user.id, { confirm_token: null })
-                    .then(() => {
-                        sendEmail({
-                            to: user.email,
-                            subject: PostConfirmationEmail.subject(),
-                            content: PostConfirmationEmail.content(),
-                        }).catch((error) => {
-                            toast.error("Une erreur inattendue est survenue lors de l'envoi du mail.", {
-                                position: "top-center",
-                            });
-                        });
-
-                        toast.success("Votre compte a bien été confirmé. Vous pouvez maintenant vous connecter.", {
-                            position: "top-center",
-                        });
-
-                        navigate("/login");
-                    })
-                    .catch((error) => {
-                        toast.error("Une erreur inattendue est survenue lors de la mise à jour du compte.", {
-                            position: "top-center",
-                        });
-                    });
-            }).catch((error) => {
-                toast.error("Une erreur inattendue est survenue lors de la récupération de l'utilisateur.", {
-                    position: "top-center",
-                });
-            });
-        }
-
-        if (localStorage.getItem("user")) {
-            navigate("/dashboard");
-        }
-    }, [navigate]);
 
     const handleSubmit = async (event) => {
         event.preventDefault();
@@ -127,7 +69,7 @@ const RegisterPage = () => {
                 to: email,
                 subject: ConfirmationEmail.subject(),
                 content: ConfirmationEmail.content(confirmToken),
-            }).catch((error) => {
+            }, null).catch((error) => {
                 toast.error("Une erreur inattendue est survenue lors de l'envoi de l'email.", {
                     position: "top-center",
                 });

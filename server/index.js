@@ -44,11 +44,16 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 const corsOptions = {
-    origin: ["http://localhost:5000", "http://localhost:3000"],
+    origin: [
+      "http://localhost:5000",
+      "http://localhost:3000",
+      /^http:\/\/192\.168\.1\.\d+:5000$/,
+    ],
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
     credentials: true,
     allowedHeaders: ["Content-Type", "Authorization"],
-};
+  };
+  
 
 app.use(cors(corsOptions));
 
@@ -325,7 +330,7 @@ pool.getConnection().then((connection) => {
     app.use("/roles/", RolesRouter);
     app.use("/email/", EmailRouter);
 
-    server.listen(PORT, () => {
+    server.listen(PORT, '0.0.0.0', () => {
         console.log(`Server running on http://localhost:${PORT} !`);
     });
 
