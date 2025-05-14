@@ -40,28 +40,32 @@ export const readWorkspaceMember = async (request) => {
         if (!workspaceMember) return createErrorResponse(ERRORS.WORKSPACE_MEMBER_NOT_FOUND);
         return workspaceMember;
     } else {
-        let query = "SELECT * FROM workspace_members"
+        let query = `
+            SELECT wm.*, u.username 
+            FROM workspace_members wm 
+            JOIN users u ON wm.user_id = u.id
+        `;
         let where = [];
         let params = [];
 
         if (request.query.workspace_id) {
             const [workspace] = await pool.query("SELECT * FROM workspaces WHERE id = ?", [request.query.workspace_id]);
             if (!workspace) return createErrorResponse(ERRORS.WORKSPACE_NOT_FOUND);
-            where.push("workspace_id = ?");
+            where.push("wm.workspace_id = ?");
             params.push(request.query.workspace_id);
         }
 
         if (request.query.user_id) {
             const [user] = await pool.query("SELECT * FROM users WHERE id = ?", [request.query.user_id]);
             if (!user) return createErrorResponse(ERRORS.USER_NOT_FOUND);
-            where.push("user_id = ?");
+            where.push("wm.user_id = ?");
             params.push(request.query.user_id);
         }
 
         if (request.query.role_id) {
             const [role] = await pool.query("SELECT * FROM roles WHERE id = ?", [request.query.role_id]);
             if (!role) return createErrorResponse(ERRORS.ROLE_NOT_FOUND);
-            where.push("role_id = ?");
+            where.push("wm.role_id = ?");
             params.push(request.query.role_id);
         }
 
@@ -72,6 +76,7 @@ export const readWorkspaceMember = async (request) => {
         return pool.query(query, params);
     }
 };
+
 
 export const updateWorkspaceMember = async (request) => {
     if (!request.params.id) return createErrorResponse(ERRORS.ID_NOT_PROVIDED);

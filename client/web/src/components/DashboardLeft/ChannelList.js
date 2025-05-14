@@ -1,10 +1,26 @@
-import React from 'react';
+import React, { useState } from 'react';
+import * as Fa from "react-icons/fa6"
 
 const ChannelList = ({ channels, setSelectedChannel, selectedChannel, getBackground, getForeground }) => {
+    const [searchTerm, setSearchTerm] = useState('');
+
+    const filteredChannels = Object.values(channels).filter(channel =>
+        channel.name.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+
     return (
         <div className="dashboard-left-channels">
-            {channels && Object.values(channels).length > 0 ? (
-                Object.values(channels).map((channel) => {
+            <input
+                type="text"
+                placeholder="Rechercher un canal..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="channel-search-input"
+
+            />
+
+            {filteredChannels.length > 0 ? (
+                filteredChannels.map((channel) => {
                     const isSelected = selectedChannel?.id === channel.id;
 
                     return (
@@ -21,7 +37,11 @@ const ChannelList = ({ channels, setSelectedChannel, selectedChannel, getBackgro
                                 position: "relative",
                             }}
                         >
-                            <p>{channel.name}</p>
+                            <p>
+                                {channel.name} {channel.is_private ? <Fa.FaLock className="channel-lock-icon" /> : null}
+                            </p>
+
+
 
                             {isSelected && (
                                 <span
@@ -41,7 +61,7 @@ const ChannelList = ({ channels, setSelectedChannel, selectedChannel, getBackgro
                     );
                 })
             ) : (
-                <p>Aucun canal disponible</p>
+                <p>Aucun canal trouvé</p>
             )}
         </div>
     );

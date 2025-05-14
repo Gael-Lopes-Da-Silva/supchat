@@ -190,20 +190,14 @@ passport.serializeUser((user, done) => {
   done(null, user.user.id);
 });
 
-passport.deserializeUser(async (id, done) => { //sert à récupérer l'user dan la session(cas d'un compte google non lié)
-  try {
-      const connection = await pool.getConnection();
-      const userResult = await connection.query("SELECT * FROM users WHERE id = ?", [id]);
+passport.deserializeUser(async (id, done) => { //sert à récupérer l'user dasn la session(cas d'un compte google non lié)
 
-      if (userResult.length > 0) {
-          done(null, userResult[0]);
-      } else {
-          done(null, null);
-      }
+  try {
+      const [userResult] = await pool.query("SELECT * FROM users WHERE id = ?", [id]);
+      done(null, userResult[0] || null);
   } catch (error) {
       done(error);
   }
 });
-
 
 export default passport;

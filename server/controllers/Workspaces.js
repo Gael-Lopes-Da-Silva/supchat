@@ -1,8 +1,7 @@
 import pool from "../database/db.js";
 import { ERRORS, createErrorResponse } from "../app/ErrorHandler.js";
-import { io } from "../index.js";
 
-export const createWorkspace = async (request) => {
+export const createWorkspace = async (request, io = null) => {
     if (!request.body.name) return createErrorResponse(ERRORS.NAME_NOT_PROVIDED);
     if (!request.body.user_id) return createErrorResponse(ERRORS.USER_ID_NOT_PROVIDED);
 
@@ -10,7 +9,6 @@ export const createWorkspace = async (request) => {
     if (!user) return createErrorResponse(ERRORS.USER_NOT_FOUND);
     if (user.deleted_at !== null) return createErrorResponse(ERRORS.USER_DELETED);
 
-    
     const result = await pool.query(
         "INSERT INTO workspaces (name, description, is_private, user_id) VALUES (?, ?, ?, ?)",
         [
@@ -23,11 +21,8 @@ export const createWorkspace = async (request) => {
 
     const newWorkspaceId = result.insertId;
 
-    
-
     const roleId = 2; 
 
-    
     const [existingMember] = await pool.query(
         "SELECT * FROM workspace_members WHERE workspace_id = ? AND user_id = ?",
         [newWorkspaceId, request.body.user_id]
@@ -40,7 +35,6 @@ export const createWorkspace = async (request) => {
         );
     }
 
-
     const newWorkspace = {
         id: newWorkspaceId,
         name: request.body.name,
@@ -49,10 +43,18 @@ export const createWorkspace = async (request) => {
         user_id: request.body.user_id,
     };
 
+    if (io && request.socket) {
+        // envoi la notif à tout le monde sauf l'auteur (osef de recevoir une notif de notre propre création on sait cquon fait..)
+        request.socket.broadcast.emit('publicWorkspaceCreated', newWorkspace);
     
-    io.to(`user_${request.body.user_id}`).emit('workspaceCreated', newWorkspace);
-
+        // pour mettre à jour en temps reel le ws qui vient d'être cree dans la sidebar. 
+        // côté front On va listen cet emit pour refetch la workspacelist. PS : ça c'est pour du créateur du ws
+        io.to(`user_${request.body.user_id}`).emit('workspaceCreated', newWorkspace); 
+    }
+    
     return newWorkspace;
+    
+
 };
 
 
@@ -168,3 +170,66 @@ export const readUserWorkspaces = async ({ user_id }) => {
         return createErrorResponse({ code: 500, message: error.message });
     }
 };
+
+
+export const readPublicWorkspaces = async (request) => {
+    try {
+        const rows = await pool.query(
+            "SELECT id, name, description, is_private FROM workspaces WHERE is_private = 0"
+        );
+
+        return rows;
+    } catch (error) {
+        console.error("Erreur dans readPublicWorkspaces:", error);
+        return { error: 1, error_message: "Erreur lors de la récupération des workspaces publics." };
+    }
+};
+
+export const joinWorkspace = async ({ workspace_id, user_id }, io = null) => {
+    try {
+        const rows = await pool.query(
+            "SELECT * FROM workspaces WHERE id = ?",
+            [workspace_id]
+        );
+
+        if (!rows || rows.length === 0) {
+            throw new Error("Workspace introuvable.");
+        }
+
+        const workspace = rows[0];
+
+        const existingMemberships = await pool.query(
+            "SELECT 1 FROM workspace_members WHERE workspace_id = ? AND user_id = ?",
+            [workspace_id, user_id]
+        );
+
+        const isAlreadyMember = existingMemberships.length > 0;
+
+        if (workspace.is_private && !isAlreadyMember) {
+            throw new Error("Ce workspace est privé. Invitation requise.");
+        }
+
+        if (!workspace.is_private && !isAlreadyMember) {
+            await pool.query(
+                `INSERT INTO workspace_members (workspace_id, user_id, role_id)
+                 VALUES (?, ?, (SELECT id FROM roles WHERE name = 'member'))`,
+                [workspace_id, user_id]
+            );
+        }
+
+        const channels = await pool.query(
+            "SELECT * FROM channels WHERE workspace_id = ?",
+            [workspace_id]
+        );
+
+        return { workspace, channels, isAlreadyMember };
+
+    } catch (error) {
+        console.error("Erreur joinWorkspace:", error);
+        return {
+            error: true,
+            error_message: error.message || "Erreur inconnue lors de la tentative de rejoindre le workspace."
+        };
+    }
+};
+

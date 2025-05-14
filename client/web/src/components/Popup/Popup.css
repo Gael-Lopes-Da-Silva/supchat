@@ -1,9 +1,22 @@
-.popup {
+
+  
+
+
+  .popup {
     border-radius: 1rem;
     border: solid 3px #333;
     box-shadow: #333 5px 5px 0px, rgba(0, 0, 0, 0.35) 0px 5px 15px;
     position: absolute;
+    top: 2rem;         
+    left: 70%;        
+    transform: translateX(-50%);
     z-index: 10;
+}
+
+
+.notifications-popup span {
+    text-decoration: underline;
+    cursor: pointer ;
 }
 
 .popup.light {

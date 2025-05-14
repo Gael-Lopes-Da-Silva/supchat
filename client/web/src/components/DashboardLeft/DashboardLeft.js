@@ -22,43 +22,50 @@ const DashboardLeft = ({
     updateModalState,
     setMousePosition,
     getBackground,
-    getForeground
+    getForeground,
+    publicWorkspaces,
+    handleJoinPublicWorkspace,
 }) => {
     const navigate = useNavigate();
 
+
     useEffect(() => {
         if (!selectedWorkspace.id) return;
-    
-        socket.emit('joinWorkspace', `workspace_${selectedWorkspace.id}`);
-    
+
+        socket.emit('joinWorkspace', selectedWorkspace.id);
+
+
         const handleChannelCreated = (newChannel) => {
-    
+
             setChannels((prevChannels) => ({
                 ...prevChannels,
                 [newChannel.id]: newChannel,
             }));
         };
-    
+
         socket.on("channelCreated", handleChannelCreated);
-    
+
         return () => {
-            socket.off("channelCreated", handleChannelCreated); 
+            socket.off("channelCreated", handleChannelCreated);
         };
     }, [selectedWorkspace.id]);
-    
-    
+
+
 
     return (
         <div className="dashboard-left" style={{ display: !guiVisibility.leftPanel && "none" }}>
             <div className="dashboard-left-workspaces">
                 <WorkspaceList
                     workspaces={workspaces}
+                    publicWorkspaces={publicWorkspaces}
                     selectedWorkspace={selectedWorkspace}
                     updateGuiState={updateGuiState}
                     setSelectedWorkspace={setSelectedWorkspace}
                     getBackground={getBackground}
                     getForeground={getForeground}
+                    handleJoinPublicWorkspace={handleJoinPublicWorkspace}
                 />
+
                 <WorkspaceButtons
                     updateGuiState={updateGuiState}
                     updateModalState={updateModalState}

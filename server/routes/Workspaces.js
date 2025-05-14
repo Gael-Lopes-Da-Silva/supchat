@@ -6,6 +6,7 @@ import {
     updateWorkspace,
     deleteWorkspace,
     restoreWorkspace,
+    readPublicWorkspaces
 } from "../controllers/Workspaces.js";
 
 const router = express.Router();
@@ -75,6 +76,19 @@ router.get("/", (request, response) => {
         });
     });
 });
+
+
+router.get("/public", (request, response) => {
+    readPublicWorkspaces(request).then((result) => {
+        response.status(200).json(result); 
+    }).catch((error) => {
+        response.status(500).json({
+            error: 1,
+            error_message: error.message,
+        });
+    });
+});
+
 
 // GET /workspaces/:id
 //

@@ -223,3 +223,32 @@ export const restoreWorkspaceInvitation = async (request) => {
 
     return pool.query("UPDATE workspace_invitations SET deleted_at = NULL WHERE id = ?", [request.params.id]);
 };
+
+
+export const joinWorkspaceViaInvitation = async ({ token, user_id, username, socket, io }) => {
+    try {
+        const result = await joinWorkspaceWithInvitation({ token, user_id });
+
+        if (result.error) return result;
+
+        const workspaceId = result.result.workspace_id;
+
+        socket.join(`workspace_${workspaceId}`);
+        socket.workspaceId = workspaceId;
+        
+        socket.to(`workspace_${workspaceId}`).emit("workspaceUserJoined", {
+            workspace_id: workspaceId,
+            username,
+        });
+        
+
+        return {
+            result: { workspace_id: workspaceId },
+            error: 0
+        };
+
+    } catch (error) {
+        console.error("joinWorkspaceViaInvitation error:", error);
+        return createErrorResponse({ code: 500, message: error.message });
+    }
+};

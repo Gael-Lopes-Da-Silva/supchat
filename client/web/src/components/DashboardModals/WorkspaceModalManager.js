@@ -79,7 +79,7 @@ const WorkspaceModalManager = ({
                     })
                   }
                 >
-                  Rejoindre un espace de travail <Fa.FaChevronRight />
+                  Rejoindre un espace de travail privé <Fa.FaChevronRight />
                 </button>
                 <button
                   onClick={() =>

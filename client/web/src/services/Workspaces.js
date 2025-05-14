@@ -11,6 +11,21 @@ export const createWorkspace = async (body) => {
     return await response.json();
 };
 
+
+export const getPublicWorkspaces = async () => {
+    const response = await fetch(`${process.env.REACT_APP_API_URL}workspaces/public`, {
+        method: "GET",
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+        },
+    });
+
+    return await response.json(); 
+};
+
+
+
 export const readWorkspace = async ({ id }) => {
     console.log("Reading workspace with ID:", id);
     try {

@@ -1,9 +1,7 @@
 import pool from "../database/db.js";
 import { ERRORS, createErrorResponse } from "../app/ErrorHandler.js";
-import { io } from "../index.js";
 
-export const createChannel = async (request) => {
-    console.log("📥 Full request.body:", request.body);
+export const createChannel = async (request, io = null) => {
 
     try {
         const { user_id, workspace_id, name, is_private = false } = request.body;
@@ -15,18 +13,15 @@ export const createChannel = async (request) => {
         const users = await pool.query("SELECT * FROM users WHERE id = ?", [user_id]);
         const user = users[0];
         
-        
         if (!user) return createErrorResponse(ERRORS.USER_NOT_FOUND);
         if (user.deleted_at !== null) return createErrorResponse(ERRORS.USER_DELETED);
-        
 
         const workspaces = await pool.query("SELECT * FROM workspaces WHERE id = ?", [workspace_id]);
         const workspace = workspaces[0];
-        
-        
+
         if (!workspace) return createErrorResponse(ERRORS.WORKSPACE_NOT_FOUND);
         if (workspace.deleted_at !== null) return createErrorResponse(ERRORS.WORKSPACE_DELETED);
-        
+
         const result = await pool.query(
             "INSERT INTO channels (workspace_id, name, is_private, user_id) VALUES (?, ?, ?, ?)",
             [workspace_id, name, is_private ?? false, user_id]
@@ -40,7 +35,16 @@ export const createChannel = async (request) => {
             user_id
         };
 
-        io.to(`workspace_${workspace_id}`).emit("channelCreated", newChannel);
+        if (io) {
+            if (is_private) {
+                // Envoie uniquement au createur
+                io.to(`user_${user_id}`).emit("channelCreated", newChannel);
+            } else {
+                // Channel public → tout le monde dans le workspace
+                io.to(`workspace_${workspace_id}`).emit("channelCreated", newChannel);
+            }
+        }
+        
 
         return newChannel;
     } catch (error) {
@@ -52,44 +56,41 @@ export const createChannel = async (request) => {
 
 
 export const readChannel = async (request) => {
-
-    if (request.params.id) {
+    if (request.params?.id) {
         const [channel] = await pool.query("SELECT * FROM channels WHERE id = ?", [request.params.id]);
         if (!channel) return createErrorResponse(ERRORS.CHANNEL_NOT_FOUND);
         return channel;
-    } else {
-        let query = "SELECT * FROM channels";
-        let where = [];
-        let params = [];
-
-        if (request.query.workspace_id) {
-            where.push("workspace_id = ?");
-            params.push(request.query.workspace_id);
-        }
-
-        if (request.query.name) {
-            where.push("name = ?");
-            params.push(request.query.name);
-        }
-
-        if (request.query.is_private) {
-            where.push("is_private = ?");
-            params.push(request.query.is_private);
-        }
-
-        if (request.query.user_id) {
-            where.push("user_id = ?");
-            params.push(request.query.user_id);
-        }
-
-        if (where.length > 0) {
-            query += " WHERE " + where.join(" AND ");
-        }
-        console.log("Generated SQL Query:", query);
-        console.log("Query Parameters:", params);
-
-        return pool.query(query, params);
     }
+
+    let query = "SELECT * FROM channels";
+    let where = [];
+    let params = [];
+
+    if (request.query?.workspace_id) {
+        where.push("workspace_id = ?");
+        params.push(request.query.workspace_id);
+    }
+
+    if (request.query?.name) {
+        where.push("name = ?");
+        params.push(request.query.name);
+    }
+
+    if (request.query?.is_private) {
+        where.push("is_private = ?");
+        params.push(request.query.is_private);
+    }
+
+    if (request.query?.user_id) {
+        where.push("(is_private = 0 OR id IN (SELECT channel_id FROM channel_members WHERE user_id = ?))");
+        params.push(request.query.user_id);
+    }
+
+    if (where.length > 0) {
+        query += " WHERE " + where.join(" AND ");
+    }
+
+    return pool.query(query, params);
 };
 
 
@@ -140,4 +141,102 @@ export const restoreChannel = async (request) => {
     if (channel.deleted_at === null) return createErrorResponse(ERRORS.CHANNEL_NOT_DELETED);
 
     return pool.query("UPDATE channels SET deleted_at = NULL WHERE id = ?", [request.params.id]);
+};
+
+
+export const joinChannel = async ({ channel_id, workspace_id }) => {
+    if (!channel_id || !workspace_id) {
+        return { error: 1, error_message: "Channel ID ou Workspace ID manquant." };
+    }
+
+    const [channel] = await pool.query("SELECT workspace_id FROM channels WHERE id = ?", [channel_id]);
+
+    if (!channel || channel.workspace_id !== workspace_id) {
+        return { error: 1, error_message: "Channel introuvable ou non autorisé." };
+    }
+
+    const messages = await fetchMessagesForChannel(channel_id, workspace_id);
+    return { messages };
+};
+
+
+export const sendMessage = async ({ channel_id, user_id, content }, io = null) => {
+    if (!channel_id || !user_id || !content) {
+        return createErrorResponse({
+            code: 400,
+            message: "Les champs requis sont manquants."
+        });
+    }
+
+    try {
+        const result = await pool.query(
+            "INSERT INTO messages (channel_id, user_id, content) VALUES (?, ?, ?)",
+            [channel_id, user_id, content]
+        );
+
+        const [channel] = await pool.query(
+            "SELECT name FROM channels WHERE id = ?",
+            [channel_id]
+        );
+        
+        const [user] = await pool.query(
+            "SELECT username FROM users WHERE id = ?",
+            [user_id]
+        );
+
+        const message = {
+            id: result.insertId,
+            channel_id,
+            user_id,
+            content,
+            username: user.username,
+            channel_name: channel.name
+
+        };
+
+        if (io) {
+            console.log("📤 Envoi de receiveMessage à channel_", channel_id);
+
+            io.to(`channel_${channel_id}`).emit("receiveMessage", message);
+        }
+
+        return { result: message };
+    } catch (err) {
+        console.error("Erreur sendMessage:", err);
+        return createErrorResponse({ code: 500, message: err.message });
+    }
+};
+
+
+export const fetchMessagesForChannel = async ({ channel_id, workspace_id }) => {
+    if (!channel_id || !workspace_id) {
+        return createErrorResponse({
+            code: 400,
+            message: "channel_id ou workspace_id manquant."
+        });
+    }
+
+    let connection;
+
+    try {
+        connection = await pool.getConnection();
+
+        const query = `
+            SELECT m.id, m.channel_id, m.user_id, m.content, m.created_at, u.username
+            FROM messages m
+            JOIN users u ON m.user_id = u.id
+            JOIN channels c ON m.channel_id = c.id
+            WHERE m.channel_id = ? AND c.workspace_id = ?
+            ORDER BY m.created_at ASC
+        `;
+
+        const messages = await connection.query(query, [channel_id, workspace_id]);
+
+        return { messages: messages.map(m => ({ ...m })), error: 0 };
+    } catch (error) {
+        console.error("Erreur fetchMessagesForChannel:", error);
+        return createErrorResponse({ code: 500, message: error.message });
+    } finally {
+        if (connection) connection.release();
+    }
 };

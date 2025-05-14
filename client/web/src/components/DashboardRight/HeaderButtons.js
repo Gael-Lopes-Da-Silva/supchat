@@ -1,7 +1,9 @@
 import React from 'react';
 import * as Fa from "react-icons/fa6";
 
-const HeaderButtons = ({ guiVisibility, updateGuiState, hideAllPopup, updatePopupState, setMousePosition }) => {
+const HeaderButtons = ({ guiVisibility, updateGuiState, hideAllPopup, updatePopupState, setMousePosition, notifications }) => {
+   
+
     return (
         <>
             <div className="dashboard-right-header-buttons">
@@ -40,9 +42,15 @@ const HeaderButtons = ({ guiVisibility, updateGuiState, hideAllPopup, updatePopu
                         });
                     }}
                     title="Notifications"
+                    className="notification-button"
                 >
                     <Fa.FaBell />
+                    {notifications.filter(n => !n.read).length > 0 && (
+                        <span className="notification-badge">{notifications.filter(n => !n.read).length}</span>
+                    )}
+
                 </button>
+
                 <button
                     onClick={() => {
                         localStorage.setItem(

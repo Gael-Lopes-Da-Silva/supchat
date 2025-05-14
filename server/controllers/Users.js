@@ -62,12 +62,13 @@ export const createUser = async (request) => {
 export const readUser = async (request) => {
 
     if (request.params.id) {
-        const result = await pool.query("SELECT * FROM users WHERE id = ?", [request.params.id]);
+        const [user] = await pool.query("SELECT * FROM users WHERE id = ?", [request.params.id]);
 
-        if (!result || result.length === 0) {
+        if (!user) {
             return createErrorResponse(ERRORS.USER_NOT_FOUND);
         }
-        return { success: true, result: result[0] };
+
+        return user;
     }
 
     let query = "SELECT * FROM users";
@@ -105,11 +106,26 @@ export const readUser = async (request) => {
         return createErrorResponse(ERRORS.USER_NOT_FOUND);
     }
 
+    return pool.query(query, params);
+
+};
+
+
+export const readUsersByIds = async (ids = []) => { // pour afficher tous les users connecvtés
+
+    // etant donné que c'est une requête préparer qu'on va faire, il faut afficher autant de "?" que d'id (membres connectés)
+    //donc on map sur ids et on sépare par des virgules. 
+    const placeholders = ids.map(() => '?').join(',');
+    const query = `SELECT id, username FROM users WHERE id IN (${placeholders})`;
+
+    const result = await pool.query(query, ids);
+
     return {
         success: true,
-        result: users.length === 1 ? users[0] : users
+        result
     };
 };
+
 
 export const updateUser = async (request) => {
     if (!request.params.id) {

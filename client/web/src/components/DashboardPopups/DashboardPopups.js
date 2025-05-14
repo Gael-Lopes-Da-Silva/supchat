@@ -8,6 +8,9 @@ const DashboardPopups = ({
   mousePosition,
   joinedUsername,
   onLogout,
+  notifications,
+  handleClickNotification,
+  handleRemoveNotification
 }) => {
   return (
     <>
@@ -50,16 +53,42 @@ const DashboardPopups = ({
         theme={theme}
         display={visibility.notifications}
         content={
-          <div>
-            <header></header>
+          <div className="notifications-popup">
+            <header><strong>Notifications</strong></header>
             <main>
-              <p>Notifications</p>
+              {notifications.length === 0 ? (
+                <p>Aucune notification.</p>
+              ) : (
+                
+                <ul>
+                  {notifications.map((notif, index) => (
+                   <li
+                   key={index}
+                   className={`notification-item ${notif.read ? 'notification-read' : ''}`}
+                 >
+                   <span onClick={() => handleClickNotification(index, notif)}>
+                     {notif.message}
+                   </span>
+                   <button
+                     className="notification-remove"
+                     onClick={(e) => {
+                       e.stopPropagation();
+                       handleRemoveNotification(index);
+                     }}
+                     title="Supprimer"
+                   >
+                     ✖
+                   </button>
+                 </li>
+                 
+
+                  ))}
+
+                </ul>
+              )}
             </main>
-            <footer></footer>
           </div>
         }
-        top={mousePosition?.y}
-        left={mousePosition?.x}
       />
 
       <Popup
@@ -95,6 +124,8 @@ const DashboardPopups = ({
         top={mousePosition?.y - 60}
         left={mousePosition?.x}
       />
+
+    
 
       <Popup
         ref={refs.workspace}

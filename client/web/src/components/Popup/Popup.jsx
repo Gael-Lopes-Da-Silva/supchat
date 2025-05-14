@@ -1,8 +1,8 @@
 import './Popup.css';
 
-const Popup = ({ content, display, ref, theme = "light", top, bottom, left, right }) => {
+const Popup = ({ content, display, ref, theme = "light" }) => {
     return (
-        <div className={`popup ${theme}`} ref={ref} style={{ display: !display ? "none" : "", top: top, bottom: bottom, left: left, right: right }}>
+        <div className={`popup ${theme}`} ref={ref} style={{ display: display ? '' : 'none' }}>
             {content}
         </div>
     );
