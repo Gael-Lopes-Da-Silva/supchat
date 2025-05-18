@@ -1,0 +1,39 @@
+.select-component {
+  width: 100%;
+  padding: 0.6rem 1rem;
+  border-radius: 0.6rem;
+  border: solid 3px #333;
+  font-size: 1rem;
+  font-weight: bold;
+  box-shadow: #333 5px 5px 0px;
+  appearance: none;
+  background-repeat: no-repeat;
+  background-position: right 0.8rem center;
+  background-size: 1rem;
+  outline: none;
+}
+
+.select-component.light {
+  background-color: #fffceb;
+  color: #333;
+}
+
+.select-component.dark {
+  background-color: #4d4d4d;
+  color: #fffceb;
+}
+
+.select-component:focus {
+  outline: none;
+  box-shadow: #333 3px 3px 0px;
+}
+
+.select-component option {
+  background-color: #fff;
+  color: #000;
+}
+
+.select-component.dark option {
+  background-color: #3d3d3d;
+  color: #fffceb;
+}

@@ -21,8 +21,6 @@ const WorkspaceList = ({ workspaces, selectedWorkspace, updateGuiState, setSelec
                         key={workspace.id}
                         title={workspace.name}
                         onClick={() => {
-                            console.log("Selecting workspace:", workspace);
-
                             updateGuiState("discoverWorkspaces", false);
                             setSelectedWorkspace(workspace);
                         }}

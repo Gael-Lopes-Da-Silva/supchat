@@ -12,12 +12,28 @@ export const createChannel = async (request, io = null) => {
 
         const users = await pool.query("SELECT * FROM users WHERE id = ?", [user_id]);
         const user = users[0];
-        
+
         if (!user) return createErrorResponse(ERRORS.USER_NOT_FOUND);
         if (user.deleted_at !== null) return createErrorResponse(ERRORS.USER_DELETED);
 
         const workspaces = await pool.query("SELECT * FROM workspaces WHERE id = ?", [workspace_id]);
         const workspace = workspaces[0];
+
+        // veruf si utilisateur n'est pas guest (role_id = 3)
+        const [roles] = await pool.query(
+            "SELECT role_id FROM workspace_members WHERE user_id = ? AND workspace_id = ?",
+            [user_id, workspace_id]
+        );
+
+        const role_id = roles?.role_id
+
+        if (!role_id) {
+            return createErrorResponse({ code: 403, message: "Rôle non trouvé dans ce workspace." });
+        }
+
+        if (role_id === 3) {
+            return createErrorResponse({ code: 403, message: "Permission refusée : les invités ne peuvent pas créer de channel." });
+        }
 
         if (!workspace) return createErrorResponse(ERRORS.WORKSPACE_NOT_FOUND);
         if (workspace.deleted_at !== null) return createErrorResponse(ERRORS.WORKSPACE_DELETED);
@@ -40,11 +56,11 @@ export const createChannel = async (request, io = null) => {
                 // Envoie uniquement au createur
                 io.to(`user_${user_id}`).emit("channelCreated", newChannel);
             } else {
-                // Channel public → tout le monde dans le workspace
+                // Channel public -> tout le monde dans le workspace
                 io.to(`workspace_${workspace_id}`).emit("channelCreated", newChannel);
             }
         }
-        
+
 
         return newChannel;
     } catch (error) {
@@ -178,7 +194,7 @@ export const sendMessage = async ({ channel_id, user_id, content }, io = null) =
             "SELECT name FROM channels WHERE id = ?",
             [channel_id]
         );
-        
+
         const [user] = await pool.query(
             "SELECT username FROM users WHERE id = ?",
             [user_id]
@@ -195,8 +211,6 @@ export const sendMessage = async ({ channel_id, user_id, content }, io = null) =
         };
 
         if (io) {
-            console.log("📤 Envoi de receiveMessage à channel_", channel_id);
-
             io.to(`channel_${channel_id}`).emit("receiveMessage", message);
         }
 

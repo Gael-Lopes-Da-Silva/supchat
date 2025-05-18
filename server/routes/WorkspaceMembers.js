@@ -7,6 +7,7 @@ import {
     deleteWorkspaceMember,
     restoreWorkspaceMember,
 } from "../controllers/WorkspaceMembers.js";
+import { ensureAuthenticated } from "../middlewares/JwtAuth.js";
 
 const router = express.Router();
 
@@ -104,6 +105,7 @@ router.get("/:id", (request, response) => {
     });
 });
 
+
 // PUT /workspaces/members/:id
 //
 // param:
@@ -114,23 +116,26 @@ router.get("/:id", (request, response) => {
 //   role_id: number (optional)
 // return:
 //   result: [workspace_member]
-router.put("/:id", (request, response) => {
-    updateWorkspaceMember(request).then((result) => {
+
+router.put("/:id", ensureAuthenticated, (req, res) => {
+    const io = req.app.get("io");
+
+    updateWorkspaceMember(req, io).then((result) => {
         if (!result.error && result !== "") {
-            response.status(200).json({
+            res.status(200).json({
                 when: "WorkspaceMembers > UpdateWorkspaceMember",
                 result: result,
                 error: 0,
             });
         } else {
-            response.status(404).json({
+            res.status(404).json({
                 when: "WorkspaceMembers > UpdateWorkspaceMember",
                 error: result.error || 1,
                 error_message: result.error_message || "Could not update workspace member",
             });
         }
     }).catch((error) => {
-        response.status(500).json({
+        res.status(500).json({
             when: "WorkspaceMembers > UpdateWorkspaceMember",
             error: 1,
             error_message: error.message,
@@ -138,34 +143,41 @@ router.put("/:id", (request, response) => {
     });
 });
 
+
+
+
 // DELETE /workspaces/members/:id
 //
 // param:
 //   id: number (required)
 // return:
 //   result: [workspace_member]
-router.delete("/:id", (request, response) => {
-    deleteWorkspaceMember(request).then((result) => {
-        if (!result.error && result !== "") {
-            response.status(200).json({
+router.delete("/:id", ensureAuthenticated, (req, res) => {
+    const io = req.app.get("io");
+
+    deleteWorkspaceMember(req, io)
+        .then((result) => {
+            if (!result.error && result !== "") {
+                res.status(200).json({
+                    when: "WorkspaceMembers > DeleteWorkspaceMember",
+                    result: result,
+                    error: 0,
+                });
+            } else {
+                res.status(404).json({
+                    when: "WorkspaceMembers > DeleteWorkspaceMember",
+                    error: result.error || 1,
+                    error_message: result.error_message || "Could not delete workspace member",
+                });
+            }
+        })
+        .catch((error) => {
+            res.status(500).json({
                 when: "WorkspaceMembers > DeleteWorkspaceMember",
-                result: result,
-                error: 0,
+                error: 1,
+                error_message: error.message,
             });
-        } else {
-            response.status(404).json({
-                when: "WorkspaceMembers > DeleteWorkspaceMember",
-                error: result.error || 1,
-                error_message: result.error_message || "Could not delete workspace member",
-            });
-        }
-    }).catch((error) => {
-        response.status(500).json({
-            when: "WorkspaceMembers > DeleteWorkspaceMember",
-            error: 1,
-            error_message: error.message,
         });
-    });
 });
 
 

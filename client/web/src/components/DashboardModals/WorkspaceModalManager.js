@@ -1,9 +1,9 @@
-import React from "react";
 import * as Fa from "react-icons/fa6";
 import Modal from "../Modal/Modal";
 import CreateWorkspaceForm from "../DashboardForms/CreateWorkspaceForm";
 import JoinWorkspaceForm from "../DashboardForms/JoinWorkspaceForm";
 import CreateChannelForm from "../DashboardForms/CreateChannelForm";
+import ManageRolesForm from "../DashboardForms/ManageRolesForm";
 
 const WorkspaceModalManager = ({
   modalRef,
@@ -30,14 +30,20 @@ const WorkspaceModalManager = ({
   setChannelName,
   setChannelDescription,
   setChannelIsPrivate,
+  selectedWorkspaceId,
+  currentUserRoleId,
+  selectedWorkspace
 }) => {
   const handleGoBack = () => {
     updateGuiState("workspaceModal", {
       createWorkspace: false,
       joinWorkspace: false,
       createChannel: false,
+      manageRoles: false,
     });
   };
+
+const canGenerateInvitation = currentUserRoleId === 1 && selectedWorkspace?.is_private === 1;
 
   return (
     <Modal
@@ -50,14 +56,15 @@ const WorkspaceModalManager = ({
       }
       onClose={() => updateModalState("workspace", false)}
       onGoBack={handleGoBack}
-      title="Ajouter/Rejoindre un espace de travail ou créer un channel"
+      title="Ajouter/Rejoindre un espace de travail,créer un channel, gérer les rôles"
       theme={theme}
       content={
         <div>
           {/* Choix des actions */}
           {!guiVisibility.createWorkspace &&
             !guiVisibility.joinWorkspace &&
-            !guiVisibility.createChannel && (
+            !guiVisibility.createChannel &&
+            !guiVisibility.manageRoles && (
               <main>
                 <button
                   onClick={() =>
@@ -81,21 +88,47 @@ const WorkspaceModalManager = ({
                 >
                   Rejoindre un espace de travail privé <Fa.FaChevronRight />
                 </button>
-                <button
-                  onClick={() =>
-                    updateGuiState("workspaceModal", {
-                      createWorkspace: false,
-                      joinWorkspace: false,
-                      createChannel: true,
-                    })
-                  }
-                >
-                  Créer un channel <Fa.FaChevronRight />
-                </button>
 
-                <button onClick={handleGenerateInvitation}>
-                  Générer une invitation
-                </button>
+                {currentUserRoleId !== 3 && (
+                  <button
+                    onClick={() =>
+                      updateGuiState("workspaceModal", {
+                        createWorkspace: false,
+                        joinWorkspace: false,
+                        createChannel: true,
+                        manageRoles: false,
+                      })
+                    }
+                  >
+                    Créer un channel <Fa.FaChevronRight />
+                  </button>
+                )}
+
+
+                {canGenerateInvitation && (
+                  <button onClick={handleGenerateInvitation}>
+                    Générer une invitation
+                  </button>
+                )}
+
+
+
+                {currentUserRoleId === 1 && (
+                  <button
+                    onClick={() =>
+                      updateGuiState("workspaceModal", {
+                        createWorkspace: false,
+                        joinWorkspace: false,
+                        createChannel: false,
+                        manageRoles: true,
+                      })
+                    }
+                  >
+                    Gérer les rôles <Fa.FaChevronRight />
+                  </button>
+                )}
+
+
               </main>
             )}
 
@@ -136,6 +169,23 @@ const WorkspaceModalManager = ({
               onSubmit={handleCreateChannel}
             />
           )}
+
+
+          {guiVisibility.manageRoles && (
+            <ManageRolesForm
+              theme={theme}
+              workspaceId={selectedWorkspaceId}
+              onClose={() =>
+                updateGuiState("workspaceModal", {
+                  createWorkspace: false,
+                  joinWorkspace: false,
+                  createChannel: false,
+                  manageRoles: false,
+                })
+              }
+            />
+          )}
+
         </div>
       }
     />

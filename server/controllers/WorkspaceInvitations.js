@@ -2,49 +2,56 @@ import pool from "../database/db.js";
 import { ERRORS, createErrorResponse } from "../app/ErrorHandler.js";
 import { v4 as uuidv4 } from 'uuid';
 import { createWorkspaceMember } from "./WorkspaceMembers.js";
-
 export const createWorkspaceInvitation = async (request) => {
-    try {
-        if (!request.body.user_id) return createErrorResponse(ERRORS.USER_ID_NOT_PROVIDED);
-        if (!request.body.workspace_id) return createErrorResponse(ERRORS.WORKSPACE_ID_NOT_PROVIDED);
+  try {
+    const { user_id, workspace_id, maximum_use, used_by, expire_at } = request.body;
 
-        const [user] = await pool.query("SELECT * FROM users WHERE id = ?", [request.body.user_id]);
-        if (!user) return createErrorResponse(ERRORS.USER_NOT_FOUND);
-        if (user.deleted_at !== null) return createErrorResponse(ERRORS.USER_DELETED);
+    if (!user_id) return createErrorResponse(ERRORS.USER_ID_NOT_PROVIDED);
+    if (!workspace_id) return createErrorResponse(ERRORS.WORKSPACE_ID_NOT_PROVIDED);
 
-        const [workspace] = await pool.query("SELECT * FROM workspaces WHERE id = ?", [request.body.workspace_id]);
-        if (!workspace) return createErrorResponse(ERRORS.WORKSPACE_NOT_FOUND);
-        if (workspace.deleted_at !== null) return createErrorResponse(ERRORS.WORKSPACE_DELETED);
+    const [user] = await pool.query("SELECT * FROM users WHERE id = ?", [user_id]);
+    if (!user) return createErrorResponse(ERRORS.USER_NOT_FOUND);
+    if (user.deleted_at !== null) return createErrorResponse(ERRORS.USER_DELETED);
 
-        const token = uuidv4();
+    const [workspace] = await pool.query("SELECT * FROM workspaces WHERE id = ?", [workspace_id]);
+    if (!workspace) return createErrorResponse(ERRORS.WORKSPACE_NOT_FOUND);
+    if (workspace.deleted_at !== null) return createErrorResponse(ERRORS.WORKSPACE_DELETED);
 
-        const result = await pool.query(
-            "INSERT INTO workspace_invitations (user_id, workspace_id, token, maximum_use, used_by, expire_at) VALUES (?, ?, ?, ?, ?, ?)",
-            [
-                request.body.user_id,
-                request.body.workspace_id,
-                token,
-                request.body.maximum_use || null,
-                request.body.used_by || 0,
-                request.body.expire_at || null,
-            ]
-        );
+    const [membership] = await pool.query(
+      "SELECT role_id FROM workspace_members WHERE user_id = ? AND workspace_id = ?",
+      [user_id, workspace_id]
+    );
 
-        const response = {
-            result: {
-                insertId: result.insertId,
-                token: token
-            },
-            error: 0
-        };
-
-        console.log("Response being sent:", response);
-        return response;
-    } catch (error) {
-        console.error("Error creating workspace invitation:", error);
-        return createErrorResponse({ error: 1, error_message: error.message });
+    if (!membership || membership.role_id !== 1) {
+      return createErrorResponse({
+        error: 1,
+        error_message: "Seuls les administrateurs peuvent générer une invitation.",
+      });
     }
+
+    const token = uuidv4();
+
+    const result = await pool.query(
+      "INSERT INTO workspace_invitations (user_id, workspace_id, token, maximum_use, used_by, expire_at) VALUES (?, ?, ?, ?, ?, ?)",
+      [user_id, workspace_id, token, maximum_use || null, used_by || 0, expire_at || null]
+    );
+
+    const response = {
+      result: {
+        insertId: result.insertId,
+        token: token
+      },
+      error: 0
+    };
+
+    return response;
+    
+  } catch (error) {
+    console.error("Error creating workspace invitation:", error);
+    return createErrorResponse({ error: 1, error_message: error.message });
+  }
 };
+
 
 
 

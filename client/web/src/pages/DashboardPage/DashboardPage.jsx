@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef, useCallback } from 'react';
+import  { useEffect, useState, useRef, useCallback } from 'react';
 import { useNavigate } from "react-router-dom";
 import useSocketEvents from "../../hooks/useSocketEvents";
 import DashboardPopups from "../../components/DashboardPopups/DashboardPopups";
@@ -9,7 +9,6 @@ import DiscoverWorkspaces from "../../components/DashboardRight/DiscoverWorkspac
 
 import { createWorkspaceInvitation } from "../../services/WorkspaceInvitations";
 import { getPublicWorkspaces } from "../../services/Workspaces";
-import { readWorkspaceMember } from "../../services/WorkspaceMembers";
 import { getBackground, getForeground } from "../../utils/colorUtils";
 
 import "./DashboardPage.css";
@@ -28,6 +27,7 @@ const DashboardPage = () => {
     const [workspaceName, setWorkspaceName] = useState("");
     const [workspaceDescription, setWorkspaceDescription] = useState("");
     const [workspaceIsPrivate, setWorkspaceIsPrivate] = useState(false);
+    const [workspaceIdToSelect, setWorkspaceIdToSelect] = useState(null);
     const [workspaceInvitation, setWorkspaceInvitation] = useState("");
     const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
     const [guiVisibility, setGuiVisibility] = useState({
@@ -38,6 +38,8 @@ const DashboardPage = () => {
             createWorkspace: false,
             joinWorkspace: false,
             createChannel: false,
+            manageRoles: false,
+
         },
     });
     const [popupVisibility, setPopupVisibility] = useState({
@@ -63,6 +65,10 @@ const DashboardPage = () => {
         const stored = localStorage.getItem("notifications");
         return stored ? JSON.parse(stored) : [];
     });
+    const [channelNotificationPrefs, setChannelNotificationPrefs] = useState(() => {
+        const saved = localStorage.getItem("channelNotificationPrefs");
+        return saved ? JSON.parse(saved) : {};
+    });
 
     const [channelToSelect, setChannelToSelect] = useState(null);
 
@@ -82,21 +88,7 @@ const DashboardPage = () => {
 
     const navigate = useNavigate();
 
-    // // fetch les membres du workspace qu'on select
-    useEffect(() => {
-        if (!selectedWorkspace?.id) return;
 
-        const fetchWorkspaceMembers = async () => {
-            try {
-                const res = await readWorkspaceMember({ workspace_id: selectedWorkspace.id });
-                if (res?.result) setWorkspaceUsers(res.result);
-            } catch (err) {
-                console.error("Erreur lors du chargement des membres du workspace :", err);
-            }
-        };
-
-        fetchWorkspaceMembers();
-    }, [selectedWorkspace?.id]);
 
     // stocke les notifs en localstorag
     useEffect(() => {
@@ -119,10 +111,11 @@ const DashboardPage = () => {
     // Si aucun workspace sélectionné mais des workspaces dispo => auto sélection du premier
     useEffect(() => {
         const workspaceArray = Object.values(workspaces);
-        if (workspaceArray.length > 0 && !selectedWorkspace.id) {
+        if (workspaceArray.length > 0 && !selectedWorkspace?.id) {
             setSelectedWorkspace(workspaceArray[0]);
         }
-    }, [workspaces, selectedWorkspace]);
+    }, [workspaces, selectedWorkspace?.id]);
+
 
     const handleJoinPublicWorkspace = (workspace) => {
         if (!workspace || !workspace.id || !user?.id)
@@ -130,7 +123,7 @@ const DashboardPage = () => {
         if (!workspaces[workspace.id]) { // met à jour le ws pour trigger le useEffect (ligne 87)
             // qui va mettre à jour la liste des membres du ws. La condition dit grossomodo si ya plus de workspace dans la liste
             // des ws public (dans discover, du coup ça veut dire qu'on a cliqué sur rejoindre) alors on met à jour le state
-            setSelectedWorkspace(workspace);
+            setWorkspaceIdToSelect(workspace.id);
         }
         // Si le workspace est privé et que l'utilisateur n'est pas membre => on bloque
         const isAlreadyMember = !!workspaces[workspace.id];
@@ -140,10 +133,10 @@ const DashboardPage = () => {
             return;
         }
 
-        // Sinon, rejoindre normalement
         socket.emit("joinWorkspace", { workspace_id: workspace.id });
-    };
+        updateGuiState("discoverWorkspaces", false);
 
+    };
 
 
     // on recup l'user stocké en localstorage pi on le connecte via socket, ou redirige vers login
@@ -172,44 +165,53 @@ const DashboardPage = () => {
     // du coup, on stabilise pushNotification avec useCallback
     // ça évite les appels en double, les effets chelous et les comportements imprévus
     const pushNotification = useCallback((notif) => {
-        setNotifications(prev => {
-            const alreadyExists = prev.some(n =>// pk cette verif ? car côté serveur je broadcast à la fois à tout les membres du canal
-                // (pour qu'ils puisse recevoir les msg et aussi à tout les membres du workspace) donc pour éviter des doubles notifications
-                // on vérifie si la notif existe déjà dans le tableau
-                n.type === notif.type &&
-                n.workspaceId === notif.workspaceId &&
-                n.channelId === notif.channelId &&
-                !n.read
-            );
+        if (notif.channelId && channelNotificationPrefs[notif.channelId] === false) return false;
 
-            return alreadyExists ? prev : [...prev, { ...notif, read: false }];
-        });
+        const alreadyExists = notifications.some(n =>
+            n.type === notif.type &&
+            n.workspaceId === notif.workspaceId &&
+            n.channelId === notif.channelId &&
+            !n.read
+        );
 
+        if (alreadyExists) return false;
+
+        setNotifications(prev => [...prev, { ...notif, read: false }]);
         updatePopupState("notifications", true);
-    }, []);
+
+        return true; // ✅ ajoutée
+    }, [notifications, channelNotificationPrefs]);
+
+
+
 
     // même délire pour handleNewPublicWorkspace
     // on évite de recréer la fonction à chaque render
     // sinon, elle est vue comme "nouvelle" et peut foutre le bazar dans les useEffect
-    const handleNewPublicWorkspace = useCallback((workspace) => {
-        if (
-            workspace.is_private || // privé ?
-            workspaces[workspace.id] // déjà connu dans mes workspaces actuel ?
-        ) {
-            return; //  déjà connu ou privé → on ignore
-        }
+const handleNewPublicWorkspace = useCallback((workspace) => {
+  if (
+    workspace.is_private ||
+    workspaces[workspace.id] ||
+    publicWorkspaces.some(w => w.id === workspace.id) // ✅ ← ceci évite le spam
+  ) {
+    return;
+  }
 
-        pushNotification({
-            type: "newPublicWorkspace",
-            message: `Un nouvel espace public a été créé : ${workspace.name}`,
-            workspaceId: workspace.id,
-        });
+  pushNotification({
+    type: "newPublicWorkspace",
+    message: `Un nouvel espace public a été créé : ${workspace.name}`,
+    workspaceId: workspace.id,
+  });
 
-        notificationSoundRef.current.play().catch(err => {
-            console.warn("Playback failed:", err);
-        });
-        setPublicWorkspaces(prev => [...prev, workspace]);
-    }, [workspaces, pushNotification]);
+  notificationSoundRef.current.play().catch(err => {
+    console.warn("Playback failed:", err);
+  });
+
+  setPublicWorkspaces(prev => [...prev, workspace]);
+}, [workspaces, publicWorkspaces, pushNotification]);
+
+
+    
 
 
     const updatePopupState = (key, value) => {
@@ -293,6 +295,12 @@ const DashboardPage = () => {
             channelMap[channel.id] = channel;
         });
         setChannels(channelMap);
+
+
+        if (workspaceIdToSelect === workspace.id || !selectedWorkspace?.id) {
+            setSelectedWorkspace(workspace);
+            setWorkspaceIdToSelect(null); // reset
+        }
 
         setSelectedWorkspace(workspace);
 
@@ -383,6 +391,8 @@ const DashboardPage = () => {
         }
     }, [selectedWorkspace?.id, channels, selectedChannel?.id]);
 
+
+
     const handleGenerateInvitation = async () => {
         if (!selectedWorkspace.id) {
             console.error("No workspace selected");
@@ -423,12 +433,7 @@ const DashboardPage = () => {
         });
     };
 
-    useEffect(() => {
-        socket.on("joinWorkspaceSuccess", onJoinSuccess);
-        return () => {
-            socket.off("joinWorkspaceSuccess", onJoinSuccess);
-        };
-    }, [onJoinSuccess]);
+
 
     const handleCreateChannel = (event) => {
         event.preventDefault();
@@ -447,8 +452,11 @@ const DashboardPage = () => {
     };
 
     useSocketEvents({
+        workspaces,
         socket,
         selectedWorkspace,
+        setWorkspaces,
+        setSelectedWorkspace,
         selectedChannel,
         setChannels,
         setSelectedChannel,
@@ -464,6 +472,11 @@ const DashboardPage = () => {
         setConnectedUsers,
         handleNewPublicWorkspace,
     });
+
+
+    const currentUserRoleId = workspaceUsers.find(u => u.user_id === user.id)?.role_id;
+
+
 
 
     return (
@@ -483,7 +496,11 @@ const DashboardPage = () => {
                 hideAllModal();
             }
         }} className={`dashboard-container ${theme}`}>
+
+
             <WorkspaceModalManager
+                selectedWorkspace={selectedWorkspace}
+                currentUserRoleId={currentUserRoleId}
                 modalRef={modalRefs.workspace}
                 display={modalVisibility.workspace}
                 theme={theme}
@@ -498,6 +515,7 @@ const DashboardPage = () => {
                 workspaceDescription={workspaceDescription}
                 workspaceIsPrivate={workspaceIsPrivate}
                 workspaceInvitation={workspaceInvitation}
+                selectedWorkspaceId={selectedWorkspace?.id}
                 channelName={channelName}
                 channelDescription={channelDescription}
                 channelIsPrivate={channelIsPrivate}
@@ -549,6 +567,7 @@ const DashboardPage = () => {
 
             {selectedWorkspace.id && !guiVisibility.discoverWorkspaces && (
                 <DashboardRight
+                    currentUserRoleId={currentUserRoleId}
                     messages={messages}
                     setMessages={setMessages}
                     notificationSoundRef={notificationSoundRef}
@@ -566,6 +585,10 @@ const DashboardPage = () => {
                     updatePopupState={updatePopupState}
                     setMousePosition={setMousePosition}
                     notifications={notifications}
+                    channelNotificationPrefs={channelNotificationPrefs}
+                    setChannelNotificationPrefs={setChannelNotificationPrefs}
+
+
                 />
             )}
             {!selectedWorkspace.id && !guiVisibility.discoverWorkspaces && (

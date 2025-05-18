@@ -15,6 +15,8 @@ import { readUsersByIds, readUser } from './controllers/Users.js';
 import { joinWorkspaceViaInvitation } from './controllers/WorkspaceInvitations.js';
 import { createChannelMember } from './controllers/ChannelMembers.js';
 import { fetchMessagesForChannel } from "./controllers/Channels.js";
+import { readWorkspaceMembersByWorkspaceId } from "./controllers/WorkspaceMembers.js";
+
 
 const connectedUsers = new Map();
 
@@ -59,54 +61,66 @@ export default function setupSocketServer(server) {
 
         socket.on("disconnect", () => {
             connectedUsers.delete(socket.id);
-            broadcastConnectedUsers(io); // quand un user déco, on MAJ la liste pour tout le monde
+            broadcastConnectedUsers(io); // quand un user déco -> maj dla liste des users connectés
         });
 
         socket.on("getUserWorkspaces", async ({ user_id }) => {
             const response = await readUserWorkspaces({ user_id });
-            socket.emit("userWorkspaces", response.result || []); // envoie les workspaces de l'utilisateur
+            socket.emit("userWorkspaces", response.result); // envoie les workspaces de l'utilisateur
         });
+
+        socket.on("getWorkspaceMembers", async ({ workspace_id }) => {
+            try {
+                const request = { query: { workspace_id } };
+                const members = await readWorkspaceMembersByWorkspaceId(request);
+                socket.emit("workspaceMembers", members);
+            } catch (err) {
+                console.error("Erreur getWorkspaceMembers:", err);
+                socket.emit("workspaceMembers", []);
+            }
+        });
+
 
         socket.on("createWorkspace", async (data) => {
             const request = { body: data, socket };
             const newWs = await createWorkspace(request, io);
 
-            socket.emit("workspaceCreatedSuccess", newWs); // renvoie le nouveau workspace au user qui cree le ws
+            socket.emit("workspaceCreatedSuccess", newWs);
 
-            if (newWs?.result && !newWs.result.is_private) {
-                // si le ws  est public → broadcast à tous sauf au user qui la creee
-                socket.broadcast.emit("publicWorkspaceCreated", newWs.result);
+            if (newWs && !newWs.is_private) {
+                socket.broadcast.emit("publicWorkspaceCreated", newWs);
             }
         });
 
-      socket.on("joinWorkspaceWithInvitation", async ({ token, user_id, username }) => {
-    try {
-        const result = await joinWorkspaceViaInvitation({ token, user_id, username, socket, io });
 
-        const workspaceId = result.result.workspace_id;
+        socket.on("joinWorkspaceWithInvitation", async ({ token, user_id, username }) => {
+            try {
+                const result = await joinWorkspaceViaInvitation({ token, user_id, username, socket, io });
 
-        // Utilise readWorkspace
-        const workspace = await readWorkspace({ params: { id: workspaceId } });
+                const workspaceId = result.result.workspace_id;
 
-        // Utilise readChannel pour récupérer tous les channels du workspace
-        const allChannels = await readChannel({ query: { workspace_id: workspaceId } });
+                // Utilise readWorkspace
+                const workspace = await readWorkspace({ params: { id: workspaceId } });
 
-        // Envoie les données au client (workspace + channels)
-        socket.emit("joinWorkspaceSuccess", {
-            workspace,
-            channels: allChannels,
+                // Utilise readChannel pour récupérer tous les channels du workspace
+                const allChannels = await readChannel({ query: { workspace_id: workspaceId } });
+
+                // Envoie les données au client (workspace + channels)
+                socket.emit("joinWorkspaceSuccess", {
+                    workspace,
+                    channels: allChannels,
+                });
+
+                // Notifie les autres que quelqu’un a rejoint
+                socket.to(`workspace_${workspaceId}`).emit("workspaceUserJoined", {
+                    workspace_id: workspaceId,
+                    username,
+                });
+            } catch (err) {
+                console.error("Erreur joinWorkspaceWithInvitation:", err);
+                socket.emit("joinWorkspaceError", { message: err.message });
+            }
         });
-
-        // Notifie les autres que quelqu’un a rejoint
-        socket.to(`workspace_${workspaceId}`).emit("workspaceUserJoined", {
-            workspace_id: workspaceId,
-            username,
-        });
-    } catch (err) {
-        console.error("Erreur joinWorkspaceWithInvitation:", err);
-        socket.emit("joinWorkspaceError", { message: err.message });
-    }
-});
 
 
         socket.on("joinWorkspace", async (data) => {
@@ -212,7 +226,6 @@ export default function setupSocketServer(server) {
                 );
 
                 const user = await readUser({ params: { id: user_id } });
-                console.log("user", user);
                 const channel = await readChannel({ params: { id: channel_id } });
                 const workspace = await readWorkspace({ params: { id: channel.workspace_id } });
 
@@ -250,11 +263,18 @@ export default function setupSocketServer(server) {
                 // ici on envoie receiveMessage à tous les utilisateurs connectés. 
                 // Cet event sera catch par le front et
                 //  on pourra envoyer une notif à quelqu'un qui n'a pas forcément de channel ou le bon workspace de selectionné
-                for (const uid of connectedUsers.values()) {
-                    if (uid !== user_id) {
-                        io.to(`user_${uid}`).emit("receiveMessage", messageData);
+                for (const [socketId, uid] of connectedUsers) {
+                    if (uid === user_id) continue; // pas à soi-même
+
+                    const socketUser = io.sockets.sockets.get(socketId);
+                    const isInChannel = socketUser?.rooms.has(`channel_${channel_id}`);
+
+                    if (!isInChannel) {
+                        socket.to(`user_${uid}`).emit("receiveMessage", messageData);
                     }
                 }
+
+
 
             } catch (error) {
                 console.error("Erreur dans sendMessage:", error);
@@ -267,4 +287,5 @@ export default function setupSocketServer(server) {
         });
 
     });
+    return io;
 }

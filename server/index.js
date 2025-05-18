@@ -1,14 +1,11 @@
 import cors from "cors";
 import express from "express";
 import http from 'http';
-import session from "express-session";
-import passport from "passport";
 import pool from "./database/db.js";
 
 import ChannelMembersRouter from "./routes/ChannelMembers.js";
 import ChannelPermissionsRouter from "./routes/ChannelPermissions.js";
 import ChannelsRouter from "./routes/Channels.js";
-import PermissionsRouter from "./routes/Permissions.js";
 import RolePermissionsRouter from "./routes/RolePermissions.js";
 import RolesRouter from "./routes/Roles.js";
 import UsersRouter from "./routes/Users.js";
@@ -28,14 +25,7 @@ const PORT = process.env.PORT;
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(session({
-    secret: process.env.SESSION_SECRET,
-    resave: false,
-    saveUninitialized: true,
-    cookie: { secure: false }
-}));
-app.use(passport.initialize());
-app.use(passport.session());
+
 
 const corsOptions = {
     origin: [
@@ -51,10 +41,10 @@ const corsOptions = {
 app.use(cors(corsOptions));
 
 const server = http.createServer(app);
-setupSocketServer(server); 
+const io = setupSocketServer(server);
 
+app.set("io", io);
 app.use("/users/", UsersRouter);
-app.use("/permissions/", PermissionsRouter);
 app.use("/workspaces/invitations/", WorkspaceInvitationsRouter);
 app.use("/workspaces/permissions/", WorkspacePermissionsRouter);
 app.use("/workspaces/members/", WorkspaceMembersRouter);

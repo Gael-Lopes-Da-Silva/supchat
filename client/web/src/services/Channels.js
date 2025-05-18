@@ -1,6 +1,5 @@
 
 export const createChannel = async ({ name, description, is_private, workspace_id, user_id }) => {
-    console.log('Creating channel with:', { name, description, is_private, workspace_id, user_id });
 
     const response = await fetch(`${process.env.REACT_APP_API_URL}channels`, {
         method: 'POST',

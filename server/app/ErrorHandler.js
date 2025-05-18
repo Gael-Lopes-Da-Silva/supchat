@@ -50,6 +50,11 @@ export const ERRORS = {
     WORKSPACE_ALREADY_DELETED: { code: 23, message: "Workspace already deleted" },
     WORKSPACE_NOT_DELETED: { code: 24, message: "Workspace not deleted" },
     WORKSPACE_ID_NOT_PROVIDED: { code: 25, message: "Workspace_id not provided" },
+    WORKSPACE_MEMBER_NOT_FOUND : { code: 26, message: "Workspace member not found" },
+    WORKSPACE_MEMBER_DELETED : { code: 27, message: "Workspace member deleted" },
+    WORKSPACE_MEMBER_ALREADY_DELETED : { code: 28, message: "Workspace member already deleted" },
+    WORKSPACE_MEMBER_ID_NOT_PROVIDED: { code: 29, message: "Workspace member ID not provided" },
+    WORKSPACE_IS_PRIVATE: { code: 22, message: "Workspace is private. Invitation required." },
 
     //Channels
     CHANNEL_NOT_FOUND: { code: 43, message: "Channel not found" },

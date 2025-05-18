@@ -27,7 +27,6 @@ export const getPublicWorkspaces = async () => {
 
 
 export const readWorkspace = async ({ id }) => {
-    console.log("Reading workspace with ID:", id);
     try {
         const response = await fetch(`${process.env.REACT_APP_API_URL}workspaces/${id}`, {
             method: 'GET',
@@ -41,7 +40,6 @@ export const readWorkspace = async ({ id }) => {
         }
 
         const data = await response.json();
-        console.log("Workspace data fetched:", data);
         return data;
     } catch (error) {
         console.error("Error fetching workspace data:", error);

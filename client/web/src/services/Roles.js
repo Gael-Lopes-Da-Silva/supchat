@@ -9,3 +9,16 @@ export const readRole = async (query) => {
 
     return await response.json();
 };
+
+export const getRoles = async () => {
+    const response = await fetch(`${process.env.REACT_APP_API_URL}roles`, {
+        method: "GET",
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+        },
+    });
+
+    return await response.json();
+};
+

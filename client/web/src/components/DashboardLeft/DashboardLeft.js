@@ -1,10 +1,8 @@
-import React, { useEffect } from 'react';
 import * as Fa from "react-icons/fa6";
 import WorkspaceButtons from "./WorkspaceButtons";
 import WorkspaceList from "./WorkspaceList";
 import ChannelList from "./ChannelList";
 import { useNavigate } from "react-router-dom";
-import socket from '../../socket';
 
 const DashboardLeft = ({
     workspaces,
@@ -15,7 +13,6 @@ const DashboardLeft = ({
     guiVisibility,
     updateGuiState,
     setSelectedWorkspace,
-    setChannels,
     setSelectedChannel,
     hideAllPopup,
     updatePopupState,
@@ -29,33 +26,13 @@ const DashboardLeft = ({
     const navigate = useNavigate();
 
 
-    useEffect(() => {
-        if (!selectedWorkspace.id) return;
-
-        socket.emit('joinWorkspace', selectedWorkspace.id);
-
-
-        const handleChannelCreated = (newChannel) => {
-
-            setChannels((prevChannels) => ({
-                ...prevChannels,
-                [newChannel.id]: newChannel,
-            }));
-        };
-
-        socket.on("channelCreated", handleChannelCreated);
-
-        return () => {
-            socket.off("channelCreated", handleChannelCreated);
-        };
-    }, [selectedWorkspace.id]);
-
 
 
     return (
         <div className="dashboard-left" style={{ display: !guiVisibility.leftPanel && "none" }}>
             <div className="dashboard-left-workspaces">
                 <WorkspaceList
+                    user={user}
                     workspaces={workspaces}
                     publicWorkspaces={publicWorkspaces}
                     selectedWorkspace={selectedWorkspace}
@@ -98,6 +75,7 @@ const DashboardLeft = ({
                             selectedChannel={selectedChannel}
                             getBackground={getBackground}
                             getForeground={getForeground}
+                            user={user}
                         />
                     )}
                 </main>

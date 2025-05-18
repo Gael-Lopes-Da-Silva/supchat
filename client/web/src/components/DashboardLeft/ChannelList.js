@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import * as Fa from "react-icons/fa6"
 
-const ChannelList = ({ channels, setSelectedChannel, selectedChannel, getBackground, getForeground }) => {
+const ChannelList = ({ channels, setSelectedChannel, selectedChannel, getBackground, getForeground, user }) => {
     const [searchTerm, setSearchTerm] = useState('');
 
     const filteredChannels = Object.values(channels).filter(channel =>
@@ -16,7 +16,6 @@ const ChannelList = ({ channels, setSelectedChannel, selectedChannel, getBackgro
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="channel-search-input"
-
             />
 
             {filteredChannels.length > 0 ? (
@@ -40,8 +39,6 @@ const ChannelList = ({ channels, setSelectedChannel, selectedChannel, getBackgro
                             <p>
                                 {channel.name} {channel.is_private ? <Fa.FaLock className="channel-lock-icon" /> : null}
                             </p>
-
-
 
                             {isSelected && (
                                 <span

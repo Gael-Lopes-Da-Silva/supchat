@@ -1,8 +1,9 @@
-import React, { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import socket from '../../socket';
 import HeaderButtons from "./HeaderButtons";
 import * as Fa from "react-icons/fa6";
 import { getUserChannelIds } from '../../services/Channels';
+import { deleteWorkspaceMember } from '../../services/WorkspaceMembers';
 
 const DashboardRight = ({
     selectedWorkspace,
@@ -19,7 +20,10 @@ const DashboardRight = ({
     workspaceUsers,
     notifications,
     setSelectedChannel,
-    messages
+    messages,
+    channelNotificationPrefs,
+    setChannelNotificationPrefs,
+    currentUserRoleId
 }) => {
     const [input, setInput] = useState('');
     const [channelMembers, setChannelMembers] = useState([]);
@@ -28,6 +32,8 @@ const DashboardRight = ({
     const [showMentions, setShowMentions] = useState(false);
     const contextMenuRef = useRef(null);
     const messagesEndRef = useRef(null);
+    const isAdmin = currentUserRoleId === 1;
+
 
     const [contextMenu, setContextMenu] = useState({
         visible: false,
@@ -35,6 +41,27 @@ const DashboardRight = ({
         y: 0,
         user: null,
     });
+
+
+    const toggleChannelNotifications = (channelId) => {
+        setChannelNotificationPrefs((prev) => {
+            const updated = { ...prev };
+
+            // Si c'est la 1ere fois qu'on clique sur mute de pour ce chan, on désactive les notifications pour ce canal
+            if (updated[channelId] === undefined) {
+                updated[channelId] = true;
+            } else {
+                // Sinon, on inverse l'état actuel
+                updated[channelId] = !updated[channelId];
+            }
+
+            localStorage.setItem("channelNotificationPrefs", JSON.stringify(updated));
+
+            return updated; // maj de prev
+        });
+    };
+
+
 
 
     useEffect(() => {
@@ -139,6 +166,25 @@ const DashboardRight = ({
             return <span key={index}>{part}</span>;
         });
     };
+    const handleKickMember = async (workspaceMemberId) => {
+        try {
+            const res = await deleteWorkspaceMember(workspaceMemberId);
+
+            if (res.error) {
+                alert("Erreur lors de l'expulsion.");
+                return;
+            }
+
+            alert("Membre expulsé.");
+            socket.emit("getWorkspaceMembers", { workspace_id: selectedWorkspace.id });
+
+        } catch (err) {
+            console.error("Erreur expulsion membre :", err);
+            alert("Erreur réseau.");
+        }
+    };
+
+
 
     const handleMentionClick = (username) => {
         const updated = input.replace(/@[\wÀ-ÿ.'\- ]*$/, `@${username} `);
@@ -150,6 +196,7 @@ const DashboardRight = ({
         <div className="dashboard-right">
             <div className="dashboard-right-content">
                 <header className="dashboard-header">
+
                     <HeaderButtons
                         guiVisibility={guiVisibility}
                         updateGuiState={updateGuiState}
@@ -157,10 +204,16 @@ const DashboardRight = ({
                         updatePopupState={updatePopupState}
                         setMousePosition={setMousePosition}
                         notifications={notifications}
+                        selectedChannel={selectedChannel}
+                        channelNotificationPrefs={channelNotificationPrefs}
+                        toggleChannelNotifications={toggleChannelNotifications}
                     />
+
                     <h2 className="channel-title">
                         {selectedChannel?.name ? `#${selectedChannel.name}` : "Aucun canal sélectionné"}
                     </h2>
+
+
                 </header>
 
                 <main>
@@ -238,46 +291,76 @@ const DashboardRight = ({
                     </footer>
                 )}
             </div>
-
             <div className="dashboard-right-peoples" style={{ display: !guiVisibility.userList && "none" }}>
-                <h4>Utilisateurs connectés à Supchat</h4>
-                {workspaceUsers.length > 0 ? (
-                    <ul>
-                        {workspaceUsers.map((u) => {
-                            const isConnected = connectedUsers.some(cu => cu.id === u.user_id);
-                            return (
-                                <li key={u.id}>
-                                    <button
-                                        className="user-button"
-                                        onClick={async (e) => {
-                                            if (u.user_id === user.id) return;
-                                            const rect = e.currentTarget.getBoundingClientRect();
-                                            let x = rect.right + 5;
-                                            let y = rect.top;
-                                            const menuWidth = 180;
-                                            const menuHeight = 100;
-                                            if (x + menuWidth > window.innerWidth) x = rect.left - menuWidth - 5;
-                                            if (y + menuHeight > window.innerHeight) y = window.innerHeight - menuHeight - 10;
+                <h4>Utilisateurs connectés à Supchat ({connectedUsers.length})</h4>
+                <ul>
+                    {connectedUsers.map((u) => (
+                        <li key={u.id}>🟢 {u.username}</li>
+                    ))}
+                </ul>
 
-                                            const channelIds = await getUserChannelIds(u.user_id, selectedWorkspace.id);
-                                            setContextMenu({
-                                                visible: true,
-                                                x,
-                                                y,
-                                                user: u,
-                                                channelIds,
-                                            });
-                                        }}
-                                    >
-                                        {isConnected ? '🟢' : '⚪'} {u.username}
-                                    </button>
-                                </li>
-                            );
-                        })}
+                <h4>
+                    Membres du workspace connectés (
+                    {workspaceUsers.filter(u => connectedUsers.some(cu => cu.id === u.user_id)).length}
+                    /
+                    {workspaceUsers.length}
+                    )
+                </h4>
+
+                <ul>
+                    <ul>
+                        {workspaceUsers
+                            .filter(u => connectedUsers.some(cu => cu.id === u.user_id))
+                            .map((u) => {
+                                const isNotSelf = u.user_id !== user.id;
+
+                                return (
+                                    <li key={u.id} className="user-list-item">
+                                        <div className="user-line">
+                                            <button
+                                                className="user-button"
+                                                disabled={!isNotSelf}
+                                                onClick={async (e) => {
+                                                    if (!isNotSelf) return; 
+                                                    e.stopPropagation();
+                                                    const rect = e.currentTarget.getBoundingClientRect();
+                                                    let x = rect.right + 5;
+                                                    let y = rect.top;
+                                                    const menuWidth = 180;
+                                                    const menuHeight = 100;
+
+                                                    if (x + menuWidth > window.innerWidth) x = rect.left - menuWidth - 5;
+                                                    if (y + menuHeight > window.innerHeight) y = window.innerHeight - menuHeight - 10;
+
+                                                    const channelIds = await getUserChannelIds(u.user_id, selectedWorkspace.id);
+                                                    setContextMenu({
+                                                        visible: true,
+                                                        x,
+                                                        y,
+                                                        user: u,
+                                                        channelIds,
+                                                    });
+                                                }}
+                                            >
+                                                🟢 {u.username}
+                                            </button>
+
+                                            {isAdmin && isNotSelf && (
+                                                <button
+                                                    title="Expulser ce membre du workspace"
+                                                    onClick={() => handleKickMember(u.id)}
+                                                    className="kick-button"
+                                                >
+                                                    ❌
+                                                </button>
+                                            )}
+                                        </div>
+                                    </li>
+                                );
+                            })}
                     </ul>
-                ) : (
-                    <p>Aucun utilisateur dans ce workspace.</p>
-                )}
+
+                </ul>
 
                 {contextMenu.visible && (
                     <div
@@ -287,7 +370,11 @@ const DashboardRight = ({
                     >
                         {(() => {
                             const availableChannels = Object.values(channels)
-                                .filter(c => c.is_private && c.user_id === user.id && !contextMenu.channelIds?.includes(Number(c.id)));
+                                .filter(c =>
+                                    c.is_private &&
+                                    c.user_id === user.id &&
+                                    !contextMenu.channelIds?.includes(Number(c.id))
+                                );
 
                             if (availableChannels.length === 0) {
                                 return <p>{contextMenu.user.username} est déjà membre de tous vos canaux privés.</p>;
@@ -326,6 +413,7 @@ const DashboardRight = ({
             </div>
         </div>
     );
+
 };
 
 export default DashboardRight;

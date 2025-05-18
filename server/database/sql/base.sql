@@ -194,6 +194,7 @@ JOIN permissions p
 ON p.name IN ('can_assign_roles', 'can_set_permissions', 'can_post', 'can_moderate', 'can_manage_members')
 WHERE r.name = 'admin';
 
+
 INSERT INTO role_permissions (role_id, permission_id)
 SELECT r.id AS role_id, p.id AS permission_id
 FROM roles r
