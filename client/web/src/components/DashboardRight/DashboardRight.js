@@ -1,9 +1,12 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import { useEffect, useState, useRef } from 'react';
 import socket from '../../socket';
 import HeaderButtons from "./HeaderButtons";
 import * as Fa from "react-icons/fa6";
-import { getUserChannelIds } from '../../services/Channels';
+import EmojiPicker from 'emoji-picker-react';
+import { getUserChannelIds, getUsersReactions } from '../../services/Channels';
 import { deleteWorkspaceMember } from '../../services/WorkspaceMembers';
+import { ReactComponent as EmojiIcon } from '../../assets/emoji-round-plus.svg';
 
 const DashboardRight = ({
     selectedWorkspace,
@@ -30,6 +33,19 @@ const DashboardRight = ({
     const [messageSearchTerm, setMessageSearchTerm] = useState('');
     const [mentionSuggestions, setMentionSuggestions] = useState([]);
     const [showMentions, setShowMentions] = useState(false);
+    const [activeEmojiPickerMessageId, setActiveEmojiPickerMessageId] = useState(null);
+    const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+    const [userSearchTerm, setUserSearchTerm] = useState('');
+    const [tooltip, setTooltip] = useState({
+        visible: false,
+        x: 0,
+        y: 0,
+        content: "",
+    });
+
+    const reactionPickerRefs = useRef({});
+    const fileInputRef = useRef(null);
+
     const contextMenuRef = useRef(null);
     const messagesEndRef = useRef(null);
     const isAdmin = currentUserRoleId === 1;
@@ -42,6 +58,69 @@ const DashboardRight = ({
         user: null,
     });
 
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            const ref = reactionPickerRefs.current[activeEmojiPickerMessageId];
+            if (ref && !ref.contains(event.target)) {
+                setActiveEmojiPickerMessageId(null);
+            }
+        };
+
+        if (activeEmojiPickerMessageId !== null) {
+            document.addEventListener("mousedown", handleClickOutside);
+        }
+
+        return () => {
+            document.removeEventListener("mousedown", handleClickOutside);
+        };
+    }, [activeEmojiPickerMessageId]);
+
+
+    const fetchUsersForReaction = async (messageId, emoji, x, y) => {
+        try {
+            const users = await getUsersReactions(messageId, emoji);
+            if (users.length > 0) {
+                setTooltip({
+                    visible: true,
+                    content: `Réaction de ${users.join(", ")}`,
+                    x,
+                    y
+                });
+            } else {
+                setTooltip({ visible: false, content: "", x: 0, y: 0 });
+            }
+        } catch (err) {
+            console.error("Erreur fetch users for reaction:", err);
+            setTooltip({ visible: false, content: "", x: 0, y: 0 });
+        }
+    };
+
+
+    const handleEmojiClick = (emojiData) => {
+        setInput((prev) => prev + emojiData.emoji);
+        setShowEmojiPicker(false);
+    };
+
+    const toggleReaction = (message_id, emoji) => {
+        const message = messages.find(msg => msg.id === message_id);
+
+        const userReacted = message.reactions?.some(
+            (r) => r.emoji === emoji && r.user_ids?.includes(user.id)
+        );
+
+
+        if (userReacted) {
+            socket.emit("removeReaction", { message_id, user_id: user.id, emoji });
+        } else {
+            socket.emit("addReaction", { message_id, user_id: user.id, emoji });
+        }
+    };
+
+
+
+    const showEmojiPickerFor = (message_id) => {
+        setActiveEmojiPickerMessageId(message_id);
+    };
 
     const toggleChannelNotifications = (channelId) => {
         setChannelNotificationPrefs((prev) => {
@@ -61,12 +140,28 @@ const DashboardRight = ({
         });
     };
 
+    const getAttachmentUrl = (path) => {
+        if (!path) return null;
+        const API_URL = process.env.REACT_APP_API_URL?.replace(/\/$/, "");
+        return path.startsWith("http") ? path : `${API_URL}${path}`;
+    };
 
+    const formatTimestamp = (timestamp) => {
+        const date = new Date(timestamp);
+        return date.toLocaleString('fr-FR', {
+            day: '2-digit',
+            month: 'short',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+    };
 
 
     useEffect(() => {
         const fetchChannelMembers = async () => {
             if (!selectedChannel?.id || !selectedChannel?.is_private) return;
+
             try {
                 const res = await fetch(`${process.env.REACT_APP_API_URL}channels/members?channel_id=${selectedChannel.id}`);
                 const data = await res.json();
@@ -78,15 +173,48 @@ const DashboardRight = ({
         fetchChannelMembers();
     }, [selectedChannel?.id]);
 
-    useEffect(() => {
-        const handleClickOutside = (e) => {
-            if (contextMenuRef.current && !contextMenuRef.current.contains(e.target)) {
-                setContextMenu(prev => ({ ...prev, visible: false }));
-            }
-        };
-        window.addEventListener("mousedown", handleClickOutside);
-        return () => window.removeEventListener("mousedown", handleClickOutside);
-    }, []);
+
+    const handleFileUpload = (e) => {
+        const file = e.target.files[0];
+        if (!file || !selectedChannel?.id || !user?.id) return;
+
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('channel_id', selectedChannel.id);
+        formData.append('user_id', user.id);
+
+        fetch(`${process.env.REACT_APP_API_URL}channels/upload`, {
+            method: 'POST',
+            body: formData,
+        })
+            .then(res => res.json())
+            .then(data => {
+                if (data.error === 0 && data.result?.fileUrl && data.result?.message_id) {
+                    socket.emit("broadcastAttachedMsg", {
+                        id: data.result.message_id,
+                        user_id: user.id,
+                        username: user.username,
+                        content: "",
+                        attachment: data.result.fileUrl,
+                        channel_id: selectedChannel.id,
+                        channel_name: selectedChannel.name,
+                        workspace_id: selectedWorkspace.id,
+                        workspace_name: selectedWorkspace.name,
+                        mentioned_user_ids: [],
+                    });
+
+                } else {
+                    alert("Erreur upload : " + (data.error_message || "Erreur inconnue"));
+                }
+            })
+            .catch(err => {
+                console.error("Upload failed:", err);
+                alert("Erreur lors de l'upload.");
+            });
+
+    };
+
+
 
     const handleInputChange = (e) => {
         const val = e.target.value;
@@ -106,13 +234,25 @@ const DashboardRight = ({
         }
     };
 
+    const getFileName = (path) => {
+        if (!path) return "";
+        return decodeURIComponent(path.split('/').pop());
+    };
+
+
+
+
     useEffect(() => {
-        if (messagesEndRef.current) {
-            messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
-        }
-    }, [messages]);
+        setTimeout(() => {
+            messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+        }, 100); // faut laisser le temps au dom de terminer le layout des messages entre chaque selection de channel
+
+    }, [selectedChannel?.id, messages]);
+
+
 
     const sendMessage = () => {
+
         if (input.trim() && selectedChannel?.id && user?.id) {
             socket.emit('sendMessage', {
                 user_id: user.id,
@@ -138,9 +278,27 @@ const DashboardRight = ({
         }
     };
 
-    const filteredMessages = messages.filter(msg =>
-        msg.content.toLowerCase().includes(messageSearchTerm.toLowerCase())
+    const filteredMessages = messages.filter(msg => {
+        const searchTerm = messageSearchTerm.toLowerCase();
+
+        const isPhoto = (msg.attachment && msg.attachment.match(/\.(jpg|jpeg|png|gif|webp)$/i));
+        const isVideo = (msg.attachment && msg.attachment.match(/\.(mp4|webm)$/i));
+
+        return (
+            (msg.content && msg.content.toLowerCase().includes(searchTerm)) ||
+            (msg.attachment && msg.attachment.toLowerCase().includes(searchTerm)) ||
+            (searchTerm === "photos" && isPhoto) ||
+            (searchTerm === "videos" && isVideo)
+        );
+    });
+
+
+
+
+    const filteredUsers = workspaceUsers.filter((u) =>
+        u.username.toLowerCase().includes(userSearchTerm.toLowerCase())
     );
+
 
     const renderMessageContent = (text) => {
         return text.split(/(@[\wÀ-ÿ.'\- ]+|#[\wÀ-ÿ0-9._-]+)/g).map((part, index) => {
@@ -219,6 +377,10 @@ const DashboardRight = ({
                 <main>
                     {selectedWorkspace.id && selectedChannel?.id ? (
                         <div className="chat-container">
+                            <small className="message-search-hint">
+                                Astuce : tapez <strong>photos</strong>, <strong>videos</strong> ou <strong>.pdf</strong> pour filtrer par type de fichier.
+                            </small>
+
                             <input
                                 type="text"
                                 placeholder="Rechercher un message..."
@@ -226,13 +388,116 @@ const DashboardRight = ({
                                 onChange={(e) => setMessageSearchTerm(e.target.value)}
                                 className="message-search-input"
                             />
+
                             <div className="chat-messages">
                                 {filteredMessages.length > 0 ? (
-                                    filteredMessages.map((msg) => (
-                                        <p key={msg.id} className="chat-message">
-                                            <strong>{msg.username}:</strong> {renderMessageContent(msg.content)}
-                                        </p>
-                                    ))
+                                    filteredMessages.map((msg) => {
+                                        const displayedTimestamp = msg.created_at || new Date().toISOString();
+
+                                        return (
+                                            <div
+                                                key={msg.id}
+                                                className={`chat-message ${msg.user_id === user.id ? 'from-me' : 'from-others'}`}
+                                            >
+                                                <div className="message-inner">
+                                                    <div className="message-header">
+                                                        {msg.username}
+                                                        <span className="timestamp"> · {formatTimestamp(displayedTimestamp)}</span>
+                                                    </div>
+
+                                                    <div className="message-text">
+                                                        {renderMessageContent(msg.content)}
+                                                    </div>
+
+                                                    {msg.attachment && (
+                                                        <div className="chat-attachment">
+                                                            {msg.attachment.match(/\.(jpg|jpeg|png|gif|webp)$/i) ? (
+                                                                <a href={getAttachmentUrl(msg.attachment)} download target="_blank" rel="noopener noreferrer">
+                                                                    <img src={getAttachmentUrl(msg.attachment)} alt="uploaded" className="uploaded-image" />
+                                                                </a>
+                                                            ) : msg.attachment.match(/\.(mp4|webm)$/i) ? (
+                                                                <a href={getAttachmentUrl(msg.attachment)} download target="_blank" rel="noopener noreferrer">
+                                                                    <video src={getAttachmentUrl(msg.attachment)} controls className="uploaded-video" />
+                                                                </a>
+                                                            ) : (
+                                                                <a href={getAttachmentUrl(msg.attachment)} download target="_blank" rel="noopener noreferrer">
+                                                                    {getFileName(msg.attachment)}
+                                                                </a>
+                                                            )}
+                                                        </div>
+                                                    )}
+
+                                                    <div className="reaction-action">
+                                                        {activeEmojiPickerMessageId !== msg.id &&
+                                                            !msg.reactions?.some(r => r.user_ids?.includes(user.id)) && (
+                                                                <button onClick={() => showEmojiPickerFor(msg.id)} className="reaction-add-btn" title="Ajouter une réaction">
+                                                                    <EmojiIcon style={{ width: '15px', height: '20px' }} />
+                                                                </button>
+                                                            )}
+
+                                                    </div>
+
+                                                    <div className="message-reactions">
+                                                        {msg.reactions?.map(r => (
+                                                            <button
+                                                                key={r.emoji}
+                                                                onClick={() => toggleReaction(msg.id, r.emoji)}
+                                                                onMouseEnter={(e) => {
+                                                                    const rect = e.currentTarget.getBoundingClientRect();
+                                                                    fetchUsersForReaction(msg.id, r.emoji, rect.left, rect.top);
+                                                                }}
+                                                                onMouseLeave={() => setTooltip({ visible: false, content: "", x: 0, y: 0 })}
+                                                                className="reaction-btn"
+                                                            >
+                                                                {r.emoji} {r.user_ids?.length || 0}
+                                                            </button>
+                                                        ))}
+                                                    </div>
+
+
+                                                    {activeEmojiPickerMessageId === msg.id && (
+                                                        <div
+                                                            className="emoji-picker"
+                                                            ref={(el) => (reactionPickerRefs.current[msg.id] = el)}
+                                                        >
+                                                            {['❤️', '😂', '👍', '👎', '🔥', '😢', '😡'].map((emoji) => (
+                                                                <button
+                                                                    key={emoji}
+                                                                    onClick={() => {
+                                                                        toggleReaction(msg.id, emoji);
+                                                                        setActiveEmojiPickerMessageId(null);
+                                                                    }}
+                                                                >
+                                                                    {emoji}
+                                                                </button>
+                                                            ))}
+                                                        </div>
+                                                    )}
+
+                                                    {tooltip.visible && (
+                                                        <div
+                                                            className="reaction-tooltip"
+                                                            style={{
+                                                                position: "fixed",
+                                                                top: tooltip.y,
+                                                                left: tooltip.x,
+                                                                transform: "translate(-50%, -100%)",
+                                                                backgroundColor: "#333",
+                                                                color: "#fff",
+                                                                padding: "5px 10px",
+                                                                borderRadius: "5px",
+                                                                fontSize: "0.8rem",
+                                                                zIndex: 1000,
+                                                                whiteSpace: "nowrap"
+                                                            }}
+                                                        >
+                                                            {tooltip.content}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        );
+                                    })
                                 ) : (
                                     <p>Aucun message trouvé.</p>
                                 )}
@@ -246,25 +511,50 @@ const DashboardRight = ({
                     )}
                 </main>
 
+
+
                 {selectedChannel?.id && (
+
                     <footer>
+
                         <div className="dashboard-right-footer-buttons">
-                            <button title="Uploader un fichier" disabled={!selectedChannel?.id}>
+                            <button
+                                title="Uploader un fichier"
+                                disabled={!selectedChannel?.id}
+                                onClick={() => fileInputRef.current?.click()}
+                            >
                                 <Fa.FaCirclePlus />
                             </button>
+
+
+                            <input
+                                type="file"
+                                ref={fileInputRef}
+                                style={{ display: 'none' }}
+                                onChange={handleFileUpload}
+                            />
+
                             <button
                                 onClick={(e) => {
                                     e.stopPropagation();
-                                    hideAllPopup();
-                                    updatePopupState("emojis", true);
-                                    setMousePosition({ x: e.clientX, y: e.clientY });
+                                    setShowEmojiPicker((prev) => !prev);
                                 }}
                                 title="Insérer un émoji"
                                 disabled={!selectedChannel?.id}
                             >
                                 <Fa.FaFaceSmile />
                             </button>
+                            {showEmojiPicker && (
+                                <div className="emoji-picker-container">
+                                    <EmojiPicker
+                                        onEmojiClick={handleEmojiClick}
+                                        autoFocusSearch={false}
+                                    />
+                                </div>
+                            )}
+
                         </div>
+
                         <div className="chat-input-container">
                             <input
                                 type="text"
@@ -275,6 +565,7 @@ const DashboardRight = ({
                                 onKeyDown={handleKeyPress}
                                 disabled={!selectedChannel?.id}
                             />
+
                             {showMentions && mentionSuggestions.length > 0 && (
                                 <ul className="mention-suggestions">
                                     {mentionSuggestions.map((u) => (
@@ -293,23 +584,45 @@ const DashboardRight = ({
             </div>
             <div className="dashboard-right-peoples" style={{ display: !guiVisibility.userList && "none" }}>
                 <h4>Utilisateurs connectés à Supchat ({connectedUsers.length})</h4>
+
+
                 <ul>
-                    {connectedUsers.map((u) => (
-                        <li key={u.id}>🟢 {u.username}</li>
-                    ))}
+                    {connectedUsers.map((u) => {
+                        const status = u.status;
+                        const statusIcons = {
+                            online: "🟢",
+                            busy: "🔴",
+                            away: "🟡",
+                            offline: "⚫"
+                        };
+
+                        return (
+                            <li key={u.id}>
+                                {statusIcons[status]} {u.username}
+                            </li>
+                        );
+                    })}
                 </ul>
+
 
                 <h4>
                     Membres du workspace connectés (
-                    {workspaceUsers.filter(u => connectedUsers.some(cu => cu.id === u.user_id)).length}
+                    {filteredUsers.filter(u => connectedUsers.some(cu => cu.id === u.user_id)).length}
                     /
                     {workspaceUsers.length}
                     )
                 </h4>
+                <input
+                    type="text"
+                    placeholder="Rechercher un membre..."
+                    value={userSearchTerm}
+                    onChange={(e) => setUserSearchTerm(e.target.value)}
+                    className="user-search-input"
+                />
 
                 <ul>
                     <ul>
-                        {workspaceUsers
+                        {filteredUsers
                             .filter(u => connectedUsers.some(cu => cu.id === u.user_id))
                             .map((u) => {
                                 const isNotSelf = u.user_id !== user.id;
@@ -321,7 +634,7 @@ const DashboardRight = ({
                                                 className="user-button"
                                                 disabled={!isNotSelf}
                                                 onClick={async (e) => {
-                                                    if (!isNotSelf) return; 
+                                                    if (!isNotSelf) return;
                                                     e.stopPropagation();
                                                     const rect = e.currentTarget.getBoundingClientRect();
                                                     let x = rect.right + 5;

@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import { useEffect } from 'react';
 import { readWorkspaceMember } from "../services/WorkspaceMembers";
 import { readChannelMember } from "../services/ChannelMembers";
@@ -21,7 +22,8 @@ const useSocketEvents = ({
   handleNewPublicWorkspace,
   setWorkspaces,
   setSelectedWorkspace,
-  workspaces
+  workspaces,
+  channels
 }) => {
 
 
@@ -47,7 +49,9 @@ const useSocketEvents = ({
           if (didNotify) notificationSoundRef.current?.play().catch(console.warn);
         }
       } else {
+
         setMessages(prev => prev.some(m => m.id === msg.id) ? prev : [...prev, msg]);
+
       }
     };
 
@@ -196,7 +200,7 @@ const useSocketEvents = ({
     if (selectedWorkspace?.id) {
       socket.emit("joinWorkspace", { workspace_id: selectedWorkspace.id });
     }
-  }, [selectedWorkspace?.id]);
+  }, [selectedWorkspace?.id]); // autojoin du workspace quon selectionne
 
   useEffect(() => {
     if (selectedChannel?.id && selectedWorkspace?.id) {
@@ -206,6 +210,58 @@ const useSocketEvents = ({
       });
     }
   }, [selectedChannel?.id, selectedWorkspace?.id]);
+  
+  useEffect(() => {
+    const handleStatus = ({ user_id, status }) => {
+      console.log("userStatusBroadcast", user_id, status);  
+      setConnectedUsers(prev =>
+        prev.map(u =>
+          u.id === user_id ? { ...u, status } : u
+        )
+      );
+    };
+
+    socket.on("userStatusBroadcast", handleStatus);
+    return () => socket.off("userStatusBroadcast", handleStatus);
+  }, [socket]);
+
+
+  useEffect(() => {
+    const handleUpdateReactions = ({ message_id, reactions }) => {
+      console.log("updateReactions", message_id, reactions);
+      setMessages((prevMessages) =>
+        prevMessages.map((msg) =>
+          msg.id === message_id ? { ...msg, reactions } : msg
+        )
+      );
+    };
+
+    const handleReactionNotification = ({ message, message_id, emoji, workspace_id, channel_id }) => {
+      pushNotification({
+        type: "reaction",
+        message,
+        messageId: message_id,
+        emoji,
+        workspaceId: workspace_id,
+        channelId: channel_id,
+        onClick: () => {
+          setSelectedWorkspace(workspaces[workspace_id]);
+          setSelectedChannel(channels[channel_id]);
+        },
+      });
+      notificationSoundRef.current?.play().catch(console.warn);
+    };
+
+    socket.on("updateReactions", handleUpdateReactions);
+    socket.on("reactionNotification", handleReactionNotification);
+
+    return () => {
+      socket.off("updateReactions", handleUpdateReactions);
+      socket.off("reactionNotification", handleReactionNotification);
+    };
+  }, [socket, setMessages, pushNotification, notificationSoundRef]);
+
+
 
 
   useEffect(() => {
@@ -280,7 +336,7 @@ const useSocketEvents = ({
   useEffect(() => {
     const handleWorkspaceCreated = (newWorkspace) => {
       if (newWorkspace?.id) {
-        socket.emit("joinWorkspace", { workspace_id: newWorkspace.id });
+        socket.emit("joinWorkspace", { workspace_id: newWorkspace.id }); // auto join du nouveau workspace qu'on vient de creer
       }
     };
     socket.on("workspaceCreated", handleWorkspaceCreated);

@@ -78,13 +78,13 @@ CREATE TABLE messages (
 
 -- FILES
 CREATE TABLE files (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    message_id INT,
-    file BLOB NOT NULL,
-    uploaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP NULL,
-    deleted_at TIMESTAMP NULL,
-    FOREIGN KEY (message_id) REFERENCES messages(id)
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  message_id INT,
+  file_path VARCHAR(255) NOT NULL,
+  uploaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NULL,
+  deleted_at TIMESTAMP NULL,
+  FOREIGN KEY (message_id) REFERENCES messages(id)
 );
 
 -- REACTIONS

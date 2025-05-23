@@ -1,4 +1,5 @@
-import  { useEffect, useState, useRef, useCallback } from 'react';
+/* eslint-disable react-hooks/exhaustive-deps */
+import { useEffect, useState, useRef, useCallback } from 'react';
 import { useNavigate } from "react-router-dom";
 import useSocketEvents from "../../hooks/useSocketEvents";
 import DashboardPopups from "../../components/DashboardPopups/DashboardPopups";
@@ -133,7 +134,7 @@ const DashboardPage = () => {
             return;
         }
 
-        socket.emit("joinWorkspace", { workspace_id: workspace.id });
+        socket.emit("joinWorkspace", { workspace_id: workspace.id }); // autojoin du workspace public sur lequel on vient de cliquer
         updateGuiState("discoverWorkspaces", false);
 
     };
@@ -150,6 +151,8 @@ const DashboardPage = () => {
 
         setUser(storedUser.data);
         socket.emit("registerUser", storedUser.data.id);
+        const status = localStorage.getItem("user.status") || "online";
+        socket.emit("userStatusUpdate", { user_id: storedUser.data.id, status });
     }, [navigate]);
 
 
@@ -179,7 +182,7 @@ const DashboardPage = () => {
         setNotifications(prev => [...prev, { ...notif, read: false }]);
         updatePopupState("notifications", true);
 
-        return true; // ✅ ajoutée
+        return true;
     }, [notifications, channelNotificationPrefs]);
 
 
@@ -188,30 +191,30 @@ const DashboardPage = () => {
     // même délire pour handleNewPublicWorkspace
     // on évite de recréer la fonction à chaque render
     // sinon, elle est vue comme "nouvelle" et peut foutre le bazar dans les useEffect
-const handleNewPublicWorkspace = useCallback((workspace) => {
-  if (
-    workspace.is_private ||
-    workspaces[workspace.id] ||
-    publicWorkspaces.some(w => w.id === workspace.id) // ✅ ← ceci évite le spam
-  ) {
-    return;
-  }
+    const handleNewPublicWorkspace = useCallback((workspace) => {
+        if (
+            workspace.is_private ||
+            workspaces[workspace.id] ||
+            publicWorkspaces.some(w => w.id === workspace.id) // ✅ ← ceci évite le spam
+        ) {
+            return;
+        }
 
-  pushNotification({
-    type: "newPublicWorkspace",
-    message: `Un nouvel espace public a été créé : ${workspace.name}`,
-    workspaceId: workspace.id,
-  });
+        pushNotification({
+            type: "newPublicWorkspace",
+            message: `Un nouvel espace public a été créé : ${workspace.name}`,
+            workspaceId: workspace.id,
+        });
 
-  notificationSoundRef.current.play().catch(err => {
-    console.warn("Playback failed:", err);
-  });
+        notificationSoundRef.current.play().catch(err => {
+            console.warn("Playback failed:", err);
+        });
 
-  setPublicWorkspaces(prev => [...prev, workspace]);
-}, [workspaces, publicWorkspaces, pushNotification]);
+        setPublicWorkspaces(prev => [...prev, workspace]);
+    }, [workspaces, publicWorkspaces, pushNotification]);
 
 
-    
+
 
 
     const updatePopupState = (key, value) => {
@@ -237,7 +240,7 @@ const handleNewPublicWorkspace = useCallback((workspace) => {
                 const first = workspaceList[0];
                 setSelectedWorkspace(first);
 
-                socket.emit("joinWorkspace", { workspace_id: first.id });
+                socket.emit("joinWorkspace", { workspace_id: first.id }); // selectionne le premier workspace quand on vient de se co
             }
         });
     }, [user]);
@@ -302,8 +305,6 @@ const handleNewPublicWorkspace = useCallback((workspace) => {
             setWorkspaceIdToSelect(null); // reset
         }
 
-        setSelectedWorkspace(workspace);
-
         //  En gros si il y a un channelToSelect (grossomodo si on a cliqué sur une notif qui nous fait switch de workspace)
         //  alors on le met dans selectedChannel car on suppose que si on est dans onJoinsuccess
         // c'est qu'on  vient de switch de workspace et donc le render est déjà fait (jrappel que si on change de workspace
@@ -334,14 +335,17 @@ const handleNewPublicWorkspace = useCallback((workspace) => {
         setChannelToSelect(channelId);
     };
 
-    // Gère le clic sur une notification
-    const markNotificationAsRead = (index) => {
-        setNotifications((prev) => {
-            const updated = [...prev];
-            updated[index] = { ...updated[index], read: true };
-            return updated;
-        });
-    };
+    // Gère le clic sur une notif
+const markNotificationAsRead = (index) => {
+    setNotifications(prev => 
+        prev.map((notif, i) =>  
+         // si la notif cliquée (index) correspond à une notif dans la state notifications  " i === index ?"
+        //  alors on la met à jour en y mettant la prop read à true " ...notif, read: true } "
+            i === index ? { ...notif, read: true } : notif //  ": notif" sinon on la touche pas
+        )
+    );
+};
+
 
     const handleClickNotification = (index, notif) => {
         markNotificationAsRead(index);
@@ -380,7 +384,7 @@ const handleNewPublicWorkspace = useCallback((workspace) => {
         }
     }, [selectedWorkspace?.id, channelToSelect, channels]);
 
-    // Sélectionne automatiquement le premier canal du workspace courant si aucun canal n’est encore sélectionné
+    // auto select du premier channel si aucun n'est sélectionné
     useEffect(() => {
         if (!selectedWorkspace?.id) return;
 
@@ -471,6 +475,9 @@ const handleNewPublicWorkspace = useCallback((workspace) => {
         notificationSoundRef,
         setConnectedUsers,
         handleNewPublicWorkspace,
+        messages,
+        channels
+
     });
 
 

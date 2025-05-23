@@ -2,6 +2,7 @@ import cors from "cors";
 import express from "express";
 import http from 'http';
 import pool from "./database/db.js";
+import path from 'path';
 
 import ChannelMembersRouter from "./routes/ChannelMembers.js";
 import ChannelPermissionsRouter from "./routes/ChannelPermissions.js";
@@ -25,6 +26,7 @@ const PORT = process.env.PORT;
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
 
 
 const corsOptions = {

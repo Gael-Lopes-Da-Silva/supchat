@@ -6,20 +6,21 @@ import {
     joinWorkspace,
     readWorkspace
 } from './controllers/Workspaces.js';
+import { readUsersByIds, readUser } from './controllers/Users.js';
+import { joinWorkspaceViaInvitation } from './controllers/WorkspaceInvitations.js';
+import { createChannelMember } from './controllers/ChannelMembers.js';
 import {
+    fetchMessagesForChannel, 
+    addReaction, 
+    removeReaction,
     createChannel,
     readChannel
 } from "./controllers/Channels.js";
-import { readUsersByIds, readUser } from './controllers/Users.js';
-
-import { joinWorkspaceViaInvitation } from './controllers/WorkspaceInvitations.js';
-import { createChannelMember } from './controllers/ChannelMembers.js';
-import { fetchMessagesForChannel } from "./controllers/Channels.js";
 import { readWorkspaceMembersByWorkspaceId } from "./controllers/WorkspaceMembers.js";
 
 
 const connectedUsers = new Map();
-
+const userStatuses = new Map();
 const broadcastConnectedUsers = async (io) => {
     const userIds = [...connectedUsers.values()];
     if (userIds.length === 0) {
@@ -29,10 +30,35 @@ const broadcastConnectedUsers = async (io) => {
 
     try {
         const { result } = await readUsersByIds(userIds);
-        io.emit("connectedUsers", result);
+
+        const usersWithStatus = result.map(u => ({
+            ...u,
+            status: userStatuses.get(u.id)
+        }));
+
+        io.emit("connectedUsers", usersWithStatus);
     } catch (err) {
         console.error("Erreur récupération des utilisateurs connectés :", err);
         io.emit("connectedUsers", []);
+    }
+};
+
+const broadcastMessage = (io, message, senderId) => {
+    const channelRoom = `channel_${message.channel_id}`;
+
+    // on send à tous ceux du canal
+    io.to(channelRoom).emit("receiveMessage", message);
+
+    // et ici à tout ceux hors du canal
+    for (const [socketId, uid] of connectedUsers) {
+        if (uid === senderId) continue;
+
+        const socketUser = io.sockets.sockets.get(socketId);
+        const isInChannel = socketUser?.rooms.has(channelRoom);
+
+        if (!isInChannel) {
+            io.to(`user_${uid}`).emit("receiveMessage", message);
+        }
     }
 };
 
@@ -57,10 +83,18 @@ export default function setupSocketServer(server) {
             connectedUsers.set(socket.id, userId);
             broadcastConnectedUsers(io); // on garde une trace des users connectés et on broadcast la liste
         });
+        socket.on("userStatusUpdate", ({ user_id, status }) => {
+            if (user_id && status) {
+                userStatuses.set(user_id, status);
+                io.emit("userStatusBroadcast", { user_id, status });
+            }
+        });
 
 
         socket.on("disconnect", () => {
             connectedUsers.delete(socket.id);
+            userStatuses.delete(socket.userId);
+
             broadcastConnectedUsers(io); // quand un user déco -> maj dla liste des users connectés
         });
 
@@ -99,19 +133,17 @@ export default function setupSocketServer(server) {
 
                 const workspaceId = result.result.workspace_id;
 
-                // Utilise readWorkspace
                 const workspace = await readWorkspace({ params: { id: workspaceId } });
 
-                // Utilise readChannel pour récupérer tous les channels du workspace
                 const allChannels = await readChannel({ query: { workspace_id: workspaceId } });
 
-                // Envoie les données au client (workspace + channels)
+                // on envoie cet event pour mettre à jour les workspace et channels que vient de join l'user
                 socket.emit("joinWorkspaceSuccess", {
                     workspace,
                     channels: allChannels,
                 });
 
-                // Notifie les autres que quelqu’un a rejoint
+                // trigger la notif pour les autres users du workspace comme quoi quelqu'un a join
                 socket.to(`workspace_${workspaceId}`).emit("workspaceUserJoined", {
                     workspace_id: workspaceId,
                     username,
@@ -137,9 +169,9 @@ export default function setupSocketServer(server) {
                 if (socket.workspaceId) socket.leave(`workspace_${socket.workspaceId}`);
 
                 socket.workspaceId = workspace_id;
-                socket.join(`workspace_${workspace_id}`); // on rejoint la room du nouveau workspace
+                socket.join(`workspace_${workspace_id}`); // on rejoint le nioveau ws
 
-                // si c’est la première fois qu’on rejoint → notif les autres
+                // si c’est la première fois qu’on rejoint -> notif les autres
                 if (!result.isAlreadyMember) {
                     const userRows = await pool.query("SELECT username FROM users WHERE id = ?", [socket.userId]);
                     const username = userRows[0]?.username;
@@ -176,6 +208,9 @@ export default function setupSocketServer(server) {
             }
 
             try {
+
+                socket.channelId = channel_id;
+
                 socket.join(`channel_${channel_id}`); // on rejoint la room du canal
 
                 const result = await fetchMessagesForChannel({ channel_id, workspace_id });
@@ -211,19 +246,32 @@ export default function setupSocketServer(server) {
             }
         });
 
-        socket.on("sendMessage", async (msg) => {
-            const { user_id, content, channel_id } = msg;
 
-            if (!user_id || !content || !channel_id) {
+
+        socket.on("sendMessage", async (msg) => {
+            const { user_id, content, channel_id, attachment } = msg;
+
+            if (!user_id || (!content && !attachment) || !channel_id) {
                 return socket.emit("sendMessageError", { message: "Champs manquants." });
             }
 
             try {
-                // insertion du message en BDD
+                // insert en bdd
                 const result = await pool.query(
                     "INSERT INTO messages (channel_id, user_id, content) VALUES (?, ?, ?)",
                     [channel_id, user_id, content]
                 );
+
+
+
+                const message_id = result.insertId;
+
+                if (attachment) {
+                    await pool.query(
+                        "INSERT INTO files (message_id, file_path) VALUES (?, ?)",
+                        [message_id, attachment]
+                    );
+                }
 
                 const user = await readUser({ params: { id: user_id } });
                 const channel = await readChannel({ params: { id: channel_id } });
@@ -245,9 +293,10 @@ export default function setupSocketServer(server) {
                 const mentionedUserIds = mentionedUsernames.map(username => usernameMap.get(username));
 
                 const messageData = {
-                    id: result.insertId,
+                    id: message_id,
                     username: user.username,
                     content,
+                    attachment,
                     channel_id,
                     channel_name: channel.name,
                     workspace_id: channel.workspace_id,
@@ -263,16 +312,9 @@ export default function setupSocketServer(server) {
                 // ici on envoie receiveMessage à tous les utilisateurs connectés. 
                 // Cet event sera catch par le front et
                 //  on pourra envoyer une notif à quelqu'un qui n'a pas forcément de channel ou le bon workspace de selectionné
-                for (const [socketId, uid] of connectedUsers) {
-                    if (uid === user_id) continue; // pas à soi-même
+                // ...
+                broadcastMessage(io, messageData, user_id);
 
-                    const socketUser = io.sockets.sockets.get(socketId);
-                    const isInChannel = socketUser?.rooms.has(`channel_${channel_id}`);
-
-                    if (!isInChannel) {
-                        socket.to(`user_${uid}`).emit("receiveMessage", messageData);
-                    }
-                }
 
 
 
@@ -281,6 +323,54 @@ export default function setupSocketServer(server) {
                 socket.emit("sendMessageError", { message: "Erreur interne serveur." });
             }
         });
+
+        socket.on("broadcastAttachedMsg", (message) => {
+            if (!message || !message.channel_id || !message.user_id) return;
+            broadcastMessage(io, message, message.user_id);
+        });
+
+
+
+        socket.on("addReaction", async ({ message_id, user_id, emoji }) => {
+            const result = await addReaction({ message_id, user_id, emoji });
+            if (result.error) {
+                socket.emit("addReactionError", { message: "Erreur ajout réaction." });
+                return;
+            }
+
+            const { reactions, channel_id, author_id, workspace_id, reactingUsername } = result;
+
+            io.to(`channel_${channel_id}`).emit("updateReactions", {
+                message_id,
+                reactions,
+            });
+
+            if (author_id !== user_id) {
+                io.to(`user_${author_id}`).emit("reactionNotification", {
+                    message: `${reactingUsername} a réagi à votre message avec ${emoji}`,
+                    message_id,
+                    emoji,
+                    workspace_id,
+                    channel_id,
+                });
+            }
+        });
+
+        socket.on("removeReaction", async ({ message_id, user_id, emoji }) => {
+            const result = await removeReaction({ message_id, user_id, emoji });
+            if (result.error) {
+                socket.emit("removeReactionError", { message: "Erreur suppression réaction." });
+                return;
+            }
+
+            const { reactions, channel_id } = result;
+
+            io.to(`channel_${channel_id}`).emit("updateReactions", {
+                message_id,
+                reactions,
+            });
+        });
+
 
         socket.on("connect_error", (err) => {
             console.error("WebSocket connection failed:", err);

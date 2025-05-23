@@ -137,3 +137,35 @@ export const addUserToChannel = async ({ channel_id, user_id, role_id = 2,invite
         return [];
     }
 };
+
+
+export const getUsersReactions = async (message_id, emoji) => {
+  try {
+    const response = await fetch(`${process.env.REACT_APP_API_URL}channels/getUsersReactions?` + new URLSearchParams({
+      message_id,
+      emoji
+    }), {
+      method: "GET",
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+      }
+    });
+
+    if (!response.ok) {
+      throw new Error("Erreur réseau");
+    }
+
+    const data = await response.json();
+
+    if (data.error) {
+      throw new Error(data.error_message);
+    }
+
+    return data.users || [];
+  } catch (error) {
+    console.error("Erreur getUsersReactions:", error);
+    return [];
+  }
+};
+

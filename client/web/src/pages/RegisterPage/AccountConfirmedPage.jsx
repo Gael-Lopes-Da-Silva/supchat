@@ -20,14 +20,14 @@ const AccountConfirmedPage = () => {
 
     if (confirm_token) {
       readUser({ confirm_token }, api_url).then((data) => {
-        if (!data || !data.result || !data.result.result) {
-          toast.error(data.message, {
+        if (!data || !data.result || data.result.length === 0) {
+          toast.error("Utilisateur introuvable", {
             position: "top-center",
           });
           return;
         }
 
-        const user = data.result.result;
+        const user = data.result[0];
 
         if (!user || !user.id) {
           toast.error("Erreur interne : Impossible de récupérer l'utilisateur.", {
@@ -35,6 +35,8 @@ const AccountConfirmedPage = () => {
           });
           return;
         }
+
+        console.log("Mise à jour utilisateur", user.id);
 
         updateUser(user.id, { confirm_token: null }, api_url)
           .then(() => {
@@ -65,6 +67,8 @@ const AccountConfirmedPage = () => {
     }
   }, []);
 
+
+
   return (
     <div className={`privacy-container ${theme}`}>
       <div className="privacy-box">
@@ -72,8 +76,8 @@ const AccountConfirmedPage = () => {
         <hr />
         <p>Merci d’avoir confirmé votre adresse e-mail.</p>
         <p>Votre compte Supchat est maintenant actif ! Vous pouvez dès à présent vous connecter via le site web {" "}
-        <Link text="ici" onClick={() => navigate("/login")} />{" "} 
-        ou l'application mobile et commencer à discuter 🎊</p>
+          <Link text="ici" onClick={() => navigate("/login")} />{" "}
+          ou l'application mobile et commencer à discuter 🎊</p>
         <hr />
         <p>À bientôt sur Supchat 🚀</p>
       </div>

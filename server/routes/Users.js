@@ -11,6 +11,7 @@ import {
   updateUser,
   getUserProviders,
   unlinkProvider,
+  exportUserData
 } from "../controllers/Users.js";
 
 const router = express.Router();
@@ -187,5 +188,10 @@ router.get(
 
 router.get("/:id/providers", getUserProviders);
 router.post("/unlink-provider", unlinkProvider);
+
+
+router.get("/:id/export", exportUserData);
+
+
 
 export default router;

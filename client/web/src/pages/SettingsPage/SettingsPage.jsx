@@ -1,12 +1,14 @@
 import * as react from "react";
 import * as reactdom from "react-router-dom";
 import { FaGoogle, FaFacebook, FaTimes } from "react-icons/fa";
+import socket from '../../socket';
 
 import "./SettingsPage.css";
 
 const SettingsPage = () => {
   const [user, setUser] = react.useState(null);
   const [theme, setTheme] = react.useState(localStorage.getItem("gui.theme") ?? "light");
+  const [status, setStatus] = react.useState(localStorage.getItem("user.status") ?? "online");
   const [isGoogleLinked, setIsGoogleLinked] = react.useState(false);
   const [isFacebookLinked, setIsFacebookLinked] = react.useState(false);
   const [forceRender, setForceRender] = react.useState(0);
@@ -21,7 +23,7 @@ const SettingsPage = () => {
       alert(errorMessage);
     }
 
-    const storedUser = JSON.parse(localStorage.getItem("user"))?.data || null;
+    const storedUser = JSON.parse(localStorage.getItem("user"))?.data;
     setUser(storedUser);
 
     if (storedUser?.id) {
@@ -33,7 +35,7 @@ const SettingsPage = () => {
           setIsGoogleLinked(data.isGoogleLinked);
           setIsFacebookLinked(data.isFacebookLinked);
         })
-        .catch((err) => console.error(" erreur de fetching des providers :", err));
+        .catch((err) => console.error("erreur de fetching des providers:", err));
     }
   }, []);
 
@@ -80,6 +82,26 @@ const SettingsPage = () => {
     }
   };
 
+
+const handleExportData = () => {
+  if (!user?.id) return;
+  window.location.href = `http://localhost:3000/users/${user.id}/export`;
+};
+
+
+
+const handleStatusChange = (e) => {
+  const newStatus = e.target.value;
+  setStatus(newStatus);
+  localStorage.setItem("user.status", newStatus);
+
+  socket.emit("updateStatus", {
+    user_id: user.id,
+    status: newStatus,
+  });
+};
+
+
   return (
     <div className={`settings-container ${theme}`} key={forceRender}>
       <div className="settings-left">
@@ -105,45 +127,67 @@ const SettingsPage = () => {
         <main>
           {user && (
             <div className="settings-link-providers">
-              <>
-                {user.provider === null && (
-                  <>
-                    {isGoogleLinked ? (
-                      <div className="linked-provider">
-                        <button className="google-btn linked">
-                          <FaGoogle /> Compte Google lié ✅
-                        </button>
-                        <button onClick={() => handleUnlinkProvider("google")} className="unlink-btn">
-                          ❌ Délier
-                        </button>
-                      </div>
-                    ) : (
-                      !isFacebookLinked && (
-                        <button onClick={() => handleLinkProvider("google")} className="google-btn">
-                          <FaGoogle /> Lier mon compte Google
-                        </button>
-                      )
-                    )}
+              <p><strong>Nom d'utilisateur :</strong> {user?.username}</p>
+              <p><strong>Email :</strong> {user?.email}</p>
 
-                    {isFacebookLinked ? (
-                      <div className="linked-provider">
-                        <button className="facebook-btn linked">
-                          <FaFacebook /> Compte Facebook lié ✅
-                        </button>
-                        <button onClick={() => handleUnlinkProvider("facebook")} className="unlink-btn">
-                          ❌ Délier
-                        </button>
-                      </div>
-                    ) : (
-                      !isGoogleLinked && (
-                        <button onClick={() => handleLinkProvider("facebook")} className="facebook-btn">
-                          <FaFacebook /> Lier avec Facebook
-                        </button>
-                      )
-                    )}
-                  </>
-                )}
-              </>
+              <label>Thème :</label>
+              <select value={theme} onChange={(e) => {
+                setTheme(e.target.value);
+                localStorage.setItem("gui.theme", e.target.value);
+              }}>
+                <option value="light">Clair</option>
+                <option value="dark">Sombre</option>
+              </select>
+
+              <label>Statut :</label>
+              <select value={status} onChange={handleStatusChange}>
+                <option value="online">🟢 En ligne</option>
+                <option value="busy">🔴 Occupé</option>
+                <option value="away">🟡 Absent</option>
+                <option value="offline">⚫ Hors ligne</option>
+              </select>
+
+              <button onClick={handleExportData} style={{ marginTop: '10px' }}>
+                📥 Exporter mes données
+              </button>
+
+              {user.provider === null && (
+                <>
+                  {isGoogleLinked ? (
+                    <div className="linked-provider">
+                      <button className="google-btn linked">
+                        <FaGoogle /> Compte Google lié ✅
+                      </button>
+                      <button onClick={() => handleUnlinkProvider("google")} className="unlink-btn">
+                        ❌ Délier
+                      </button>
+                    </div>
+                  ) : (
+                    !isFacebookLinked && (
+                      <button onClick={() => handleLinkProvider("google")} className="google-btn">
+                        <FaGoogle /> Lier mon compte Google
+                      </button>
+                    )
+                  )}
+
+                  {isFacebookLinked ? (
+                    <div className="linked-provider">
+                      <button className="facebook-btn linked">
+                        <FaFacebook /> Compte Facebook lié ✅
+                      </button>
+                      <button onClick={() => handleUnlinkProvider("facebook")} className="unlink-btn">
+                        ❌ Délier
+                      </button>
+                    </div>
+                  ) : (
+                    !isGoogleLinked && (
+                      <button onClick={() => handleLinkProvider("facebook")} className="facebook-btn">
+                        <FaFacebook /> Lier avec Facebook
+                      </button>
+                    )
+                  )}
+                </>
+              )}
             </div>
           )}
         </main>

@@ -1,4 +1,6 @@
 import express from "express";
+import multer from "multer";
+import { v4 as uuidv4 } from "uuid";
 
 import {
     createChannel,
@@ -6,6 +8,8 @@ import {
     updateChannel,
     deleteChannel,
     restoreChannel,
+    uploadFileToChannel,
+    getUsersForReaction
 } from "../controllers/Channels.js";
 
 const router = express.Router();
@@ -74,6 +78,43 @@ router.get("/", (request, response) => {
             error_message: error.message,
         });
     });
+});
+
+
+
+// GET /channels/getUsersReactions
+//
+// query:
+//   message_id: number (required)
+//   emoji: string (required)
+// return:
+//   users: [string] (liste des usernames ayant réagi avec cet emoji)
+router.get("/getUsersReactions", async (req, res) => {
+  const { message_id, emoji } = req.query;
+
+  if (!message_id || !emoji) {
+    return res.status(400).json({
+      when: "Channels > GetUsersReactions",
+      error: 1,
+      error_message: "message_id et emoji sont requis.",
+    });
+  }
+
+  try {
+    const users = await getUsersForReaction({ message_id, emoji });
+
+    return res.status(200).json({
+      when: "Channels > GetUsersReactions",
+      users,
+      error: 0,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      when: "Channels > GetUsersReactions",
+      error: 1,
+      error_message: error.message,
+    });
+  }
 });
 
 
@@ -206,5 +247,46 @@ router.patch("/:id", (request, response) => {
         });
     });
 });
+
+
+// POST /channels/upload
+//
+// body (multipart/form-data):
+//   file: Fichier (obligatoire)
+//   channel_id: number (obligatoire)
+//   user_id: number (obligatoire)
+// return:
+//   { success: true, fileUrl: "/uploads/..." }
+
+
+const storage = multer.diskStorage({
+    destination: "uploads/",
+    filename: (req, file, cb) => {
+        cb(null, `${uuidv4()}-${file.originalname}`);
+    }
+});
+
+const upload = multer({ storage });
+
+router.post("/upload", upload.single("file"), async (req, res) => {
+    const result = await uploadFileToChannel(req.file, req.body);
+
+    if (!result.error) {
+        return res.status(201).json({
+            when: "Channels > UploadFileToChannel",
+            result: result.result,
+            error: 0,
+        });
+    } else {
+        return res.status(400).json({
+            when: "Channels > UploadFileToChannel",
+            error: result.error,
+            error_message: result.error_message,
+        });
+    }
+});
+
+
+
 
 export default router;

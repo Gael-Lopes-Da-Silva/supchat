@@ -2,6 +2,8 @@ import bcrypt from "bcrypt";
 import crypto from 'crypto';
 import jwt from "jsonwebtoken";
 
+import PDFDocument from "pdfkit";
+
 import pool from "../database/db.js";
 import { ERRORS, createErrorResponse } from "../app/ErrorHandler.js";
 
@@ -60,7 +62,6 @@ export const createUser = async (request) => {
 };
 
 export const readUser = async (request) => {
-
     if (request.params.id) {
         const [user] = await pool.query("SELECT * FROM users WHERE id = ?", [request.params.id]);
 
@@ -166,6 +167,8 @@ export const restoreUser = async (request) => {
 };
 
 export const loginUser = async (request) => {
+
+    console.log("Login attempt with email:", request.body.email);
     if (!request.body.email) {
         return createErrorResponse(ERRORS.EMAIL_NOT_PROVIDED, "Veuillez fournir un e-mail.");
     }
@@ -178,13 +181,14 @@ export const loginUser = async (request) => {
         [request.body.email]
     );
 
+    console.log("Users found:", users);
     if (!users || users.length === 0) {
         console.error("Aucun utilisateur trouvé pour cet email :", request.body.email);
         return createErrorResponse(ERRORS.USER_NOT_FOUND, "Aucun utilisateur trouvé avec cet e-mail.");
     }
 
     const user = users;
-
+    console.log("User  token:", user.confirm_token);
     if (user.confirm_token !== null) {
         console.error("Compte non confirmé :", user.email);
         return createErrorResponse(ERRORS.USER_NOT_CONFIRMED, "Veuillez confirmer votre compte avant de vous connecter.");
@@ -313,3 +317,122 @@ export const unlinkProvider = async (req, res) => {
         return res.status(500).json(createErrorResponse(ERRORS.INTERNAL_SERVER_ERROR));
     }
 };
+
+
+export const exportUserData = async (req, res) => {
+    const userId = req.params.id;
+
+    try {
+        // Récupération de l'utilisateur
+        const users = await pool.query("SELECT * FROM users WHERE id = ?", [userId]);
+        const user = users[0];
+        if (!user) return res.status(404).json(createErrorResponse(ERRORS.USER_NOT_FOUND));
+
+        // Requêtes associées
+        const providers = await pool.query("SELECT * FROM providers WHERE user_id = ?", [userId]);
+        const workspaces = await pool.query("SELECT * FROM workspaces WHERE user_id = ?", [userId]);
+        const workspaceMemberships = await pool.query(`
+  SELECT wm.*, w.name AS workspace_name
+  FROM workspace_members wm
+  JOIN workspaces w ON wm.workspace_id = w.id
+  WHERE wm.user_id = ?
+`, [userId]);
+
+        const channelMemberships = await pool.query(`
+  SELECT cm.*, c.name AS channel_name
+  FROM channel_members cm
+  JOIN channels c ON cm.channel_id = c.id
+  WHERE cm.user_id = ?
+`, [userId]);
+
+        const messages = await pool.query("SELECT * FROM messages WHERE user_id = ?", [userId]);
+        const reactions = await pool.query(
+            `SELECT r.*, m.content AS message_content
+   FROM reactions r
+   LEFT JOIN messages m ON r.message_id = m.id
+   WHERE r.user_id = ?`,
+            [userId]
+        );
+
+        // Configuration PDF
+        const doc = new PDFDocument({ size: 'A4', margin: 40 });
+        res.setHeader("Content-Disposition", 'attachment; filename="mes_donnees_supchat.pdf"');
+        res.setHeader("Content-Type", "application/pdf");
+        doc.pipe(res);
+
+        // Titre principal
+        doc.fontSize(20).text(" Export de vos données Supchat", { align: "center", underline: true });
+        doc.moveDown(1.5);
+
+        // Informations utilisateur
+        doc.fontSize(14).text(` Nom d'utilisateur : ${user.username}`);
+        doc.text(` Email : ${user.email}`);
+        doc.text(` ID utilisateur : ${user.id}`);
+        doc.text(` Créé le : ${new Date(user.created_at).toLocaleString("fr-FR")}`);
+        doc.moveDown();
+
+        // Providers
+        doc.fontSize(16).text("Nature du compte :", { underline: true });
+        providers.forEach(p => doc.text(`- ${p.provider || "local"}`));
+        doc.moveDown();
+
+        // Workspaces
+        doc.fontSize(16).text(" Espaces de travail créés :", { underline: true });
+        if (workspaces.length === 0) doc.text("Aucun.");
+        workspaces.forEach(ws => doc.text(`- ${ws.name} (${ws.is_private ? "Privé" : "Public"})`));
+        doc.moveDown();
+
+        // Workspace memberships
+        doc.fontSize(16).text(" Participations aux workspaces :", { underline: true });
+        if (workspaceMemberships.length === 0) doc.text("Aucune.");
+        workspaceMemberships.forEach(wm => doc.text(`- ${wm.workspace_name} (ID : ${wm.workspace_id}) | Rôle ID : ${wm.role_id}`));
+        doc.moveDown();
+
+        // Channel memberships
+        doc.fontSize(16).text(" Canaux rejoints :", { underline: true });
+        if (channelMemberships.length === 0) doc.text("Aucun.");
+        channelMemberships.forEach(cm => doc.text(`- ${cm.channel_name} (ID : ${cm.channel_id}) | Rôle ID : ${cm.role_id}`));
+        doc.moveDown();
+
+        // Messages
+        doc.fontSize(16).text(" Messages envoyés :", { underline: true });
+        if (messages.length === 0) doc.text("Aucun.");
+        messages.slice(0, 20).forEach(m =>
+            doc.text(`• ${m.content?.slice(0, 100) || "(fichier)"} — ${new Date(m.created_at).toLocaleString("fr-FR")}`)
+        );
+        if (messages.length > 20) doc.text(`...et ${messages.length - 20} autres`);
+        doc.moveDown();
+
+        // Réactions
+
+        doc.fontSize(16).text(" Réactions ajoutées :", { underline: true });
+
+        if (reactions.length === 0) {
+            doc.text("Aucune.");
+        } else {
+            reactions.forEach(r => {
+                const emojiName = {
+                    "❤️": "coeur",
+                    "😂": "rire",
+                    "👍": "pouce",
+                    "👎": "pouce bas",
+                    "🔥": "flamme",
+                    "😢": "triste",
+                    "😡": "colère"
+                }[r.emoji] || r.emoji;
+
+                const contentPreview = r.message_content
+                    ? r.message_content.slice(0, 100)
+                    : "(un fichier)";
+
+                doc.text(`- ${emojiName} sur « ${contentPreview} » — ${new Date(r.added_at).toLocaleString("fr-FR")}`);
+            });
+        }
+
+        doc.end();
+    } catch (err) {
+        console.error("Erreur exportUserData PDF :", err);
+        res.status(500).json(createErrorResponse(ERRORS.INTERNAL_SERVER_ERROR));
+    }
+};
+
