@@ -36,6 +36,7 @@ const DashboardRight = ({
     const [activeEmojiPickerMessageId, setActiveEmojiPickerMessageId] = useState(null);
     const [showEmojiPicker, setShowEmojiPicker] = useState(false);
     const [userSearchTerm, setUserSearchTerm] = useState('');
+    
     const [tooltip, setTooltip] = useState({
         visible: false,
         x: 0,
@@ -247,7 +248,7 @@ const DashboardRight = ({
             messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
         }, 100); // faut laisser le temps au dom de terminer le layout des messages entre chaque selection de channel
 
-    }, [selectedChannel?.id, messages]);
+    }, [selectedChannel?.id]);
 
 
 

@@ -228,7 +228,6 @@ const useSocketEvents = ({
 
   useEffect(() => {
     const handleUpdateReactions = ({ message_id, reactions }) => {
-      console.log("updateReactions", message_id, reactions);
       setMessages((prevMessages) =>
         prevMessages.map((msg) =>
           msg.id === message_id ? { ...msg, reactions } : msg
