@@ -1,6 +1,6 @@
 import passport from "passport";
 import { Strategy as FacebookStrategy } from "passport-facebook";
-import pool from "../../database/db.js";
+import pool from "../database/db.js";
 import jwt from "jsonwebtoken";
 import jsonwebtoken from "jsonwebtoken";
 

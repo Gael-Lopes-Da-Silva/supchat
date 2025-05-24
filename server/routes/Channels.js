@@ -12,7 +12,12 @@ import {
     getUsersForReaction
 } from "../controllers/Channels.js";
 
+import { validateCreateChannel } from "../validators/channels.js";
+import { handleValidationErrors } from "../middlewares/Validate.js";
+import { ensureAuthenticated } from "../middlewares/JwtAuth.js";
+
 const router = express.Router();
+router.use(ensureAuthenticated);
 
 // POST /channels
 //
@@ -23,28 +28,29 @@ const router = express.Router();
 //   is_private: boolean (optional)
 // return:
 //   result: [channel]
-router.post("/", (request, response) => {
-    createChannel(request).then((result) => {
-        if (!result.error && result !== "") {
-            response.status(201).json({
-                when: "Channels > CreateChannel",
-                result: result,
-                error: 0,
-            });
-        } else {
-            response.status(404).json({
-                when: "Channels > CreateChannel",
-                error: result.error || 1,
-                error_message: result.error_message || "Could not create channel",
-            });
-        }
-    }).catch((error) => {
-        response.status(500).json({
-            when: "Channels > CreateChannel",
-            error: 1,
-            error_message: error.message,
-        });
+
+router.post("/", validateCreateChannel, handleValidationErrors, (request, response) => {
+  createChannel(request).then((result) => {
+    if (!result.error && result !== "") {
+      response.status(201).json({
+        when: "Channels > CreateChannel",
+        result: result,
+        error: 0,
+      });
+    } else {
+      response.status(404).json({
+        when: "Channels > CreateChannel",
+        error: result.error || 1,
+        error_message: result.error_message || "Could not create channel",
+      });
+    }
+  }).catch((error) => {
+    response.status(500).json({
+      when: "Channels > CreateChannel",
+      error: 1,
+      error_message: error.message,
     });
+  });
 });
 
 // GET /channels

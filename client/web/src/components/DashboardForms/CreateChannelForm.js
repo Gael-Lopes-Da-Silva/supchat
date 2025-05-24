@@ -6,10 +6,8 @@ import Button from "../Button/Button";
 const CreateChannelForm = ({
   theme,
   name,
-  description,
   isPrivate,
   onNameChange,
-  onDescChange,
   onPrivacyToggle,
   onSubmit,
 }) => {
@@ -23,14 +21,7 @@ const CreateChannelForm = ({
         required={true}
         onChange={(e) => onNameChange(e.target.value)}
       />
-      <InputField
-        label="Description"
-        type="text"
-        theme={theme}
-        value={description}
-        required={true}
-        onChange={(e) => onDescChange(e.target.value)}
-      />
+
       <Checkbox
         label={<p>Channel privé</p>}
         theme={theme}

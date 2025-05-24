@@ -9,7 +9,12 @@ import {
 } from "../controllers/WorkspaceMembers.js";
 import { ensureAuthenticated } from "../middlewares/JwtAuth.js";
 
+import { validateCreateWorkspaceMember } from "../validators/workspaceMembers.js";
+import { handleValidationErrors } from "../middlewares/Validate.js";
+
 const router = express.Router();
+router.use(ensureAuthenticated);
+
 
 // POST /workspaces/members
 //
@@ -19,28 +24,29 @@ const router = express.Router();
 //   role_id: number (required)
 // return:
 //   result: [workspace_member]
-router.post("/", (request, response) => {
-    createWorkspaceMember(request).then((result) => {
-        if (!result.error && result !== "") {
-            response.status(201).json({
-                when: "WorkspaceMembers > CreateWorkspaceMember",
-                result: result,
-                error: 0,
-            });
-        } else {
-            response.status(404).json({
-                when: "WorkspaceMembers > CreateWorkspaceMember",
-                error: result.error || 1,
-                error_message: result.error_message || "Could not create workspace member",
-            });
-        }
-    }).catch((error) => {
-        response.status(500).json({
-            when: "WorkspaceMembers > CreateWorkspaceMember",
-            error: 1,
-            error_message: error.message,
-        });
+
+router.post("/", validateCreateWorkspaceMember, handleValidationErrors, (request, response) => {
+  createWorkspaceMember(request).then((result) => {
+    if (!result.error && result !== "") {
+      response.status(201).json({
+        when: "WorkspaceMembers > CreateWorkspaceMember",
+        result: result,
+        error: 0,
+      });
+    } else {
+      response.status(404).json({
+        when: "WorkspaceMembers > CreateWorkspaceMember",
+        error: result.error || 1,
+        error_message: result.error_message || "Could not create workspace member",
+      });
+    }
+  }).catch((error) => {
+    response.status(500).json({
+      when: "WorkspaceMembers > CreateWorkspaceMember",
+      error: 1,
+      error_message: error.message,
     });
+  });
 });
 
 // GET /workspaces/members
@@ -117,7 +123,7 @@ router.get("/:id", (request, response) => {
 // return:
 //   result: [workspace_member]
 
-router.put("/:id", ensureAuthenticated, (req, res) => {
+router.put("/:id", (req, res) => {
     const io = req.app.get("io");
 
     updateWorkspaceMember(req, io).then((result) => {
@@ -152,7 +158,7 @@ router.put("/:id", ensureAuthenticated, (req, res) => {
 //   id: number (required)
 // return:
 //   result: [workspace_member]
-router.delete("/:id", ensureAuthenticated, (req, res) => {
+router.delete("/:id", (req, res) => {
     const io = req.app.get("io");
 
     deleteWorkspaceMember(req, io)
@@ -213,3 +219,4 @@ router.patch("/:id", (request, response) => {
 });
 
 export default router;
+

@@ -1,4 +1,5 @@
 import express from "express";
+import { ensureAuthenticated } from "../middlewares/JwtAuth.js";
 
 import {
     createWorkspaceInvitation,
@@ -11,6 +12,7 @@ import {
 } from "../controllers/WorkspaceInvitations.js";
 
 const router = express.Router();
+router.use(ensureAuthenticated);
 
 // POST /workspaces/invitations
 //

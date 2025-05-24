@@ -1,9 +1,7 @@
 import pool from "../database/db.js";
-import { ERRORS, createErrorResponse } from "../app/ErrorHandler.js";
+import { ERRORS, createErrorResponse } from "../services/ErrorHandler.js";
 
 export const createWorkspace = async (request, io = null) => {
-    if (!request.body.name) return createErrorResponse(ERRORS.NAME_NOT_PROVIDED);
-    if (!request.body.user_id) return createErrorResponse(ERRORS.USER_ID_NOT_PROVIDED);
 
     const [user] = await pool.query("SELECT * FROM users WHERE id = ?", [request.body.user_id]);
     if (!user) return createErrorResponse(ERRORS.USER_NOT_FOUND);

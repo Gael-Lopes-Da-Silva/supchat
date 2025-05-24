@@ -2,7 +2,7 @@ import express from "express";
 
 import {
     sendEmail,
-} from "../../app/EmailHandler.js";
+} from "../services/EmailHandler.js";
 
 const router = express.Router();
 

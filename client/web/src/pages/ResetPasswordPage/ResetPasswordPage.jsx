@@ -11,7 +11,7 @@ import * as PostPasswordReset from "../../emails/PostPasswordReset";
 
 import {
     sendEmail,
-} from '../../services/Services/Email';
+} from '../../services/Email';
 import {
     readUser,
     updateUser,

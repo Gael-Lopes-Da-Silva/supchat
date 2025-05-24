@@ -1,6 +1,8 @@
 import express from "express";
 import jsonwebtoken from "jsonwebtoken";
 import passport from "passport";
+import { validateUserCreation, validateUserLogin } from "../validators/users.js";
+import { handleValidationErrors } from "../middlewares/Validate.js";
 
 import {
   createUser,
@@ -16,7 +18,7 @@ import {
 
 const router = express.Router();
 
-router.post("/", async (req, res) => {
+router.post("/", validateUserCreation, handleValidationErrors, async (req, res) => {
   try {
     const result = await createUser(req);
     if (!result.error) {
@@ -28,7 +30,7 @@ router.post("/", async (req, res) => {
   }
 });
 
-router.post("/login", async (req, res) => {
+router.post("/login", validateUserLogin, handleValidationErrors, async (req, res) => {
   try {
     const result = await loginUser(req);
     if (!result.error) {
@@ -44,6 +46,7 @@ router.post("/login", async (req, res) => {
     res.status(500).json({ when: "Users > LoginUser", error: 1, error_message: err.message });
   }
 });
+
 
 router.get("/", async (req, res) => {
   try {

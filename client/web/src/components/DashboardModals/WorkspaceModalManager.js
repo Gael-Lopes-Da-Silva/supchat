@@ -21,18 +21,16 @@ const WorkspaceModalManager = ({
   workspaceIsPrivate,
   workspaceInvitation,
   channelName,
-  channelDescription,
   channelIsPrivate,
   setWorkspaceName,
   setWorkspaceDescription,
   setWorkspaceIsPrivate,
   setWorkspaceInvitation,
   setChannelName,
-  setChannelDescription,
   setChannelIsPrivate,
   selectedWorkspaceId,
   currentUserRoleId,
-  selectedWorkspace
+  selectedWorkspace,
 }) => {
   const handleGoBack = () => {
     updateGuiState("workspaceModal", {
@@ -43,7 +41,8 @@ const WorkspaceModalManager = ({
     });
   };
 
-const canGenerateInvitation = currentUserRoleId === 1 && selectedWorkspace?.is_private === 1;
+  const canGenerateInvitation =
+    currentUserRoleId === 1 && selectedWorkspace?.is_private === 1;
 
   return (
     <Modal
@@ -89,7 +88,7 @@ const canGenerateInvitation = currentUserRoleId === 1 && selectedWorkspace?.is_p
                   Rejoindre un espace de travail privé <Fa.FaChevronRight />
                 </button>
 
-                {currentUserRoleId !== 3 && (
+                {currentUserRoleId !== 3 && selectedWorkspaceId && (
                   <button
                     onClick={() =>
                       updateGuiState("workspaceModal", {
@@ -104,14 +103,11 @@ const canGenerateInvitation = currentUserRoleId === 1 && selectedWorkspace?.is_p
                   </button>
                 )}
 
-
                 {canGenerateInvitation && (
                   <button onClick={handleGenerateInvitation}>
                     Générer une invitation
                   </button>
                 )}
-
-
 
                 {currentUserRoleId === 1 && (
                   <button
@@ -127,8 +123,6 @@ const canGenerateInvitation = currentUserRoleId === 1 && selectedWorkspace?.is_p
                     Gérer les rôles <Fa.FaChevronRight />
                   </button>
                 )}
-
-
               </main>
             )}
 
@@ -141,9 +135,7 @@ const canGenerateInvitation = currentUserRoleId === 1 && selectedWorkspace?.is_p
               isPrivate={workspaceIsPrivate}
               onNameChange={setWorkspaceName}
               onDescChange={setWorkspaceDescription}
-              onPrivacyToggle={() =>
-                setWorkspaceIsPrivate(!workspaceIsPrivate)
-              }
+              onPrivacyToggle={() => setWorkspaceIsPrivate(!workspaceIsPrivate)}
               onSubmit={handleCreateWorkspace}
             />
           )}
@@ -161,15 +153,12 @@ const canGenerateInvitation = currentUserRoleId === 1 && selectedWorkspace?.is_p
             <CreateChannelForm
               theme={theme}
               name={channelName}
-              description={channelDescription}
               isPrivate={channelIsPrivate}
               onNameChange={setChannelName}
-              onDescChange={setChannelDescription}
               onPrivacyToggle={() => setChannelIsPrivate(!channelIsPrivate)}
               onSubmit={handleCreateChannel}
             />
           )}
-
 
           {guiVisibility.manageRoles && (
             <ManageRolesForm
@@ -185,7 +174,6 @@ const canGenerateInvitation = currentUserRoleId === 1 && selectedWorkspace?.is_p
               }
             />
           )}
-
         </div>
       }
     />

@@ -50,22 +50,33 @@ const DashboardLeft = ({
             </div>
             <div className="dashboard-left-content">
                 {selectedWorkspace.id && (
-                    <header>
-                        <div
-                            onClick={(event) => {
-                                event.stopPropagation();
-                                hideAllPopup();
-                                updatePopupState("workspace", true);
-                                setMousePosition({
-                                    x: event.clientX,
-                                    y: event.clientY,
-                                });
-                            }}
-                        >
-                            <p>{selectedWorkspace.name}</p>
-                            <Fa.FaChevronDown />
-                        </div>
-                    </header>
+            <header>
+            <div
+                onClick={(event) => {
+                event.stopPropagation();
+                hideAllPopup();
+                updatePopupState("workspace", true);
+                setMousePosition({
+                    x: event.clientX,
+                    y: event.clientY,
+                });
+                }}
+                className="workspace-header"
+            >
+                <p className="workspace-info">
+                <span className="workspace-name">{selectedWorkspace.name}</span>
+                {selectedWorkspace.description && (
+                    <span className="workspace-description">
+                    {selectedWorkspace.description}
+                    </span>
+                )}
+                </p>
+                <Fa.FaChevronDown className="workspace-chevron" />
+            </div>
+</header>
+
+
+
                 )}
                 <main>
                     {selectedWorkspace.id && (

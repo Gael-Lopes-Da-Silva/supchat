@@ -19,6 +19,42 @@
     gap: 1rem;
 }
 
+.channel-header-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.channel-description {
+  font-size: 0.85rem;
+  color: #666;
+  margin-top: 2px;
+}
+
+.workspace-header {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+}
+
+.workspace-info {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px; 
+}
+
+.workspace-name {
+  font-weight: bold;
+}
+
+.workspace-description {
+  font-style: italic;
+  color: #888;
+}
+
+.workspace-chevron {
+  margin-left: auto;
+}
 
 .notification-button {
     position: relative;

@@ -3,7 +3,7 @@ import { toast } from 'react-toastify';
 import { useNavigate } from "react-router-dom";
 
 import * as PostConfirmationEmail from '../../emails/PostConfirmation';
-import { sendEmail } from '../../services/Services/Email';
+import { sendEmail } from '../../services/Email';
 import { readUser, updateUser } from '../../services/Users';
 import Link from "../../components/Link/Link";
 

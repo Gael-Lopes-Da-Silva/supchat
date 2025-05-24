@@ -1,12 +1,10 @@
 import pool from "../database/db.js";
-import { ERRORS, createErrorResponse } from "../app/ErrorHandler.js";
+import { ERRORS, createErrorResponse } from "../services/ErrorHandler.js";
 
 export const createChannelMember = async (request, io = null) => {
   const { user_id, channel_id, role_id = 2, inviter_id } = request.body;
- // àrole id a changer evidamment quand on aura un systeme de roles
+ // àrole id a par défaut à membre
 
-    if (!user_id) return createErrorResponse(ERRORS.USER_ID_NOT_PROVIDED);
-    if (!channel_id) return createErrorResponse(ERRORS.CHANNEL_ID_NOT_PROVIDED);
 
     try {
         // récupération des infos du channel et de l'invitant

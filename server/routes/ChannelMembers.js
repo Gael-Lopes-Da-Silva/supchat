@@ -1,4 +1,7 @@
 import express from "express";
+import { validateCreateChannelMember } from "../validators/channelMembers.js";
+import { handleValidationErrors } from "../middlewares/Validate.js";
+import { ensureAuthenticated } from "../middlewares/JwtAuth.js";
 
 import {
     createChannelMember,
@@ -8,7 +11,9 @@ import {
     restoreChannelMember,
 } from "../controllers/ChannelMembers.js";
 
+
 const router = express.Router();
+router.use(ensureAuthenticated);
 
 // POST /channels/members
 //
@@ -18,29 +23,35 @@ const router = express.Router();
 //   role_id: number (required)
 // return:
 //   result: [channel_member]
-router.post("/", (request, response) => {
+router.post(
+  "/",
+  validateCreateChannelMember,
+  handleValidationErrors,
+  (request, response) => {
     createChannelMember(request).then((result) => {
-        if (!result.error && result !== "") {
-            response.status(201).json({
-                when: "ChannelMembers > CreateChannelMember",
-                result: result,
-                error: 0,
-            });
-        } else {
-            response.status(404).json({
-                when: "ChannelMembers > CreateChannelMember",
-                error: result.error || 1,
-                error_message: result.error_message || "Could not create channel member",
-            });
-        }
-    }).catch((error) => {
-        response.status(500).json({
-            when: "ChannelMembers > CreateChannelMember",
-            error: 1,
-            error_message: error.message,
+      if (!result.error && result !== "") {
+        response.status(201).json({
+          when: "ChannelMembers > CreateChannelMember",
+          result: result,
+          error: 0,
         });
+      } else {
+        response.status(404).json({
+          when: "ChannelMembers > CreateChannelMember",
+          error: result.error || 1,
+          error_message: result.error_message || "Could not create channel member",
+        });
+      }
+    }).catch((error) => {
+      response.status(500).json({
+        when: "ChannelMembers > CreateChannelMember",
+        error: 1,
+        error_message: error.message,
+      });
     });
-});
+  }
+);
+
 
 // GET /channels/members
 //

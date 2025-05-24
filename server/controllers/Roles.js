@@ -1,5 +1,5 @@
 import pool from "../database/db.js";
-import { ERRORS, createErrorResponse } from "../app/ErrorHandler.js";
+import { ERRORS, createErrorResponse } from "../services/ErrorHandler.js";
 
 export const readRole = async (request) => {
     if (request.params.id) {

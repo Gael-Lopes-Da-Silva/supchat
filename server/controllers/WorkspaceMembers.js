@@ -1,12 +1,8 @@
 import pool from "../database/db.js";
-import { ERRORS, createErrorResponse } from "../app/ErrorHandler.js";
+import { ERRORS, createErrorResponse } from "../services/ErrorHandler.js";
 
 export const createWorkspaceMember = async (request) => {
   const { user_id, workspace_id, role_id } = request.body;
-
-  if (!user_id) return createErrorResponse({ code: 400, message: "USER_ID_NOT_PROVIDED" });
-  if (!workspace_id) return createErrorResponse({ code: 400, message: "WORKSPACE_ID_NOT_PROVIDED" });
-  if (!role_id) return createErrorResponse({ code: 400, message: "ROLE_ID_NOT_PROVIDED" });
 
   const [user] = await pool.query("SELECT * FROM users WHERE id = ?", [user_id]);
   if (!user) return createErrorResponse({ code: 404, message: "USER_NOT_FOUND" });
@@ -26,7 +22,6 @@ export const createWorkspaceMember = async (request) => {
 
   if (existingMember) {
     if (existingMember.deleted_at !== null) {
-      // ✅ Restaurer l'entrée soft-deleted
       await pool.query(
         "UPDATE workspace_members SET deleted_at = NULL, role_id = ? WHERE user_id = ? AND workspace_id = ?",
         [role_id, user_id, workspace_id]

@@ -1,4 +1,7 @@
 import express from "express";
+import { validateCreateWorkspace } from "../validators/workspaces.js";
+import { handleValidationErrors } from "../middlewares/Validate.js";
+import { ensureAuthenticated } from "../middlewares/JwtAuth.js";
 
 import {
     createWorkspace,
@@ -10,6 +13,8 @@ import {
 } from "../controllers/Workspaces.js";
 
 const router = express.Router();
+router.use(ensureAuthenticated);
+
 
 // POST /workspaces
 //
@@ -20,29 +25,36 @@ const router = express.Router();
 //   user_id: number (required)
 // return:
 //   result: [workspace]
-router.post("/", (request, response) => {
+
+router.post(
+  "/",
+  validateCreateWorkspace,
+  handleValidationErrors,
+  (request, response) => {
     createWorkspace(request).then((result) => {
-        if (!result.error && result !== "") {
-            response.status(201).json({
-                when: "Workspaces > CreateWorkspace",
-                result: result,
-                error: 0,
-            });
-        } else {
-            response.status(500).json({
-                when: "Workspaces > CreateWorkspace",
-                error: result.error || 1,
-                error_message: result.error_message || "Could not create workspace",
-            });
-        }
-    }).catch((error) => {
-        response.status(404).json({
-            when: "Workspaces > CreateWorkspace",
-            error: 1,
-            error_message: error.message,
+      if (!result.error && result !== "") {
+        response.status(201).json({
+          when: "Workspaces > CreateWorkspace",
+          result: result,
+          error: 0,
         });
+      } else {
+        response.status(400).json({
+          when: "Workspaces > CreateWorkspace",
+          error: result.error || 1,
+          error_message: result.error_message || "Could not create workspace",
+        });
+      }
+    }).catch((error) => {
+      response.status(500).json({
+        when: "Workspaces > CreateWorkspace",
+        error: 1,
+        error_message: error.message,
+      });
     });
-});
+  }
+);
+
 
 // GET /workspaces
 //

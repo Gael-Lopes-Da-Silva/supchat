@@ -4,7 +4,7 @@ import socket from '../../socket';
 import HeaderButtons from "./HeaderButtons";
 import * as Fa from "react-icons/fa6";
 import EmojiPicker from 'emoji-picker-react';
-import { getUserChannelIds, getUsersReactions } from '../../services/Channels';
+import { getUserChannelIds, getUsersReactions, getChannelMembers, uploadFile } from '../../services/Channels';
 import { deleteWorkspaceMember } from '../../services/WorkspaceMembers';
 import { ReactComponent as EmojiIcon } from '../../assets/emoji-round-plus.svg';
 
@@ -164,8 +164,8 @@ const DashboardRight = ({
             if (!selectedChannel?.id || !selectedChannel?.is_private) return;
 
             try {
-                const res = await fetch(`${process.env.REACT_APP_API_URL}channels/members?channel_id=${selectedChannel.id}`);
-                const data = await res.json();
+         const data = await getChannelMembers(selectedChannel.id);
+
                 if (data.result) setChannelMembers(data.result);
             } catch (err) {
                 console.error("Erreur chargement membres du canal:", err);
@@ -175,45 +175,34 @@ const DashboardRight = ({
     }, [selectedChannel?.id]);
 
 
-    const handleFileUpload = (e) => {
-        const file = e.target.files[0];
-        if (!file || !selectedChannel?.id || !user?.id) return;
+const handleFileUpload = async (e) => {
+  const file = e.target.files[0];
+  if (!file || !selectedChannel?.id || !user?.id) return;
 
-        const formData = new FormData();
-        formData.append('file', file);
-        formData.append('channel_id', selectedChannel.id);
-        formData.append('user_id', user.id);
+  const formData = new FormData();
+  formData.append('file', file);
+  formData.append('channel_id', selectedChannel.id);
+  formData.append('user_id', user.id);
 
-        fetch(`${process.env.REACT_APP_API_URL}channels/upload`, {
-            method: 'POST',
-            body: formData,
-        })
-            .then(res => res.json())
-            .then(data => {
-                if (data.error === 0 && data.result?.fileUrl && data.result?.message_id) {
-                    socket.emit("broadcastAttachedMsg", {
-                        id: data.result.message_id,
-                        user_id: user.id,
-                        username: user.username,
-                        content: "",
-                        attachment: data.result.fileUrl,
-                        channel_id: selectedChannel.id,
-                        channel_name: selectedChannel.name,
-                        workspace_id: selectedWorkspace.id,
-                        workspace_name: selectedWorkspace.name,
-                        mentioned_user_ids: [],
-                    });
+  const data = await uploadFile(formData);
 
-                } else {
-                    alert("Erreur upload : " + (data.error_message || "Erreur inconnue"));
-                }
-            })
-            .catch(err => {
-                console.error("Upload failed:", err);
-                alert("Erreur lors de l'upload.");
-            });
-
-    };
+  if (data.error === 0 && data.result?.fileUrl && data.result?.message_id) {
+    socket.emit("broadcastAttachedMsg", {
+      id: data.result.message_id,
+      user_id: user.id,
+      username: user.username,
+      content: "",
+      attachment: data.result.fileUrl,
+      channel_id: selectedChannel.id,
+      channel_name: selectedChannel.name,
+      workspace_id: selectedWorkspace.id,
+      workspace_name: selectedWorkspace.name,
+      mentioned_user_ids: [],
+    });
+  } else {
+    alert("Erreur upload : " + (data.error_message || "Erreur inconnue"));
+  }
+};
 
 
 

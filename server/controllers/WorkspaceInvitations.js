@@ -1,5 +1,5 @@
 import pool from "../database/db.js";
-import { ERRORS, createErrorResponse } from "../app/ErrorHandler.js";
+import { ERRORS, createErrorResponse } from "../services/ErrorHandler.js";
 import { v4 as uuidv4 } from 'uuid';
 import { createWorkspaceMember } from "./WorkspaceMembers.js";
 export const createWorkspaceInvitation = async (request) => {

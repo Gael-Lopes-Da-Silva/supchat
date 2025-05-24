@@ -58,7 +58,6 @@ const DashboardPage = () => {
     const [messages, setMessages] = useState([]);
 
     const [channelName, setChannelName] = useState("");
-    const [channelDescription, setChannelDescription] = useState("");
     const [channelIsPrivate, setChannelIsPrivate] = useState(false);
     const [joinedUsername, setJoinedUsername] = useState("");
     const [workspaceUsers, setWorkspaceUsers] = useState([]);
@@ -450,7 +449,6 @@ const markNotificationAsRead = (index) => {
         });
 
         setChannelName("");
-        setChannelDescription("");
         setChannelIsPrivate(false);
         hideAllModal();
     };
@@ -524,14 +522,12 @@ const markNotificationAsRead = (index) => {
                 workspaceInvitation={workspaceInvitation}
                 selectedWorkspaceId={selectedWorkspace?.id}
                 channelName={channelName}
-                channelDescription={channelDescription}
                 channelIsPrivate={channelIsPrivate}
                 setWorkspaceName={setWorkspaceName}
                 setWorkspaceDescription={setWorkspaceDescription}
                 setWorkspaceIsPrivate={setWorkspaceIsPrivate}
                 setWorkspaceInvitation={setWorkspaceInvitation}
                 setChannelName={setChannelName}
-                setChannelDescription={setChannelDescription}
                 setChannelIsPrivate={setChannelIsPrivate}
             />
 

@@ -136,7 +136,6 @@ export default function setupSocketServer(server) {
                 const workspace = await readWorkspace({ params: { id: workspaceId } });
 
                 const allChannels = await readChannel({ query: { workspace_id: workspaceId } });
-
                 // on envoie cet event pour mettre à jour les workspace et channels que vient de join l'user
                 socket.emit("joinWorkspaceSuccess", {
                     workspace,
@@ -181,7 +180,6 @@ export default function setupSocketServer(server) {
                         username,
                     });
                 }
-
                 socket.emit("joinWorkspaceSuccess", {
                     workspace: result.workspace,
                     channels: result.channels,
@@ -304,11 +302,6 @@ export default function setupSocketServer(server) {
                     user_id,
                     mentioned_user_ids: mentionedUserIds,
                 };
-
-                // envoie du msg à tous ceux du canal
-                io.to(`channel_${channel_id}`).emit("receiveMessage", messageData);
-
-
                 // ici on envoie receiveMessage à tous les utilisateurs connectés. 
                 // Cet event sera catch par le front et
                 //  on pourra envoyer une notif à quelqu'un qui n'a pas forcément de channel ou le bon workspace de selectionné

@@ -213,7 +213,6 @@ const useSocketEvents = ({
   
   useEffect(() => {
     const handleStatus = ({ user_id, status }) => {
-      console.log("userStatusBroadcast", user_id, status);  
       setConnectedUsers(prev =>
         prev.map(u =>
           u.id === user_id ? { ...u, status } : u

@@ -1,4 +1,3 @@
-import React, { useEffect } from 'react';
 import * as Fa from "react-icons/fa6";
 
 const WorkspaceList = ({ workspaces, selectedWorkspace, updateGuiState, setSelectedWorkspace, getBackground, getForeground }) => {

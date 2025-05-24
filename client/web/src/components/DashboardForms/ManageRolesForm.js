@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import Select from "../Select/Select";
 import Button from "../Button/Button";
 import { readWorkspaceMember } from "../../services/WorkspaceMembers";

@@ -1,5 +1,5 @@
 import pool from "../database/db.js";
-import { ERRORS, createErrorResponse } from "../app/ErrorHandler.js";
+import { ERRORS, createErrorResponse } from "../services/ErrorHandler.js";
 import path from "path";
 import { v4 as uuidv4 } from "uuid";
 import fs from "fs";
@@ -9,10 +9,6 @@ export const createChannel = async (request, io = null) => {
 
     try {
         const { user_id, workspace_id, name, is_private = false } = request.body;
-
-        if (!user_id) return createErrorResponse(ERRORS.USER_ID_NOT_PROVIDED);
-        if (!workspace_id) return createErrorResponse(ERRORS.WORKSPACE_ID_NOT_PROVIDED);
-        if (!name) return createErrorResponse(ERRORS.NAME_NOT_PROVIDED);
 
         const users = await pool.query("SELECT * FROM users WHERE id = ?", [user_id]);
         const user = users[0];

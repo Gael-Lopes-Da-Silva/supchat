@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 
@@ -9,7 +9,7 @@ import Link from "../../components/Link/Link";
 
 import * as ConfirmationEmail from "../../emails/Confirmation";
 
-import { sendEmail } from "../../services/Services/Email";
+import { sendEmail } from "../../services/Email";
 import { createUser } from "../../services/Users";
 
 import logo from "../../assets/logo.png";
