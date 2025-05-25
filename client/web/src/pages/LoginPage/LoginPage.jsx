@@ -34,7 +34,7 @@ const LoginPage = () => {
             try {
                 const decodedToken = jwtDecode(token);
                 localStorage.setItem("user", JSON.stringify({
-                    Token: token,
+                    token: token,
                     data: decodedToken,
                 }));
 

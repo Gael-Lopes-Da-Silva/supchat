@@ -36,7 +36,7 @@ const DashboardRight = ({
     const [activeEmojiPickerMessageId, setActiveEmojiPickerMessageId] = useState(null);
     const [showEmojiPicker, setShowEmojiPicker] = useState(false);
     const [userSearchTerm, setUserSearchTerm] = useState('');
-    
+
     const [tooltip, setTooltip] = useState({
         visible: false,
         x: 0,
@@ -112,6 +112,8 @@ const DashboardRight = ({
 
         if (userReacted) {
             socket.emit("removeReaction", { message_id, user_id: user.id, emoji });
+            setTooltip({ visible: false, content: "", x: 0, y: 0 });
+
         } else {
             socket.emit("addReaction", { message_id, user_id: user.id, emoji });
         }
@@ -164,7 +166,7 @@ const DashboardRight = ({
             if (!selectedChannel?.id || !selectedChannel?.is_private) return;
 
             try {
-         const data = await getChannelMembers(selectedChannel.id);
+                const data = await getChannelMembers(selectedChannel.id);
 
                 if (data.result) setChannelMembers(data.result);
             } catch (err) {
@@ -175,34 +177,34 @@ const DashboardRight = ({
     }, [selectedChannel?.id]);
 
 
-const handleFileUpload = async (e) => {
-  const file = e.target.files[0];
-  if (!file || !selectedChannel?.id || !user?.id) return;
+    const handleFileUpload = async (e) => {
+        const file = e.target.files[0];
+        if (!file || !selectedChannel?.id || !user?.id) return;
 
-  const formData = new FormData();
-  formData.append('file', file);
-  formData.append('channel_id', selectedChannel.id);
-  formData.append('user_id', user.id);
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('channel_id', selectedChannel.id);
+        formData.append('user_id', user.id);
 
-  const data = await uploadFile(formData);
+        const data = await uploadFile(formData);
 
-  if (data.error === 0 && data.result?.fileUrl && data.result?.message_id) {
-    socket.emit("broadcastAttachedMsg", {
-      id: data.result.message_id,
-      user_id: user.id,
-      username: user.username,
-      content: "",
-      attachment: data.result.fileUrl,
-      channel_id: selectedChannel.id,
-      channel_name: selectedChannel.name,
-      workspace_id: selectedWorkspace.id,
-      workspace_name: selectedWorkspace.name,
-      mentioned_user_ids: [],
-    });
-  } else {
-    alert("Erreur upload : " + (data.error_message || "Erreur inconnue"));
-  }
-};
+        if (data.error === 0 && data.result?.fileUrl && data.result?.message_id) {
+            socket.emit("broadcastAttachedMsg", {
+                id: data.result.message_id,
+                user_id: user.id,
+                username: user.username,
+                content: "",
+                attachment: data.result.fileUrl,
+                channel_id: selectedChannel.id,
+                channel_name: selectedChannel.name,
+                workspace_id: selectedWorkspace.id,
+                workspace_name: selectedWorkspace.name,
+                mentioned_user_ids: [],
+            });
+        } else {
+            alert("Erreur upload : " + (data.error_message || "Erreur inconnue"));
+        }
+    };
 
 
 
@@ -232,14 +234,43 @@ const handleFileUpload = async (e) => {
 
 
 
+    const prevMessageCountRef = useRef(0); // compteur reste le meme entre les renders et fais pas de rerender quand elle change
+
     useEffect(() => {
-        setTimeout(() => {
-            messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-        }, 100); // faut laisser le temps au dom de terminer le layout des messages entre chaque selection de channel
+        // Filter des msg uniquement dans le channel selectionné car j'avais un bug qui faisait que j'avais un scroll down dans un 
+        // channel où le message n'était pas envoyé mais dans un autre channel
+        const currentChannelMessages = messages.filter(msg => msg.channel_id === selectedChannel?.id);
+        const currentCount = currentChannelMessages.length;
 
-    }, [selectedChannel?.id]);
+        if (currentCount > prevMessageCountRef.current) {
+            // Nouveau message ajouté -> scroll vers le bas
+            // faut laisser le temps au dom de terminer le layout des messages entre chaque selection de channel
+            setTimeout(() => {
+                messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+            }, 100);
+        }
+
+        // maj du counter
+        prevMessageCountRef.current = currentCount;
+    }, [messages, selectedChannel?.id]);
 
 
+    useEffect(() => {
+        const handleClickOutsideContextMenu = (e) => {
+            if (
+                contextMenu.visible &&
+                contextMenuRef.current &&
+                !contextMenuRef.current.contains(e.target)
+            ) {
+                setContextMenu((prev) => ({ ...prev, visible: false }));
+            }
+        };
+
+        document.addEventListener("mousedown", handleClickOutsideContextMenu);
+        return () => {
+            document.removeEventListener("mousedown", handleClickOutsideContextMenu);
+        };
+    }, [contextMenu.visible]);
 
     const sendMessage = () => {
 
@@ -391,7 +422,7 @@ const handleFileUpload = async (e) => {
                                             >
                                                 <div className="message-inner">
                                                     <div className="message-header">
-                                                        {msg.username}
+                                                        <b> {msg.username}</b>
                                                         <span className="timestamp"> · {formatTimestamp(displayedTimestamp)}</span>
                                                     </div>
 
@@ -428,21 +459,39 @@ const handleFileUpload = async (e) => {
                                                     </div>
 
                                                     <div className="message-reactions">
-                                                        {msg.reactions?.map(r => (
-                                                            <button
+                                                        {msg.reactions?.map((r) => (
+                                                            <div
                                                                 key={r.emoji}
-                                                                onClick={() => toggleReaction(msg.id, r.emoji)}
+                                                                className="reaction-wrapper"
+                                                                style={{ display: "inline-block", position: "relative" }}
                                                                 onMouseEnter={(e) => {
                                                                     const rect = e.currentTarget.getBoundingClientRect();
                                                                     fetchUsersForReaction(msg.id, r.emoji, rect.left, rect.top);
                                                                 }}
-                                                                onMouseLeave={() => setTooltip({ visible: false, content: "", x: 0, y: 0 })}
-                                                                className="reaction-btn"
+                                                                onMouseLeave={() =>
+                                                                    setTooltip({ visible: false, content: "", x: 0, y: 0 })
+                                                                }
                                                             >
-                                                                {r.emoji} {r.user_ids?.length || 0}
-                                                            </button>
+                                                                <button
+                                                                    onClick={() => toggleReaction(msg.id, r.emoji)}
+                                                                    className="reaction-btn"
+                                                                >
+                                                                    {r.emoji} {r.user_ids?.length || 0}
+                                                                </button>
+                                                            </div>
                                                         ))}
                                                     </div>
+
+                                                    {tooltip.visible && (
+                                                        <div
+                                                            className="reaction-tooltip"
+                                                            style={{ top: tooltip.y, left: tooltip.x }}
+                                                        >
+                                                            {tooltip.content}
+                                                        </div>
+                                                    )}
+
+
 
 
                                                     {activeEmojiPickerMessageId === msg.id && (
@@ -464,26 +513,6 @@ const handleFileUpload = async (e) => {
                                                         </div>
                                                     )}
 
-                                                    {tooltip.visible && (
-                                                        <div
-                                                            className="reaction-tooltip"
-                                                            style={{
-                                                                position: "fixed",
-                                                                top: tooltip.y,
-                                                                left: tooltip.x,
-                                                                transform: "translate(-50%, -100%)",
-                                                                backgroundColor: "#333",
-                                                                color: "#fff",
-                                                                padding: "5px 10px",
-                                                                borderRadius: "5px",
-                                                                fontSize: "0.8rem",
-                                                                zIndex: 1000,
-                                                                whiteSpace: "nowrap"
-                                                            }}
-                                                        >
-                                                            {tooltip.content}
-                                                        </div>
-                                                    )}
                                                 </div>
                                             </div>
                                         );
@@ -611,57 +640,56 @@ const handleFileUpload = async (e) => {
                 />
 
                 <ul>
-                    <ul>
-                        {filteredUsers
-                            .filter(u => connectedUsers.some(cu => cu.id === u.user_id))
-                            .map((u) => {
-                                const isNotSelf = u.user_id !== user.id;
 
-                                return (
-                                    <li key={u.id} className="user-list-item">
-                                        <div className="user-line">
+                    {filteredUsers
+                        .filter(u => connectedUsers.some(cu => cu.id === u.user_id))
+                        .map((u) => {
+                            const isNotSelf = u.user_id !== user.id;
+
+                            return (
+                                <li key={u.id} className="user-list-item">
+                                    <div className="user-line">
+                                        <button
+                                            className="user-button"
+                                            disabled={!isNotSelf}
+                                            onClick={async (e) => {
+                                                if (!isNotSelf) return;
+                                                e.stopPropagation();
+                                                const rect = e.currentTarget.getBoundingClientRect();
+                                                let x = rect.right + 5;
+                                                let y = rect.top;
+                                                const menuWidth = 180;
+                                                const menuHeight = 100;
+
+                                                if (x + menuWidth > window.innerWidth) x = rect.left - menuWidth - 5;
+                                                if (y + menuHeight > window.innerHeight) y = window.innerHeight - menuHeight - 10;
+
+                                                const channelIds = await getUserChannelIds(u.user_id, selectedWorkspace.id);
+                                                setContextMenu({
+                                                    visible: true,
+                                                    x,
+                                                    y,
+                                                    user: u,
+                                                    channelIds,
+                                                });
+                                            }}
+                                        >
+                                            🟢 {u.username}
+                                        </button>
+
+                                        {isAdmin && isNotSelf && (
                                             <button
-                                                className="user-button"
-                                                disabled={!isNotSelf}
-                                                onClick={async (e) => {
-                                                    if (!isNotSelf) return;
-                                                    e.stopPropagation();
-                                                    const rect = e.currentTarget.getBoundingClientRect();
-                                                    let x = rect.right + 5;
-                                                    let y = rect.top;
-                                                    const menuWidth = 180;
-                                                    const menuHeight = 100;
-
-                                                    if (x + menuWidth > window.innerWidth) x = rect.left - menuWidth - 5;
-                                                    if (y + menuHeight > window.innerHeight) y = window.innerHeight - menuHeight - 10;
-
-                                                    const channelIds = await getUserChannelIds(u.user_id, selectedWorkspace.id);
-                                                    setContextMenu({
-                                                        visible: true,
-                                                        x,
-                                                        y,
-                                                        user: u,
-                                                        channelIds,
-                                                    });
-                                                }}
+                                                title="Expulser ce membre du workspace"
+                                                onClick={() => handleKickMember(u.id)}
+                                                className="kick-button"
                                             >
-                                                🟢 {u.username}
+                                                ❌
                                             </button>
-
-                                            {isAdmin && isNotSelf && (
-                                                <button
-                                                    title="Expulser ce membre du workspace"
-                                                    onClick={() => handleKickMember(u.id)}
-                                                    className="kick-button"
-                                                >
-                                                    ❌
-                                                </button>
-                                            )}
-                                        </div>
-                                    </li>
-                                );
-                            })}
-                    </ul>
+                                        )}
+                                    </div>
+                                </li>
+                            );
+                        })}
 
                 </ul>
 
