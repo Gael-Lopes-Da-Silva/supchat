@@ -7,7 +7,7 @@ const API_URL = Constants.expoConfig.extra.apiUrl;
 const getAuthHeaders = async () => {
   const userDataString = await AsyncStorage.getItem("user");
   const userData = JSON.parse(userDataString);
-  const token = userData?.Token;
+  const token = userData?.token;
 
   return {
     Accept: "application/json",

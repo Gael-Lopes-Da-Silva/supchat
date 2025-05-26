@@ -1,7 +1,6 @@
 const getAuthHeaders = () => {
   const userData = JSON.parse(localStorage.getItem("user"));
   const token = userData?.token;
-   console.log("getAuthHeaders", token);
   return {
     Accept: "application/json",
     "Content-Type": "application/json",

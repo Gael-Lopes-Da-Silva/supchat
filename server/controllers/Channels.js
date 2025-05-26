@@ -175,53 +175,6 @@ export const joinChannel = async ({ channel_id, workspace_id }) => {
     return { messages };
 };
 
-
-export const sendMessage = async ({ channel_id, user_id, content }, io = null) => {
-    if (!channel_id || !user_id || !content) {
-        return createErrorResponse({
-            code: 400,
-            message: "Les champs requis sont manquants."
-        });
-    }
-
-    try {
-        const result = await pool.query(
-            "INSERT INTO messages (channel_id, user_id, content) VALUES (?, ?, ?)",
-            [channel_id, user_id, content]
-        );
-
-        const [channel] = await pool.query(
-            "SELECT name FROM channels WHERE id = ?",
-            [channel_id]
-        );
-
-        const [user] = await pool.query(
-            "SELECT username FROM users WHERE id = ?",
-            [user_id]
-        );
-
-        const message = {
-            id: result.insertId,
-            channel_id,
-            user_id,
-            content,
-            username: user.username,
-            channel_name: channel.name
-
-        };
-
-        if (io) {
-            io.to(`channel_${channel_id}`).emit("receiveMessage", message);
-        }
-
-        return { result: message };
-    } catch (err) {
-        console.error("Erreur sendMessage:", err);
-        return createErrorResponse({ code: 500, message: err.message });
-    }
-};
-
-
 export const fetchMessagesForChannel = async ({ channel_id, workspace_id }) => {
     if (!channel_id || !workspace_id) {
         return {

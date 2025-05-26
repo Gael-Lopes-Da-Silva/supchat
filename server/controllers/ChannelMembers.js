@@ -155,3 +155,25 @@ export const restoreChannelMember = async (request) => {
 
     return pool.query("UPDATE channel_members SET deleted_at = NULL WHERE id = ?", [request.params.id]);
 }
+
+
+export const addUserToAllWorkspaceChannels = async ({ user_id, workspace_id }) => {
+    const channels = await pool.query(
+        "SELECT id FROM channels WHERE workspace_id = ? AND deleted_at IS NULL",
+        [workspace_id]
+    );
+
+    for (const channel of channels) {
+        const existing = await pool.query(
+            "SELECT id FROM channel_members WHERE user_id = ? AND channel_id = ? AND deleted_at IS NULL",
+            [user_id, channel.id]
+        );
+
+        if (existing.length === 0) {
+            await pool.query(
+                "INSERT INTO channel_members (channel_id, user_id, role_id) VALUES (?, ?, 2)",
+                [channel.id, user_id]
+            );
+        }
+    }
+};

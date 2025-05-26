@@ -6,9 +6,12 @@ import {
     joinWorkspace,
     readWorkspace
 } from './controllers/Workspaces.js';
-import { readUsersByIds, readUser } from './controllers/Users.js';
+import { readUsersByIds } from './controllers/Users.js';
+
+import { createAndPrepareMessage } from './controllers/Messages.js';
+
 import { joinWorkspaceViaInvitation } from './controllers/WorkspaceInvitations.js';
-import { createChannelMember } from './controllers/ChannelMembers.js';
+import { createChannelMember,addUserToAllWorkspaceChannels } from './controllers/ChannelMembers.js';
 import {
     fetchMessagesForChannel, 
     addReaction, 
@@ -20,6 +23,7 @@ import { readWorkspaceMembersByWorkspaceId } from "./controllers/WorkspaceMember
 
 
 const connectedUsers = new Map();
+
 const userStatuses = new Map();
 const broadcastConnectedUsers = async (io) => {
     const userIds = [...connectedUsers.values()];
@@ -43,23 +47,33 @@ const broadcastConnectedUsers = async (io) => {
     }
 };
 
-const broadcastMessage = (io, message, senderId) => {
+import { notifyUsersByEmail } from './services/EmailNotifier.js';
+
+const broadcastMessage = async (io, message, senderId) => {
     const channelRoom = `channel_${message.channel_id}`;
 
     // on send à tous ceux du canal
     io.to(channelRoom).emit("receiveMessage", message);
 
     // et ici à tout ceux hors du canal
-    for (const [socketId, uid] of connectedUsers) {
-        if (uid === senderId) continue;
+    for (const [socketId, userId] of connectedUsers.entries()) {
+        if (userId === senderId) continue;
 
-        const socketUser = io.sockets.sockets.get(socketId);
-        const isInChannel = socketUser?.rooms.has(channelRoom);
+        const socket = io.sockets.sockets.get(socketId);
+        const isInChannel = socket?.rooms.has(channelRoom);
 
         if (!isInChannel) {
-            io.to(`user_${uid}`).emit("receiveMessage", message);
+            io.to(`user_${userId}`).emit("receiveMessage", message);
         }
     }
+
+ // notif pour les users non connectés
+    await notifyUsersByEmail({
+        io,
+        channel_id: message.channel_id,
+        sender_id: senderId,
+        message
+    });
 };
 
 
@@ -180,10 +194,18 @@ export default function setupSocketServer(server) {
                         username,
                     });
                 }
+
+                await addUserToAllWorkspaceChannels({
+                    user_id: socket.userId,
+                    workspace_id,
+                });
+
                 socket.emit("joinWorkspaceSuccess", {
                     workspace: result.workspace,
                     channels: result.channels,
                 });
+
+        
 
                 broadcastConnectedUsers(io); // MAJ de la liste globale
             } catch (err) {
@@ -246,76 +268,15 @@ export default function setupSocketServer(server) {
 
 
 
-        socket.on("sendMessage", async (msg) => {
-            const { user_id, content, channel_id, attachment } = msg;
-
-            if (!user_id || (!content && !attachment) || !channel_id) {
-                return socket.emit("sendMessageError", { message: "Champs manquants." });
-            }
-
-            try {
-                // insert en bdd
-                const result = await pool.query(
-                    "INSERT INTO messages (channel_id, user_id, content) VALUES (?, ?, ?)",
-                    [channel_id, user_id, content]
-                );
-
-
-
-                const message_id = result.insertId;
-
-                if (attachment) {
-                    await pool.query(
-                        "INSERT INTO files (message_id, file_path) VALUES (?, ?)",
-                        [message_id, attachment]
-                    );
-                }
-
-                const user = await readUser({ params: { id: user_id } });
-                const channel = await readChannel({ params: { id: channel_id } });
-                const workspace = await readWorkspace({ params: { id: channel.workspace_id } });
-
-                // on détecte les mentions (@user)
-                const allUsers = await pool.query("SELECT id, username FROM users");
-                const usernameMap = new Map(allUsers.map(u => [u.username.toLowerCase(), u.id]));
-
-                // au pluriel ici car potentiellement je peux mentionner plusieurs personnes dans un msg
-                const mentionedUsernames = content
-                    .split(/\s+/)
-                    .filter(word => word.startsWith("@"))
-                    .map(word => word.slice(1).toLowerCase())
-                    .filter(username => usernameMap.has(username)); // garde que les usernames qui sont en bdd
-
-
-                // recup les id des utilisateurs mentionnés   
-                const mentionedUserIds = mentionedUsernames.map(username => usernameMap.get(username));
-
-                const messageData = {
-                    id: message_id,
-                    username: user.username,
-                    content,
-                    attachment,
-                    channel_id,
-                    channel_name: channel.name,
-                    workspace_id: channel.workspace_id,
-                    workspace_name: workspace.name,
-                    user_id,
-                    mentioned_user_ids: mentionedUserIds,
-                };
-                // ici on envoie receiveMessage à tous les utilisateurs connectés. 
-                // Cet event sera catch par le front et
-                //  on pourra envoyer une notif à quelqu'un qui n'a pas forcément de channel ou le bon workspace de selectionné
-                // ...
-                broadcastMessage(io, messageData, user_id);
-
-
-
-
-            } catch (error) {
-                console.error("Erreur dans sendMessage:", error);
-                socket.emit("sendMessageError", { message: "Erreur interne serveur." });
-            }
-        });
+socket.on("sendMessage", async (msg) => {
+    try {
+        const messageData = await createAndPrepareMessage(msg);
+       await broadcastMessage(io, messageData, msg.user_id);
+    } catch (error) {
+        console.error("Erreur dans sendMessage:", error);
+        socket.emit("sendMessageError", { message: error.message || "Erreur interne serveur." });
+    }
+});
 
         socket.on("broadcastAttachedMsg", (message) => {
             if (!message || !message.channel_id || !message.user_id) return;
