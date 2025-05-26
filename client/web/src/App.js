@@ -11,22 +11,28 @@ import ResetPasswordPage from './pages/ResetPasswordPage/ResetPasswordPage';
 import SettingsPage from './pages/SettingsPage/SettingsPage';
 import TermsPage from './pages/TermsPage/TermsPage';
 
+import PrivateRoutes from './components/PrivateRoutes/PrivateRoutes';
+
 const App = () => {
     return (
         <reactdom.BrowserRouter>
-            <reacttoastify.ToastContainer
-                theme="colored"
-            />
+            <reacttoastify.ToastContainer theme="colored" />
             <reactdom.Routes>
-                <reactdom.Route path="/" element={<IndexPage />} />
+
                 <reactdom.Route path="/login" element={<LoginPage />} />
                 <reactdom.Route path="/register" element={<RegisterPage />} />
                 <reactdom.Route path="/accountConfirmed" element={<AccountConfirmedPage />} />
                 <reactdom.Route path="/terms" element={<TermsPage />} />
                 <reactdom.Route path="/privacy" element={<PrivaryPage />} />
-                <reactdom.Route path="/dashboard" element={<DashboardPage />} />
-                <reactdom.Route path="/settings" element={<SettingsPage />} />
                 <reactdom.Route path="/reset_password" element={<ResetPasswordPage />} />
+
+
+                <reactdom.Route element={<PrivateRoutes />}>
+                    <reactdom.Route path="/" element={<IndexPage />} />
+                    <reactdom.Route path="/dashboard" element={<DashboardPage />} />
+                    <reactdom.Route path="/settings" element={<SettingsPage />} />
+                </reactdom.Route>
+
             </reactdom.Routes>
         </reactdom.BrowserRouter>
     );

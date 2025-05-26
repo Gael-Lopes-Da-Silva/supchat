@@ -1,7 +1,7 @@
 import { jwtDecode } from "jwt-decode";
 import { useEffect, useState } from "react";
 import { isMobile } from "react-device-detect";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { toast } from "react-toastify";
 
 import * as Fa from "react-icons/fa6";
@@ -25,6 +25,23 @@ const LoginPage = () => {
     const [theme] = useState(localStorage.getItem("gui.theme") ?? "light");
 
     const navigate = useNavigate();
+    const location = useLocation();
+
+
+useEffect(() => {
+  if (location.state?.expired) {
+    toast.warn("Votre session a expiré. Veuillez vous reconnecter.", {
+      position: "top-center",
+    });
+
+    // ici faut nettoyer toute les states transmises par navigate sinon le msg réapparaitra à chaque fois
+    // remplace: true ça efface l'historique donc si l'user revient en arrière il pourra pas recuperer l'ancienne state
+    // state : {} on efface la state transmise par privateRoutes en l'occurence "expired"
+    // ici evidament pathname correspond à /login
+    navigate(location.pathname, { replace: true, state: {} });
+  }
+}, [location, navigate]);
+
 
     useEffect(() => {
         const params = new URLSearchParams(window.location.search);
@@ -156,7 +173,7 @@ const LoginPage = () => {
                 <p>Supchat</p>
             </a>
             <div className="login-box">
-                <h1>Connexion</h1>   
+                <h1>Connexion</h1>
                 <form onSubmit={handleSubmit}>
                     <div>
                         <InputField
