@@ -23,6 +23,7 @@ const LoginPage = () => {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [theme] = useState(localStorage.getItem("gui.theme") ?? "light");
+    const [isLoading, setIsLoading] = useState(false);
 
     const navigate = useNavigate();
     const location = useLocation();
@@ -72,87 +73,92 @@ useEffect(() => {
         }
     }, [navigate]);
 
-    const handleSubmit = async (event) => {
-        event.preventDefault();
 
-        loginUser({
-            email: email,
-            password: password,
-        }).then((data) => {
-            if (data.error !== 0) {
-                switch (data.error) {
-                    case 9:
-                        toast.error("E-mail non valide.", {
-                            position: "top-center",
-                        });
-                        break;
+const handleSubmit = async (event) => {
+    event.preventDefault();
+    setIsLoading(true);
 
-                    case 10:
-                        toast.error("Mot de passe incorrect.", {
-                            position: "top-center",
-                        });
-                        break;
+    loginUser({
+        email: email,
+        password: password,
+    }).then((data) => {
+        if (data.error !== 0) {
+            switch (data.error) {
+                case 9:
+                    toast.error("E-mail non valide.", {
+                        position: "top-center",
+                    });
+                    break;
 
-                    case 54:
-                        toast.error("Veuillez confirmer votre email avant de vous connecter.", {
-                            position: "top-center",
-                        });
-                        break;
+                case 10:
+                    toast.error("Mot de passe incorrect.", {
+                        position: "top-center",
+                    });
+                    break;
 
-                    default:
-                        toast.error("Une erreur est survenue.", {
-                            position: "top-center",
-                        });
-                        break;
-                }
-                return;
+                case 54:
+                    toast.error("Veuillez confirmer votre email avant de vous connecter.", {
+                        position: "top-center",
+                    });
+                    break;
+
+                default:
+                    toast.error("Une erreur est survenue.", {
+                        position: "top-center",
+                    });
+                    break;
             }
+            setIsLoading(false);
+            return;
+        }
 
-            if (!data.token) {
-                toast.error("Erreur lors de la connexion. Veuillez réessayer.", {
+        if (!data.token) {
+            toast.error("Erreur lors de la connexion. Veuillez réessayer.", {
+                position: "top-center",
+            });
+            setIsLoading(false);
+            return;
+        }
+
+        if (data.result.password_reset_token !== null) {
+            updateUser(data.result.id, {
+                password_reset_token: null,
+            }).catch((error) => {
+                toast.error("Une erreur inattendue est survenue.", {
                     position: "top-center",
                 });
 
-                return;
-            }
-
-            if (data.result.password_reset_token !== null) {
-                updateUser(data.result.id, {
-                    password_reset_token: null,
-                }).catch((error) => {
-                    toast.error("Une erreur inattendue est survenue.", {
-                        position: "top-center",
+                if (process.env.REACT_APP_DEBUG) {
+                    console.trace({
+                        from: "loginUser() -> LoginPage.jsx",
+                        error: error,
                     });
-
-                    if (process.env.REACT_APP_DEBUG) {
-                        console.trace({
-                            from: "loginUser() -> LoginPage.jsx",
-                            error: error,
-                        });
-                    }
-                });
-            }
-
-            const decodedToken = jwtDecode(data.token);
-            localStorage.setItem("user", JSON.stringify({
-                token: data.token,
-                data: decodedToken,
-            }));
-
-            navigate("/dashboard");
-        }).catch((error) => {
-            toast.error("Une erreur inattendue est survenue.", {
-                position: "top-center",
+                }
             });
+        }
 
-            if (process.env.REACT_APP_DEBUG) {
-                console.trace({
-                    from: "loginUser() -> LoginPage.jsx",
-                    error: error,
-                });
-            }
+        const decodedToken = jwtDecode(data.token);
+        localStorage.setItem("user", JSON.stringify({
+            token: data.token,
+            data: decodedToken,
+        }));
+
+        window.location.href = "/dashboard";
+    }).catch((error) => {
+        toast.error("Une erreur inattendue est survenue.", {
+            position: "top-center",
         });
-    };
+
+        if (process.env.REACT_APP_DEBUG) {
+            console.trace({
+                from: "loginUser() -> LoginPage.jsx",
+                error: error,
+            });
+        }
+        setIsLoading(false); 
+    });
+};
+
 
     const handleGoogle = () => {
         window.location.href = `${process.env.REACT_APP_API_URL}users/auth/google`;
@@ -162,7 +168,7 @@ useEffect(() => {
         window.location.href = `https://www.facebook.com/v15.0/dialog/oauth?client_id=${process.env.REACT_APP_FACEBOOK_CLIENT_ID}&redirect_uri=${process.env.REACT_APP_API_URL}users/auth/facebook/callback&scope=email`;
     };
 
-    return (
+  return (
         <div className={`login-container ${theme}`}>
             <a
                 className="login-logo"
@@ -174,60 +180,77 @@ useEffect(() => {
             </a>
             <div className="login-box">
                 <h1>Connexion</h1>
-                <form onSubmit={handleSubmit}>
-                    <div>
-                        <InputField
-                            label="E-mail"
-                            type="email"
-                            theme={theme}
-                            value={email}
-                            required
-                            onChange={(e) => setEmail(e.target.value)}
-                        />
+
+                {isLoading ? (
+                    <div className="loading-message">
+                        <p>Chargement...</p>
                     </div>
-                    <div>
-                        <InputField
-                            label="Mot de passe"
-                            type="password"
-                            theme={theme}
-                            value={password}
-                            required
-                            onChange={(e) => setPassword(e.target.value)}
-                        />
-                        <p>
-                            <Link
-                                text="Mot de passe oublié ?"
-                                onClick={() => navigate("/reset_password")}
+                ) : (
+                    <>
+                        <form onSubmit={handleSubmit}>
+                            <div>
+                                <InputField
+                                    label="E-mail"
+                                    type="email"
+                                    theme={theme}
+                                    value={email}
+                                    required
+                                    onChange={(e) => setEmail(e.target.value)}
+                                />
+                            </div>
+                            <div>
+                                <InputField
+                                    label="Mot de passe"
+                                    type="password"
+                                    theme={theme}
+                                    value={password}
+                                    required
+                                    onChange={(e) => setPassword(e.target.value)}
+                                />
+                                <p>
+                                    <Link
+                                        text="Mot de passe oublié ?"
+                                        onClick={() => navigate("/reset_password")}
+                                    />
+                                </p>
+                            </div>
+                            <div>
+                                <Button
+                                    type="submit"
+                                    text="Se connecter"
+                                    theme={theme}
+                                    disabled={isLoading}
+                                />
+                                <p>
+                                    Pas de compte ?{" "}
+                                    <Link
+                                        text="En créer un maintenant !"
+                                        onClick={() => navigate("/register")}
+                                    />
+                                </p>
+                            </div>
+                        </form>
+
+                        <div className="login-socials">
+                            <Button
+                                icon={<Fa.FaGoogle />}
+                                onClick={handleGoogle}
+                                type="button"
+                                text="Google"
+                                theme={theme}
+                                disabled={isLoading}
                             />
-                        </p>
-                    </div>
-                    <div>
-                        <Button type="submit" text="Se connecter" theme={theme} />
-                        <p>
-                            Pas de compte ?{" "}
-                            <Link
-                                text="En créer un maintenant !"
-                                onClick={() => navigate("/register")}
+                            <Button
+                                icon={<Fa.FaFacebook />}
+                                onClick={handleFacebook}
+                                type="button"
+                                text="Facebook"
+                                theme={theme}
+                                disabled={isLoading}
                             />
-                        </p>
-                    </div>
-                </form>
-                <div className="login-socials">
-                    <Button
-                        icon={<Fa.FaGoogle />}
-                        onClick={handleGoogle}
-                        type="button"
-                        text="Google"
-                        theme={theme}
-                    />
-                    <Button
-                        icon={<Fa.FaFacebook />}
-                        onClick={handleFacebook}
-                        type="button"
-                        text="Facebook"
-                        theme={theme}
-                    />
-                </div>
+                        </div>
+                    </>
+                )}
             </div>
         </div>
     );

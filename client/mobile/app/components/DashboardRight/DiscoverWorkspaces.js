@@ -7,7 +7,7 @@ const DiscoverWorkspaces = ({
   onClose,
   toggleLeftPanel,
 }) => {
-  const filteredWorkspaces = publicWorkspaces.filter(ws => !workspaces[ws.id]);
+  const filteredWorkspaces = publicWorkspaces?.filter(ws => !workspaces[ws.id]);
 
   return (
     <ScrollView>
