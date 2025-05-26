@@ -1,0 +1,51 @@
+import { StyleSheet } from 'react-native';
+
+export default StyleSheet.create({
+  dashboardContainer: {
+    flex: 1,
+    flexDirection: 'row',
+    padding: 12,
+    gap: 12,
+    backgroundColor: '#fffceb',
+  },
+  dashboardRight: {
+    flex: 1,
+    padding: 16,
+    borderRadius: 16,
+    borderWidth: 3,
+    borderColor: '#333',
+    shadowColor: '#333',
+    shadowOffset: { width: 5, height: 5 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 4,
+    backgroundColor: '#fffceb',
+  },
+  dashboardRightHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    height: 64,
+    borderRadius: 16,
+    borderWidth: 3,
+    borderColor: '#333',
+    paddingHorizontal: 16,
+    backgroundColor: '#e5e2d3',
+  },
+  dashboardRightFooter: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    height: 64,
+    borderRadius: 16,
+    borderWidth: 3,
+    borderColor: '#333',
+    paddingHorizontal: 16,
+    backgroundColor: '#e5e2d3',
+  },
+  dashboardInput: {
+    flex: 1,
+    fontSize: 16,
+    padding: 8,
+    color: '#333',
+  },
+});

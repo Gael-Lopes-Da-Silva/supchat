@@ -5,7 +5,7 @@
         "scheme": "supchat",
         "version": "1.0.0",
         "orientation": "portrait",
-        "icon": "./assets/images/icon.png",
+        "icon": "./assets/images/favicon.png",
         "userInterfaceStyle": "automatic",
         "newArchEnabled": true,
         "ios": {
@@ -13,7 +13,7 @@
         },
         "android": {
             "adaptiveIcon": {
-                "foregroundImage": "./assets/images/adaptive-icon.png",
+                "foregroundImage": "./assets/images/favicon.png",
                 "backgroundColor": "#f77066"
             }
         },
@@ -27,7 +27,7 @@
             [
                 "expo-splash-screen",
                 {
-                    "image": "./assets/images/splash-icon.png",
+                    "image": "./assets/images/favicon.png",
                     "imageWidth": 200,
                     "resizeMode": "contain",
                     "backgroundColor": "#f77066"
@@ -38,8 +38,8 @@
             "typedRoutes": true
         },
         "extra": {
-            "apiUrl": "http://<IP_server_API>:3000/",
-            "clientWebUrl": "http://<IP_server_API>:5000/"
+            "apiUrl": "http://<server_API>:3000/",
+            "clientWebUrl": "http://<server_web>:5000/"
         }
     }
 }

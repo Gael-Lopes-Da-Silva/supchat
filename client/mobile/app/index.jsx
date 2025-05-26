@@ -1,21 +1,16 @@
 import React, { useEffect } from 'react';
 import { useRouter } from 'expo-router';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { View, ActivityIndicator } from 'react-native';
 
 export default function App() {
   const router = useRouter();
 
   useEffect(() => {
-    const checkUser = async () => {
-      const user = await AsyncStorage.getItem('user');
-      if (user) {
-        router.replace('/screens/dashboard');
-      } else {
-        router.replace('/screens/login');
-      }
+    const delayNavigation = async () => {
+      await new Promise(resolve => setTimeout(resolve, 10)); // petit délai
+      router.replace('/screens/LoginScreen/LoginPage');
     };
-    checkUser();
+    delayNavigation();
   }, []);
 
   return (

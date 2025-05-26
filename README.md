@@ -31,3 +31,20 @@ SMTP_PORT=XXX
 SMTP_USER=XXX
 SMTP_PASSWORD=XXX
 ~~~
+
+
+------------------------------------------------------------------
+
+Commandes pour lancer docker:
+
+docker compose restart
+
+------------------------------------------------------------------
+
+Commandes pour lancer la partie mobile:
+
+cd .\client\mobile\
+npm install
+npm update
+npx expo install react-native
+npm run start
