@@ -31,7 +31,7 @@ const DiscoverWorkspaces = ({
 
         <main className="public-workspaces-grid">
           {filteredWorkspaces.length === 0 ? (
-            <p>Aucun espace de travail public disponible.</p>
+            <p>Aucun espace de travail public disponible. N'hésitez pas à en créer un !</p>
           ) : (
             filteredWorkspaces.map(ws => (
               <div key={ws.id} className="public-workspace-card">
