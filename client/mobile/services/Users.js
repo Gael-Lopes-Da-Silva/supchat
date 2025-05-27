@@ -97,6 +97,7 @@ export const loginUser = async (body) => {
       },
       body: JSON.stringify(body),
     });
+    
     return await response.json();
   } catch (error) {
     return { error: true, message: "Erreur serveur" };

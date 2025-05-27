@@ -6,8 +6,6 @@ import pool from "../database/db.js";
 export const notifyUsersByEmail = async ({ io, channel_id, sender_id, message }) => {
     try {
 
-            console.log('notifyUsersByEmail appelé', { channel_id, sender_id });
-
         // recup tous les users connectés
         const sockets = await io.fetchSockets();
         const connectedUserIds = sockets.map(s => s.userId).filter(Boolean); 
