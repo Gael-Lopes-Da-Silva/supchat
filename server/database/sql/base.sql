@@ -1,3 +1,6 @@
+CREATE USER 'supchat'@'%' IDENTIFIED BY 'supchat';
+GRANT ALL PRIVILEGES ON supchat.* TO 'supchat'@'%';
+FLUSH PRIVILEGES;
 
 -- USERS
 CREATE TABLE users (
@@ -6,7 +9,6 @@ CREATE TABLE users (
     email VARCHAR(100) NOT NULL,
     password TEXT DEFAULT NULL,
     confirm_token VARCHAR(255) DEFAULT NULL,
-    password_reset_token VARCHAR(255) DEFAULT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NULL,
     deleted_at TIMESTAMP NULL
@@ -142,6 +144,7 @@ CREATE TABLE channel_members (
     FOREIGN KEY (user_id) REFERENCES users(id),
     FOREIGN KEY (role_id) REFERENCES roles(id)
 );
+
 
 
 -- TRIGGERS
