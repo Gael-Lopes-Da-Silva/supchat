@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { View, Text, Image, ScrollView } from 'react-native';
+import { View, Text, Alert, Image, ScrollView } from 'react-native';
 import Button from '../../components/Button/Button';
 import Checkbox from '../../components/Checkbox/Checkbox';
 import InputField from '../../components/InputField/InputField';
@@ -10,6 +10,7 @@ import { useRouter } from 'expo-router';
 import { createUser } from '../../../services/Users';
 import { sendEmail } from '../../../services/Email';
 import * as ConfirmationEmail from '../../../emails/Confirmation';
+import Toast from 'react-native-toast-message';
 
 const RegisterPage = () => {
   const [username, setUsername] = useState('');
@@ -24,14 +25,37 @@ const RegisterPage = () => {
       const data = await createUser({ username, email, password });
 
       if (data.error !== 0) {
-        console.warn("Erreur:", data.error);
+        switch (data.error) {
+          case 4:
+            Toast.show({
+              type: 'error', // 'success' | 'error' | 'info'
+              text1: 'Ce pseudo est déjà utilisé par un autre utilisateur',
+            });
+            break;
+
+          case 5:
+            Toast.show({
+              type: 'error', // 'success' | 'error' | 'info'
+              text1: 'Cet email est déjà utilisé par un autre utilisateur.',
+            });
+            break;
+
+          default:
+            Toast.show({
+              type: 'error', // 'success' | 'error' | 'info'
+              text1: 'Une erreur est survenue lors de l\'inscription.',
+            });
+        }
         return;
       }
 
       const confirmToken = data.result.user.confirm_token;
 
       if (!confirmToken) {
-        console.warn("Token de confirmation manquant");
+        Toast.show({
+          type: 'error', // 'success' | 'error' | 'info'
+          text1: 'Erreur lors de la récupération du token de confirmation.',
+        });
         return;
       }
 
@@ -41,10 +65,16 @@ const RegisterPage = () => {
         content: ConfirmationEmail.content(confirmToken),
       });
 
-      console.log("Email envoyé avec succès");
+      Toast.show({
+        type: 'success', // 'success' | 'error' | 'info'
+        text1: 'Votre compte a été créé. Vérifiez votre boîte mail pour confirmer votre compte.',
+      });
       router.replace('/screens/LoginScreen/LoginPage');
     } catch (error) {
-      console.warn("Erreur lors de l'inscription", error);
+      Toast.show({
+        type: 'error', // 'success' | 'error' | 'info'
+        text1: 'Une erreur inattendue est survenue lors de l\'inscription.',
+      });
     }
   };
 

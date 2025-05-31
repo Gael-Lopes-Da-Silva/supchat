@@ -1,48 +1,135 @@
-import { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity } from 'react-native';
+import React from 'react';
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  ScrollView,
+  StyleSheet,
+} from 'react-native';
+import { FontAwesome6 } from '@expo/vector-icons';
 
-const ChannelList = ({ channels, setSelectedChannel, selectedChannel, getBackground, getForeground }) => {
-  const [searchTerm, setSearchTerm] = useState('');
+const ChannelList = ({
+  channels = {},
+  setSelectedChannel,
+  selectedChannel,
+  getBackground,
+  getForeground,
+  user,
+  theme,
+}) => {
+  const textColor = theme === 'dark' ? '#ffffff' : '#000000';
+  const secondaryColor = theme === 'dark' ? '#cccccc' : '#666666';
 
-  const filteredChannels = Object.values(channels).filter(channel =>
-    channel.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const sortedChannels = Object.values(channels)
+    .filter(channel => channel && channel.id && channel.name)
+    .sort((a, b) => {
+      if (a.is_private === b.is_private) {
+        return a.name.localeCompare(b.name);
+      }
+      return a.is_private ? 1 : -1;
+    });
+
+  if (sortedChannels.length === 0) {
+    return (
+      <View style={styles.container}>
+        <View style={styles.section}>
+          <Text style={[styles.sectionTitle, { color: secondaryColor }]}>
+            CANAUX
+          </Text>
+          <Text style={[styles.emptyText, { color: secondaryColor }]}>
+            Aucun canal disponible
+          </Text>
+        </View>
+      </View>
+    );
+  }
 
   return (
-    <View>
-      <TextInput
-        placeholder="Rechercher un canal..."
-        value={searchTerm}
-        onChangeText={setSearchTerm}
-        style={{ padding: 8, borderWidth: 1, marginBottom: 10 }}
-      />
-      {filteredChannels.length > 0 ? (
-        filteredChannels.map(channel => {
-          const isSelected = selectedChannel?.id === channel.id;
+    <ScrollView style={styles.container}>
+      <View style={styles.section}>
+        <Text style={[styles.sectionTitle, { color: secondaryColor }]}>
+          CANAUX
+        </Text>
 
-          return (
-            <TouchableOpacity
-              key={channel.id}
-              onPress={() => setSelectedChannel(channel)}
-              style={{
-                backgroundColor: getBackground(channel.name),
-                padding: 10,
-                marginVertical: 4,
-                borderColor: isSelected ? '#fff' : 'transparent',
-                borderWidth: isSelected ? 2 : 1,
-              }}
-            >
-              <Text style={{ color: getForeground(channel.name), fontWeight: isSelected ? 'bold' : 'normal' }}>
-                {channel.name} {channel.is_private ? '🔒' : ''}
+        {sortedChannels.map((channel) => (
+          <TouchableOpacity
+            key={channel.id}
+            style={[
+              styles.channelButton,
+              selectedChannel?.id === channel.id && styles.selectedChannel,
+            ]}
+            onPress={() => setSelectedChannel(channel)}
+          >
+            <View style={styles.channelInfo}>
+              <FontAwesome6
+                name={channel.is_private ? 'lock' : 'hashtag'}
+                size={14}
+                color={textColor}
+                style={styles.channelIcon}
+              />
+              <Text
+                style={[
+                  styles.channelName,
+                  { color: textColor },
+                  selectedChannel?.id === channel.id && styles.selectedChannelText,
+                ]}
+                numberOfLines={1}
+              >
+                {channel.name}
               </Text>
-            </TouchableOpacity>
-          );
-        })
-      ) : (
-        <Text>Aucun canal trouvé</Text>
-      )}
-    </View>
+            </View>
+          </TouchableOpacity>
+        ))}
+      </View>
+    </ScrollView>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+  section: {
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+  },
+  sectionTitle: {
+    fontSize: 12,
+    fontWeight: '600',
+    marginBottom: 8,
+    paddingHorizontal: 8,
+  },
+  channelButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 8,
+    paddingHorizontal: 8,
+    borderRadius: 4,
+  },
+  selectedChannel: {
+    backgroundColor: '#007AFF22',
+  },
+  channelInfo: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  channelIcon: {
+    marginRight: 8,
+    width: 16,
+  },
+  channelName: {
+    fontSize: 15,
+    flex: 1,
+  },
+  selectedChannelText: {
+    fontWeight: '600',
+  },
+  emptyText: {
+    textAlign: 'center',
+    fontSize: 14,
+    paddingVertical: 16,
+  },
+});
 
 export default ChannelList;

@@ -1,7 +1,3 @@
-CREATE USER 'supchat'@'%' IDENTIFIED BY 'supchat';
-GRANT ALL PRIVILEGES ON supchat.* TO 'supchat'@'%';
-FLUSH PRIVILEGES;
-
 -- USERS
 CREATE TABLE users (
     id INT AUTO_INCREMENT PRIMARY KEY, 

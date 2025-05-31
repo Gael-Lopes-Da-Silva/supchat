@@ -3,12 +3,15 @@ import { View, Text, Image, TouchableOpacity, StyleSheet, Platform } from 'react
 import { FontAwesome6, FontAwesome } from '@expo/vector-icons';
 import { jwtDecode } from 'jwt-decode';
 import Constants from 'expo-constants';
+import Toast from 'react-native-toast-message';
 
 import Button from '../../components/Button/Button';
 import InputField from '../../components/InputField/InputField';
 import Link from '../../components/Link/Link';
 import styles from './LoginPageStyles';
 import { useRouter } from 'expo-router';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
 
 import { loginUser, updateUser } from '../../../services/Users';
 
@@ -32,7 +35,10 @@ const LoginPage = () => {
         }));
         router.replace('/screens/DashboardScreen/DashboardPage');
       } catch (error) {
-        console.warn("Token invalide");
+        Toast.show({
+          type: 'error', // 'success' | 'error' | 'info'
+          text1: 'Token invalide',
+        });
       }
     }
   }, []);
@@ -42,12 +48,18 @@ const LoginPage = () => {
       const data = await loginUser({ email, password });
 
       if (data.error !== 0) {
-        console.warn("Erreur de connexion", data.error);
+        Toast.show({
+          type: 'error', // 'success' | 'error' | 'info'
+          text1: `Erreur de connexion ${data.error}`,
+        });
         return;
       }
 
       if (!data.token) {
-        console.warn("Aucun token retourné");
+        Toast.show({
+          type: 'error', // 'success' | 'error' | 'info'
+          text1: 'Aucun token retourné',
+        });
         return;
       }
 
@@ -63,7 +75,10 @@ const LoginPage = () => {
 
       router.replace('/screens/DashboardScreen/DashboardPage');
     } catch (error) {
-      console.warn("Erreur inattendue", error);
+      Toast.show({
+        type: 'error', // 'success' | 'error' | 'info'
+        text1: `Erreur inattendue ${error}`,
+      });
     }
   };
 

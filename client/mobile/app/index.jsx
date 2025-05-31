@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { useRouter } from 'expo-router';
 import { View, ActivityIndicator } from 'react-native';
+import 'react-native-gesture-handler';
 
 export default function App() {
   const router = useRouter();
