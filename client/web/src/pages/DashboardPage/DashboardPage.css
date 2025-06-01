@@ -822,6 +822,16 @@
     box-sizing: border-box;
 }
 
+.dashboard-right-peoples h4 {
+     margin-left: 25px;
+}
+
+.dashboard-right-peoples input {
+     margin-left: 25px;
+}
+
+
+.da
 .dashboard-container.light .dashboard-right-peoples {
     background: #e5e2d3;
 }
@@ -887,6 +897,14 @@
   }
 
 
+  ul {
+  list-style: none;
+  padding-left: 0;
+  margin-left: 25px;
+}
+
+
+
   .notifications-popup ul {
     list-style: none;
     margin: 0;
@@ -922,6 +940,9 @@
     border-bottom: 1px solid #eee;
   }
 
+.user-offline {
+  opacity: 0.5;
+}
 
 
 .public-workspace-card {
@@ -945,6 +966,8 @@
     justify-items: center;
     align-items: start;
 }
+
+
 
 
 .public-workspace-card:hover {
@@ -1129,5 +1152,3 @@
 .dashboard-container.dark .chat-message.from-me .message-inner {
   background-color: #005f7f;
 }
-
-
