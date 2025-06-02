@@ -170,47 +170,51 @@ export const restoreUser = async (request) => {
   ]);
 };
 
+
 export const loginUser = async (request) => {
-  const [users] = await pool.query(
-    "SELECT u.*, p.provider FROM users u LEFT JOIN providers p ON u.id = p.user_id WHERE u.email = ? AND (p.provider = 'local' OR p.provider IS NULL)",
+  const rows = await pool.query(
+    `
+    SELECT u.*, p.provider
+    FROM users u
+    LEFT JOIN providers p ON u.id = p.user_id
+    WHERE u.email = ? AND u.password IS NOT NULL
+  `,
     [request.body.email]
   );
 
-  console.log("Users found:", users);
-  if (!users || users.length === 0) {
-    console.error(
-      "Aucun utilisateur trouvé pour cet email :",
-      request.body.email
-    );
+  if (!rows || rows.length === 0) {
+    console.error("Aucun utilisateur trouvé :", request.body.email);
     return createErrorResponse(
       ERRORS.USER_NOT_FOUND,
-      "Aucun utilisateur trouvé avec cet e-mail."
+      "Aucun compte trouvé avec cet e-mail."
     );
   }
 
-  const user = users;
-  console.log("User  token:", user.confirm_token);
-  if (user.confirm_token !== null) {
+  //  parfois j'ai deux email identique un pour un provider et l'autre pour un local donc je veux être sur que j'me connecte avec un compte local
+  const user = rows.find((row) => row.provider === null);
+
+  if (user.confirm_token) {
     console.error("Compte non confirmé :", user.email);
     return createErrorResponse(
       ERRORS.USER_NOT_CONFIRMED,
       "Veuillez confirmer votre compte avant de vous connecter."
     );
   }
+  try {
+    const match = await bcrypt.compare(request.body.password, user.password);
 
-  const match = await bcrypt.compare(request.body.password, user.password);
-  if (!match) {
-    console.error("Mot de passe incorrect !");
+    if (!match) {
+      console.error("Mot de passe incorrect !");
+      return createErrorResponse(
+        ERRORS.WRONG_PASSWORD,
+        "Mot de passe incorrect."
+      );
+    }
+  } catch (err) {
+    console.error(" ERREUR pendant bcrypt.compare :", err);
     return createErrorResponse(
-      ERRORS.WRONG_PASSWORD,
-      "Mot de passe incorrect."
-    );
-  }
-
-  if (user.provider === "google") {
-    return createErrorResponse(
-      ERRORS.USE_GOOGLE_LOGIN,
-      "Veuillez vous connecter avec Google."
+      ERRORS.INTERNAL_SERVER_ERROR,
+      "Erreur lors de la vérification du mot de passe."
     );
   }
 
@@ -218,7 +222,7 @@ export const loginUser = async (request) => {
     {
       id: user.id,
       email: user.email,
-      provider: user.provider,
+      provider: "local",
       username: user.username,
     },
     process.env.JWT_SECRET,
@@ -232,7 +236,7 @@ export const loginUser = async (request) => {
       id: user.id,
       username: user.username,
       email: user.email,
-      provider: user.provider,
+      provider: "local",
       created_at: user.created_at,
     },
   };
@@ -289,66 +293,66 @@ export const getUserProviders = async (req, res) => {
     res.status(500).json(createErrorResponse(ERRORS.INTERNAL_SERVER_ERROR));
   }
 };
-
 export const unlinkProvider = async (req, res) => {
   const { user_id, provider } = req.body;
 
   if (!user_id || !provider) {
-    return res
-      .status(400)
-      .json(createErrorResponse(ERRORS.DATA_MISSING, "Données manquantes."));
+    return res.status(400).json(
+      createErrorResponse(ERRORS.DATA_MISSING, "Données manquantes.")
+    );
   }
+
+  const connection = await pool.getConnection();
 
   try {
-    const connection = await pool.getConnection();
-    try {
-      await connection.beginTransaction();
+    await connection.beginTransaction();
 
-      const existingProvider = await connection.query(
-        "SELECT * FROM providers WHERE user_id = ? AND provider = ?",
-        [user_id, provider]
-      );
+    const [currentLink] = await connection.query(
+      "SELECT * FROM providers WHERE user_id = ? AND provider = ?",
+      [user_id, provider]
+    );
 
-      if (existingProvider.length === 0) {
-        await connection.rollback();
-        return res
-          .status(404)
-          .json(createErrorResponse(ERRORS.SOCIAL_ACCOUNT_NOT_FOUND));
-      }
-
-      const result = await connection.query(
-        "DELETE FROM providers WHERE user_id = ? AND provider = ?",
-        [user_id, provider]
-      );
-
-      if (result.affectedRows > 0) {
-        await connection.commit();
-        return res.json({
-          success: true,
-          message: `Compte ${provider} délié.`,
-        });
-      } else {
-        await connection.rollback();
-        return res
-          .status(500)
-          .json(createErrorResponse(ERRORS.OPERATION_FAILED));
-      }
-    } catch (error) {
+    if (!currentLink || !currentLink.provider_id) {
       await connection.rollback();
-      console.error("Erreur lors de la suppression du provider :", error);
-      return res
-        .status(500)
-        .json(createErrorResponse(ERRORS.INTERNAL_SERVER_ERROR));
-    } finally {
-      connection.release();
+      return res.status(400).json(
+        createErrorResponse(ERRORS.OPERATION_FAILED, "Aucune liaison trouvée.")
+      );
     }
-  } catch (error) {
-    console.error(" Erreur générale :", error);
-    return res
-      .status(500)
-      .json(createErrorResponse(ERRORS.INTERNAL_SERVER_ERROR));
+
+    const { provider_id, original_user_id } = currentLink;
+
+    if (original_user_id) {
+      // Restore à l'ancien owner
+      await connection.query(
+        `UPDATE providers 
+         SET user_id = ?, original_user_id = NULL 
+         WHERE provider_id = ? AND provider = ?`,
+        [original_user_id, provider_id, provider]
+      );
+    } else {
+      // Supprimer la liaison simple
+      await connection.query(
+        `DELETE FROM providers 
+         WHERE user_id = ? AND provider = ? AND provider_id = ?`,
+        [user_id, provider, provider_id]
+      );
+    }
+
+    await connection.commit();
+
+    return res.json({
+      success: true,
+      message: `Le compte ${provider} a été délié avec succès.`,
+    });
+  } catch (err) {
+    await connection.rollback();
+    console.error("Erreur unlinkProvider :", err);
+    return res.status(500).json(createErrorResponse(ERRORS.INTERNAL_SERVER_ERROR));
+  } finally {
+    connection.release();
   }
 };
+
 
 export const exportUserData = async (req, res) => {
   const userId = req.params.id;
@@ -411,12 +415,10 @@ export const exportUserData = async (req, res) => {
     doc.pipe(res);
 
     // Titre principal
-    doc
-      .fontSize(20)
-      .text(" Export de vos données Supchat", {
-        align: "center",
-        underline: true,
-      });
+    doc.fontSize(20).text(" Export de vos données Supchat", {
+      align: "center",
+      underline: true,
+    });
     doc.moveDown(1.5);
 
     // Informations utilisateur

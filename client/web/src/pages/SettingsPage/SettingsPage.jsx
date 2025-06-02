@@ -1,7 +1,8 @@
 import * as react from "react";
 import * as reactdom from "react-router-dom";
 import { FaGoogle, FaFacebook, FaTimes } from "react-icons/fa";
-import socket from '../../socket';
+import socket from "../../socket";
+import { toast } from "react-toastify";
 
 import "./SettingsPage.css";
 
@@ -20,7 +21,8 @@ const SettingsPage = () => {
     const errorMessage = urlParams.get("error");
 
     if (errorMessage) {
-      alert(errorMessage);
+      toast.error(errorMessage, { position: "top-center" });
+
     }
 
     const storedUser = JSON.parse(localStorage.getItem("user"))?.data;
@@ -44,7 +46,7 @@ const SettingsPage = () => {
     const token = user?.token;
 
     if (!token) {
-      alert("Vous devez être connecté pour lier un compte.");
+      toast.error(`Vous devez être connecté pour lier un compte.`, { position: "top-center" });
       return;
     }
 
@@ -54,7 +56,9 @@ const SettingsPage = () => {
   const handleUnlinkProvider = async (provider) => {
     if (!user?.id) return;
 
-    const confirmUnlink = window.confirm(`Voulez-vous vraiment délier votre compte ${provider} ?`);
+    const confirmUnlink = window.confirm(
+      `Voulez-vous vraiment délier votre compte ${provider} ?`
+    );
     if (!confirmUnlink) return;
 
     try {
@@ -75,32 +79,28 @@ const SettingsPage = () => {
 
         setForceRender((prev) => prev + 1);
       } else {
-        alert("Erreur de déliaison : " + data.error);
+      toast.error(`Erreur de déliaison : ${data.error}`, { position: "top-center" });
       }
     } catch (error) {
       console.error("Erreur de déliaison:", error);
     }
   };
 
+  const handleExportData = () => {
+    if (!user?.id) return;
+    window.location.href = `http://localhost:3000/users/${user.id}/export`;
+  };
 
-const handleExportData = () => {
-  if (!user?.id) return;
-  window.location.href = `http://localhost:3000/users/${user.id}/export`;
-};
+  const handleStatusChange = (e) => {
+    const newStatus = e.target.value;
+    setStatus(newStatus);
+    localStorage.setItem("user.status", newStatus);
 
-
-
-const handleStatusChange = (e) => {
-  const newStatus = e.target.value;
-  setStatus(newStatus);
-  localStorage.setItem("user.status", newStatus);
-
-  socket.emit("updateStatus", {
-    user_id: user.id,
-    status: newStatus,
-  });
-};
-
+    socket.emit("updateStatus", {
+      user_id: user.id,
+      status: newStatus,
+    });
+  };
 
   return (
     <div className={`settings-container ${theme}`} key={forceRender}>
@@ -127,14 +127,17 @@ const handleStatusChange = (e) => {
         <main>
           {user && (
             <div className="settings-link-providers">
-              <p><strong>Nom d'utilisateur :</strong> {user?.username}</p>
-              <p><strong>Email :</strong> {user?.email}</p>
+              <p><strong>Nom d'utilisateur :</strong> {user.username}</p>
+              <p><strong>Email :</strong> {user.email}</p>
 
               <label>Thème :</label>
-              <select value={theme} onChange={(e) => {
-                setTheme(e.target.value);
-                localStorage.setItem("gui.theme", e.target.value);
-              }}>
+              <select
+                value={theme}
+                onChange={(e) => {
+                  setTheme(e.target.value);
+                  localStorage.setItem("gui.theme", e.target.value);
+                }}
+              >
                 <option value="light">Clair</option>
                 <option value="dark">Sombre</option>
               </select>
@@ -147,13 +150,28 @@ const handleStatusChange = (e) => {
                 <option value="offline">⚫ Hors ligne</option>
               </select>
 
-              <button onClick={handleExportData} style={{ marginTop: '10px' }}>
+              <button onClick={handleExportData} style={{ marginTop: "10px" }}>
                 📥 Exporter mes données
               </button>
 
-              {user.provider === null && (
+              <hr style={{ margin: "20px 0" }} />
+
+              {user.provider === "local" ? (
                 <>
-                  {isGoogleLinked ? (
+                  {/* Boutons de liaison : seulement si aucun compte social n’est déjà lié */}
+                  {!isGoogleLinked && !isFacebookLinked && (
+                    <>
+                      <button onClick={() => handleLinkProvider("google")} className="google-btn">
+                        <FaGoogle /> Lier mon compte Google
+                      </button>
+                      <button onClick={() => handleLinkProvider("facebook")} className="facebook-btn">
+                        <FaFacebook /> Lier mon compte Facebook
+                      </button>
+                    </>
+                  )}
+
+                  {/* Boutons de déliaison */}
+                  {isGoogleLinked && (
                     <div className="linked-provider">
                       <button className="google-btn linked">
                         <FaGoogle /> Compte Google lié ✅
@@ -162,15 +180,9 @@ const handleStatusChange = (e) => {
                         ❌ Délier
                       </button>
                     </div>
-                  ) : (
-                    !isFacebookLinked && (
-                      <button onClick={() => handleLinkProvider("google")} className="google-btn">
-                        <FaGoogle /> Lier mon compte Google
-                      </button>
-                    )
                   )}
 
-                  {isFacebookLinked ? (
+                  {isFacebookLinked && (
                     <div className="linked-provider">
                       <button className="facebook-btn linked">
                         <FaFacebook /> Compte Facebook lié ✅
@@ -179,14 +191,13 @@ const handleStatusChange = (e) => {
                         ❌ Délier
                       </button>
                     </div>
-                  ) : (
-                    !isGoogleLinked && (
-                      <button onClick={() => handleLinkProvider("facebook")} className="facebook-btn">
-                        <FaFacebook /> Lier avec Facebook
-                      </button>
-                    )
                   )}
                 </>
+              ) : (
+                <div className="connectToLocalAcc">
+                  Vous êtes connecté via <strong>{user.provider}</strong>.<br />
+                  Pour gérer les liaisons de comptes, veuillez vous connecter avec votre identifiant local.
+                </div>
               )}
             </div>
           )}

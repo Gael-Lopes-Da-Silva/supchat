@@ -7,6 +7,7 @@ import DashboardRight from "../../components/DashboardRight/DashboardRight";
 import DashboardLeft from "../../components/DashboardLeft/DashboardLeft";
 import WorkspaceModalManager from "../../components/DashboardModals/WorkspaceModalManager";
 import DiscoverWorkspaces from "../../components/DashboardRight/DiscoverWorkspaces";
+import { toast } from "react-toastify";
 
 import { createWorkspaceInvitation } from "../../services/WorkspaceInvitations";
 import { getPublicWorkspaces } from "../../services/Workspaces";
@@ -126,8 +127,9 @@ const DashboardPage = () => {
     const isAlreadyMember = !!workspaces[workspace.id];
 
     if (workspace.is_private && !isAlreadyMember) {
-      alert("Ce workspace est privé. Utilisez un lien d'invitation.");
-      return;
+          toast.error(`Ce workspace est privé. Utilisez un lien d'invitation.`, { position: "top-center" });
+
+      return;  
     }
 
     socket.emit("joinWorkspace", { workspace_id: workspace.id }); // autojoin du workspace public sur lequel on vient de cliquer

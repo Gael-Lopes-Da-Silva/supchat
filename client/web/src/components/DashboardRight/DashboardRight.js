@@ -10,6 +10,8 @@ import {
   getChannelMembers,
   uploadFile,
 } from "../../services/Channels";
+import { toast } from "react-toastify";
+
 import { deleteWorkspaceMember } from "../../services/WorkspaceMembers";
 import { ReactComponent as EmojiIcon } from "../../assets/emoji-round-plus.svg";
 
@@ -205,7 +207,9 @@ const DashboardRight = ({
         mentioned_user_ids: [],
       });
     } else {
-      alert("Erreur upload : " + (data.error_message || "Erreur inconnue"));
+      toast.error(`Erreur upload : ${data.error_messagef}`, {
+        position: "top-center",
+      });
     }
   };
 
@@ -353,17 +357,17 @@ const DashboardRight = ({
       const res = await deleteWorkspaceMember(workspaceMemberId);
 
       if (res.error) {
-        alert("Erreur lors de l'expulsion.");
+        toast.error("Erreur lors de l'expulsion.", { position: "top-center" });
         return;
       }
 
-      alert("Membre expulsé.");
+      toast.success("Membre expulsé.", { position: "top-center" });
       socket.emit("getWorkspaceMembers", {
         workspace_id: selectedWorkspace.id,
       });
     } catch (err) {
       console.error("Erreur expulsion membre :", err);
-      alert("Erreur réseau.");
+      toast.error("Erreur réseau.", { position: "top-center" });
     }
   };
 
@@ -722,10 +726,9 @@ const DashboardRight = ({
               >
                 <div className="user-line">
                   <button
-                    className="user-button"
-                    disabled={!isNotSelf}
+                    className={`user-button ${!isNotSelf ? "self-user" : ""}`}
                     onClick={async (e) => {
-                      if (!isNotSelf) return;
+                      if (!isNotSelf) return; 
                       e.stopPropagation();
                       const rect = e.currentTarget.getBoundingClientRect();
                       let x = rect.right + 5;
