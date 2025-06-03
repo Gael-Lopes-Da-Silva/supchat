@@ -104,7 +104,7 @@ passport.use("google-link", new GoogleStrategy(
     clientID: process.env.GOOGLE_CLIENT_ID,
     clientSecret: process.env.GOOGLE_CLIENT_SECRET,
     callbackURL: "http://localhost:3000/users/auth/google/link/callback",
-    passReqToCallback: true
+    passReqToCallback: true,
   },
   async (req, accessToken, refreshToken, profile, done) => {
     try {
@@ -112,7 +112,7 @@ passport.use("google-link", new GoogleStrategy(
         return done(new Error("Données Google invalides."));
       }
 
-      const token = new URL(req.originalUrl, `http://${req.headers.host}`).searchParams.get("token");
+      const token = req.query.state; // oAuth galère avec les params dans l'url mais lit bien state de query
       if (!token) return done(new Error("Token JWT manquant."));
 
       let localUser;
@@ -156,7 +156,9 @@ passport.use("google-link", new GoogleStrategy(
 
         if (existingEntry.length > 0) {
           const updateResult = await connection.query(
-            "UPDATE providers SET user_id = ? WHERE provider_id = ? AND provider = 'google'",
+            `UPDATE providers 
+             SET original_user_id = user_id, user_id = ? 
+             WHERE provider_id = ? AND provider = 'google'`,
             [userId, googleId]
           );
 
@@ -186,5 +188,6 @@ passport.use("google-link", new GoogleStrategy(
     }
   }
 ));
+
 
 export default passport;

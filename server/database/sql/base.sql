@@ -13,6 +13,7 @@ CREATE TABLE users (
 /* PROVIDERS */
 CREATE TABLE providers (
     user_id INT NOT NULL,  
+    original_user_id INT NULL,
     provider_id VARCHAR(255) DEFAULT NULL,
     provider VARCHAR(50) DEFAULT 'local',
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE

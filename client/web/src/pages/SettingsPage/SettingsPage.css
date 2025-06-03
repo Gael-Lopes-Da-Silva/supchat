@@ -28,13 +28,20 @@
     background: #4d4d4d;
 }
 
+
+.connectToLocalAcc {
+    margin-top: 15px;
+    color: #666;
+    font-style: italic;
+}
+
 .settings-left-categorie {
     display: flex;
     flex-direction: column;
     padding: 0.6rem;
     border-radius: 1rem;
     border: solid 3px #333;
-    box-shadow: #333 5px 5px 0px;
+    box-shadow: #130c0c 5px 5px 0px;
     box-sizing: border-box;
 }
 

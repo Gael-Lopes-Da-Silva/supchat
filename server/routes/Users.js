@@ -125,6 +125,7 @@ router.get("/auth/facebook/link", (req, res, next) => {
     passport.authenticate("facebook-link", {
       scope: ["email", "public_profile"],
       session: false,
+      state: token,
     })(req, res, next);
   } catch (err) {
     return res.redirect("http://localhost:5000/settings?error=Token invalide.");
@@ -167,6 +168,7 @@ router.get("/auth/google/link", (req, res, next) => {
     passport.authenticate("google-link", {
       scope: ["profile", "email"],
       session: false,
+       state: token
     })(req, res, next);
   } catch (err) {
     return res.redirect("http://localhost:5000/settings?error=Token invalide.");
