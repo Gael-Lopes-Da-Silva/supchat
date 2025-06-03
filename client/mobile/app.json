@@ -9,13 +9,50 @@
         "userInterfaceStyle": "automatic",
         "newArchEnabled": true,
         "ios": {
-            "supportsTablet": true
+            "supportsTablet": true,
+            "bundleIdentifier": "com.supinfo.supchat",
+            "config": {
+                "googleSignIn": {
+                    "reservedClientId": "$(GOOGLE_IOS_RESERVED_CLIENT_ID)"
+                }
+            }
         },
         "android": {
             "adaptiveIcon": {
                 "foregroundImage": "./assets/images/favicon.png",
                 "backgroundColor": "#f77066"
-            }
+            },
+            "package": "com.supinfo.supchat",
+            "googleServicesFile": "./google-services.json",
+            "config": {
+                "googleSignIn": {
+                    "certificateHash": "$(ANDROID_CERTIFICATE_HASH)"
+                }
+            },
+            "intentFilters": [
+                {
+                    "action": "VIEW",
+                    "autoVerify": true,
+                    "data": [
+                        {
+                            "scheme": "supchat",
+                            "host": "*"
+                        },
+                        {
+                            "scheme": "exp+supchat",
+                            "host": "*"
+                        },
+                        {
+                            "scheme": "fb$(FACEBOOK_CLIENT_ID)",
+                            "host": "*"
+                        }
+                    ],
+                    "category": [
+                        "BROWSABLE",
+                        "DEFAULT"
+                    ]
+                }
+            ]
         },
         "web": {
             "bundler": "metro",
@@ -32,6 +69,20 @@
                     "resizeMode": "contain",
                     "backgroundColor": "#f77066"
                 }
+            ],
+            "@react-native-google-signin/google-signin",
+            [
+                "react-native-fbsdk-next",
+                {
+                    "appID": "$(FACEBOOK_CLIENT_ID)",
+                    "clientToken": "$(FACEBOOK_CLIENT_TOKEN)",
+                    "displayName": "Supchat",
+                    "scheme": "fb$(FACEBOOK_CLIENT_ID)",
+                    "advertiserIDCollectionEnabled": false,
+                    "autoLogAppEventsEnabled": false,
+                    "isAutoInitEnabled": true,
+                    "iosUserTrackingPermission": "Cette application souhaite accéder à vos données pour l'authentification Facebook."
+                }
             ]
         ],
         "experiments": {
@@ -39,7 +90,10 @@
         },
         "extra": {
             "apiUrl": "http://<server_API>:3000/",
-            "clientWebUrl": "http://<server_web>:5000/"
+            "clientWebUrl": "http://<server_web>:5000/",
+            "googleClientId": "$(GOOGLE_MOBILE_CLIENT_ID)",
+            "googleIosClientId": "$(GOOGLE_IOS_CLIENT_ID)",
+            "facebookAppId": "$(FACEBOOK_CLIENT_ID)"
         }
     }
 }

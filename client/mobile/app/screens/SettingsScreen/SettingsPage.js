@@ -1,10 +1,22 @@
 import { useEffect, useState } from 'react';
-import { View, Text, Button, TouchableOpacity, StyleSheet, Linking } from 'react-native';
+import { View, Text, Button, TouchableOpacity, StyleSheet, Linking, Platform } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+// import { GoogleSignin } from '@react-native-google-signin/google-signin';
+// import { LoginManager, AccessToken } from 'react-native-fbsdk-next';
+import Toast from 'react-native-toast-message';
+import Constants from 'expo-constants';
 
 import socket from '../../socket';
 import styles from './SettingsPageStyles';
+
+const API_URL = Constants.expoConfig.extra.apiUrl;
+
+// Configuration de Google Sign-In
+// GoogleSignin.configure({
+//   webClientId: process.env.GOOGLE_MOBILE_CLIENT_ID,
+//   iosClientId: process.env.GOOGLE_IOS_CLIENT_ID,
+// });
 
 const SettingsPage = () => {
   const [user, setUser] = useState(null);
@@ -21,7 +33,7 @@ const SettingsPage = () => {
       const parsed = JSON.parse(u)?.data;
       setUser(parsed);
       if (parsed?.id) {
-        fetch(`https://api.example.com/users/${parsed.id}/providers`, {
+        fetch(`${API_URL}/users/${parsed.id}/providers`, {
           headers: { Authorization: `Bearer ${parsed.token}` },
         })
           .then(res => res.json())
@@ -36,33 +48,27 @@ const SettingsPage = () => {
     AsyncStorage.getItem('user.status').then(setStatus);
   }, []);
 
-  const handleLinkProvider = (provider) => {
-    const token = user?.token;
-    if (!token) return;
-    Linking.openURL(`https://api.example.com/users/auth/${provider}/link?token=${token}`);
+  const handleLinkProvider = async (provider) => {
+    // Version temporaire pour le développement
+    Toast.show({
+      type: 'info',
+      text1: `Liaison ${provider} désactivée en développement`,
+      text2: 'Cette fonctionnalité nécessite un development build'
+    });
   };
 
   const handleUnlinkProvider = async (provider) => {
-    if (!user?.id) return;
-    try {
-      const res = await fetch(`https://api.example.com/users/unlink-provider`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ user_id: user.id, provider }),
-      });
-      const data = await res.json();
-      if (data.success) {
-        provider === 'google' ? setIsGoogleLinked(false) : setIsFacebookLinked(false);
-        setForceRender((prev) => prev + 1);
-      }
-    } catch (err) {
-      console.error(err);
-    }
+    // Version temporaire pour le développement
+    Toast.show({
+      type: 'info',
+      text1: `Déliaison ${provider} désactivée en développement`,
+      text2: 'Cette fonctionnalité nécessite un development build'
+    });
   };
 
   const handleExportData = () => {
     if (!user?.id) return;
-    Linking.openURL(`https://api.example.com/users/${user.id}/export`);
+    Linking.openURL(`${API_URL}/users/${user.id}/export`);
   };
 
   const handleStatusChange = (newStatus) => {

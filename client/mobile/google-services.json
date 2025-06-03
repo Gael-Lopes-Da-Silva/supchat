@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "705451283767",
+    "project_id": "supchat-1fc61",
+    "storage_bucket": "supchat-1fc61.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:705451283767:android:0a08c1e014386019ab36b2",
+        "android_client_info": {
+          "package_name": "com.supinfo.supchat"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBMtqKsT450r4XvHZAqAD6GTYqk5wHtUOU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

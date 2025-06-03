@@ -4,6 +4,9 @@ import { FontAwesome6, FontAwesome } from '@expo/vector-icons';
 import { jwtDecode } from 'jwt-decode';
 import Constants from 'expo-constants';
 import Toast from 'react-native-toast-message';
+// import { GoogleSignin } from '@react-native-google-signin/google-signin';
+// import { LoginManager, AccessToken } from 'react-native-fbsdk-next';
+import * as WebBrowser from 'expo-web-browser';
 
 import Button from '../../components/Button/Button';
 import InputField from '../../components/InputField/InputField';
@@ -12,10 +15,18 @@ import styles from './LoginPageStyles';
 import { useRouter } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-
 import { loginUser, updateUser } from '../../../services/Users';
 
 const API_URL = Constants.expoConfig.extra.apiUrl;
+
+// Initialisation de WebBrowser pour l'authentification Expo
+WebBrowser.maybeCompleteAuthSession();
+
+// Configuration de Google Sign-In
+// GoogleSignin.configure({
+//   webClientId: Constants.expoConfig.extra.googleClientId,
+//   iosClientId: Constants.expoConfig.extra.googleIosClientId,
+// });
 
 const LoginPage = () => {
   const [email, setEmail] = useState('');
@@ -82,12 +93,50 @@ const LoginPage = () => {
     }
   };
 
-  const handleGoogle = () => {
-    Linking.openURL(`${API_URL}/users/auth/google`);
+  const handleGoogle = async () => {
+    // Version temporaire pour le développement
+    try {
+      const fakeToken = "fake_token_for_dev";
+      const fakeUser = {
+        id: 1,
+        email: "test@example.com",
+        username: "TestUser"
+      };
+      await AsyncStorage.setItem("user", JSON.stringify({
+        token: fakeToken,
+        data: fakeUser
+      }));
+      router.replace('/screens/DashboardScreen/DashboardPage');
+    } catch (error) {
+      Toast.show({
+        type: 'error',
+        text1: 'Erreur de connexion Google (DEV)',
+        text2: error.message,
+      });
+    }
   };
 
-  const handleFacebook = () => {
-    Linking.openURL(`https://www.facebook.com/v15.0/dialog/oauth?client_id=FACEBOOK_CLIENT_ID&redirect_uri=${API_URL}/users/auth/facebook/callback&scope=email`);
+  const handleFacebook = async () => {
+    // Version temporaire pour le développement
+    try {
+      const fakeToken = "fake_token_for_dev";
+      const fakeUser = {
+        id: 1,
+        email: "test@example.com",
+        username: "TestUser"
+      };
+      await AsyncStorage.setItem("user", JSON.stringify({
+        token: fakeToken,
+        data: fakeUser
+      }));
+      router.replace('/screens/DashboardScreen/DashboardPage');
+    } catch (error) {
+      Toast.show({
+        type: 'error',
+        text1: 'Erreur de connexion Facebook (DEV)',
+        text2: error.message,
+      });
+    }
   };
 
   return (
