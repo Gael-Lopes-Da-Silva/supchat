@@ -20,3 +20,5 @@ yarn-error.*
 *.tsbuildinfo
 app-example
 package-lock.json
+./google-services.json
+./GoogleService-Info.plist
