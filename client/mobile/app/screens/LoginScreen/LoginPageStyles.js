@@ -7,7 +7,7 @@ export default StyleSheet.create({
     alignItems: 'center',
   },
   light: {
-    backgroundColor: '#fffceb',
+    backgroundColor: '#f77066',
   },
   dark: {
     backgroundColor: '#4d4d4d',
@@ -29,7 +29,7 @@ export default StyleSheet.create({
     marginLeft: 12,
     fontSize: 32,
     fontWeight: 'bold',
-    color: '#000',
+    color: '#333',
   },
   box: {
     width: '90%',
@@ -41,8 +41,8 @@ export default StyleSheet.create({
     backgroundColor: '#fffceb',
     shadowColor: '#333',
     shadowOffset: { width: 5, height: 5 },
-    shadowOpacity: 0.4,
-    shadowRadius: 4,
+    shadowOpacity: 1,
+    shadowRadius: 0,
     elevation: 6,
     gap: 20,
   },

@@ -119,13 +119,23 @@ const RegisterPage = () => {
             onChange={() => setChecked(!checked)}
             required={true}
             label={
-              <Text style={styles.termsText}>
-                J'ai lu et j'accepte les{" "}
-                <Text style={styles.link} onPress={() => router.push('/screens/TermsScreen/TermsPage')}>conditions d'utilisation</Text>{" "}
-                et la{" "}
-                <Text style={styles.link} onPress={() => router.push('/screens/PrivacyScreen/PrivacyPage')}>politique de confidentialité</Text>{" "}
-                de Supchat.
-              </Text>
+              <View style={styles.termsContainer}>
+                <Text style={styles.termsText}>
+                  J'ai lu et j'accepte les{' '}
+                </Text>
+                <Text style={[styles.termsText, styles.link]} onPress={() => router.push('/screens/TermsScreen/TermsPage')}>
+                  conditions d'utilisation
+                </Text>
+                <Text style={styles.termsText}>
+                  {' '}et la{' '}
+                </Text>
+                <Text style={[styles.termsText, styles.link]} onPress={() => router.push('/screens/PrivacyScreen/PrivacyPage')}>
+                  politique de confidentialité
+                </Text>
+                <Text style={styles.termsText}>
+                  {' '}de Supchat.
+                </Text>
+              </View>
             }
           />
         </View>

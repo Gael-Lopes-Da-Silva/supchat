@@ -1,12 +1,19 @@
 import { StyleSheet } from 'react-native';
 
 export default StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
   termsContainer: {
-    flexGrow: 1,
-    margin: 16,
+    backgroundColor: '#fffceb',
+    width: '90%',
+    maxWidth: 400,
+    marginVertical: 24,
+    paddingHorizontal: 24,
     borderWidth: 3,
     borderColor: '#333',
-    padding: 16,
     borderRadius: 12,
     shadowColor: '#333',
     shadowOffset: { width: 5, height: 5 },
@@ -15,40 +22,43 @@ export default StyleSheet.create({
     elevation: 4,
   },
   light: {
-    backgroundColor: '#fffceb',
-    color: '#333',
+    backgroundColor: '#f77066',
   },
   dark: {
     backgroundColor: '#4d4d4d',
-    color: '#fffceb',
   },
   termsBox: {
     gap: 12,
   },
   title: {
-    fontSize: 22,
+    fontSize: 24,
     fontWeight: 'bold',
     marginBottom: 10,
+    color: '#333',
   },
   line: {
-    color: '#000',
+    color: '#333',
     marginBottom: 10,
   },
   subtitle: {
     fontSize: 16,
     fontWeight: 'bold',
     marginBottom: 4,
+    color: '#333',
   },
   section: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: 'bold',
-    marginTop: 12,
+    marginTop: 16,
     marginBottom: 4,
+    color: '#333',
   },
   paragraph: {
     fontSize: 14,
     fontWeight: 'bold',
-    marginBottom: 6,
+    marginBottom: 8,
+    color: '#333',
+    lineHeight: 20,
   },
   link: {
     color: '#f77066',
@@ -59,5 +69,9 @@ export default StyleSheet.create({
     marginTop: 24,
     fontStyle: 'italic',
     textAlign: 'center',
+    color: '#333',
+  },
+  bold: {
+    fontWeight: 'bold',
   },
 });

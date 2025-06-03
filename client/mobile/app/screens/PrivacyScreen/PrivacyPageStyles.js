@@ -1,10 +1,17 @@
 import { StyleSheet } from 'react-native';
 
 export default StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
   privacyContainer: {
-    flexGrow: 1,
-    margin: 16,
-    padding: 16,
+    backgroundColor: '#fffceb',
+    width: '90%',
+    maxWidth: 400,
+    marginVertical: 24,
+    paddingHorizontal: 24,
     borderWidth: 3,
     borderColor: '#333',
     borderRadius: 12,
@@ -15,33 +22,36 @@ export default StyleSheet.create({
     elevation: 4,
   },
   light: {
-    backgroundColor: '#fffceb',
-    color: '#333',
+    backgroundColor: '#f77066',
   },
   dark: {
     backgroundColor: '#4d4d4d',
-    color: '#fffceb',
   },
   privacyBox: {
     gap: 12,
   },
   title: {
-    fontSize: 22,
+    fontSize: 24,
     fontWeight: 'bold',
     marginBottom: 8,
+    color: '#333',
   },
   section: {
-    marginTop: 12,
-    fontSize: 18,
+    marginTop: 16,
+    fontSize: 20,
     fontWeight: 'bold',
+    color: '#333',
   },
   line: {
-    color: '#000',
+    color: '#333',
     marginBottom: 10,
   },
   paragraph: {
-    marginTop: 6,
+    marginTop: 8,
     fontWeight: 'bold',
+    color: '#333',
+    fontSize: 14,
+    lineHeight: 20,
   },
   link: {
     fontWeight: 'bold',
@@ -52,5 +62,9 @@ export default StyleSheet.create({
     marginTop: 24,
     fontStyle: 'italic',
     textAlign: 'center',
+    color: '#333',
+  },
+  bold: {
+    fontWeight: 'bold',
   },
 });
