@@ -122,20 +122,47 @@ export const readUsersByIds = async (ids = []) => {
 
 export const updateUser = async (request) => {
   if (!request.params.id) {
-    return createErrorResponse(ERRORS.DATA_MISSING, "ID not provided");
+    return createErrorResponse(ERRORS.DATA_MISSING, "ID non fourni");
   }
 
-  const updateResult = await pool.query(
-    "UPDATE users SET confirm_token = NULL, updated_at = NOW() WHERE id = ?",
-    [request.params.id]
-  );
+  let updateFields = [];
+  let updateValues = [];
+
+  // Gestion du mot de passe
+  if (request.body.password) {
+    const hashedPassword = bcrypt.hashSync(request.body.password, 10);
+    updateFields.push("password = ?");
+    updateValues.push(hashedPassword);
+  }
+
+  // Gestion du confirm_token
+  if (request.body.confirm_token === null) {
+    updateFields.push("confirm_token = NULL");
+  }
+
+  // Ajout de la date de mise à jour
+  updateFields.push("updated_at = NOW()");
+
+  // Si aucun champ à mettre à jour
+  if (updateFields.length === 0) {
+    return createErrorResponse(ERRORS.DATA_MISSING, "Aucune donnée à mettre à jour");
+  }
+
+  // Construction de la requête
+  const query = `UPDATE users SET ${updateFields.join(", ")} WHERE id = ?`;
+  updateValues.push(request.params.id);
+
+  const updateResult = await pool.query(query, updateValues);
 
   if (updateResult.affectedRows === 0) {
     console.error("Erreur : Aucun utilisateur mis à jour !");
     return createErrorResponse(ERRORS.INTERNAL_SERVER_ERROR);
   }
 
-  return { success: true, message: "Utilisateur mis à jour avec succès" };
+  return { 
+    success: true, 
+    message: "Utilisateur mis à jour avec succès" 
+  };
 };
 
 export const deleteUser = async (request) => {
@@ -514,4 +541,27 @@ export const exportUserData = async (req, res) => {
     console.error("Erreur exportUserData PDF :", err);
     res.status(500).json(createErrorResponse(ERRORS.INTERNAL_SERVER_ERROR));
   }
+};
+
+export const readUserByEmail = async (email) => {
+  if (!email) {
+    return createErrorResponse(ERRORS.DATA_MISSING, "Email non fourni");
+  }
+
+  const [user] = await pool.query(
+    `SELECT u.*, p.provider 
+     FROM users u 
+     LEFT JOIN providers p ON u.id = p.user_id 
+     WHERE u.email = ?`,
+    [email]
+  );
+
+  if (!user) {
+    return createErrorResponse(ERRORS.USER_NOT_FOUND);
+  }
+
+  return {
+    success: true,
+    result: user
+  };
 };

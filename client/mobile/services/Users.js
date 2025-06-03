@@ -1,4 +1,3 @@
-
 import Constants from "expo-constants";
 
 const API_URL = Constants.expoConfig.extra.apiUrl;
@@ -143,6 +142,30 @@ export const linkProvider = async (userId, provider, providerId) => {
         error: true,
         message: `Erreur lors de la liaison du provider: ${response.statusText}`,
       };
+    }
+    return await response.json();
+  } catch (error) {
+    return { error: true, message: "Erreur serveur" };
+  }
+};
+
+export const readUserByEmail = async (email, api_url = API_URL) => {
+  if (!email) {
+    return { error: true, message: "Email requis" };
+  }
+
+  const url = `${api_url}users/by-email/${email}`;
+
+  try {
+    const response = await fetch(url, {
+      method: "GET",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      },
+    });
+    if (!response.ok) {
+      return { error: true, message: `Erreur HTTP ${response.status}` };
     }
     return await response.json();
   } catch (error) {

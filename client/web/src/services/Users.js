@@ -148,3 +148,28 @@ export const linkProvider = async (userId, provider, providerId) => {
         return { error: true, message: "Erreur serveur" };
     });
 };
+
+export const readUserByEmail = async (email, api_url) => {
+    if (!email) {
+        return { error: true, message: "Email requis" };
+    }
+
+    const url = `${api_url}users/by-email/${email}`;
+
+    return fetch(url, {
+        method: "GET",
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+        },
+    })
+    .then((response) => {
+        if (!response.ok) {
+            return { error: true, message: `Erreur HTTP ${response.status}` };
+        }
+        return response.json();
+    })
+    .catch((error) => {
+        return { error: true, message: "Erreur serveur" };
+    });
+};

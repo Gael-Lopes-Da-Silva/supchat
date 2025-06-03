@@ -10,6 +10,7 @@ import {
   deleteUser,
   loginUser,
   readUser,
+  readUserByEmail,
   restoreUser,
   updateUser,
   getUserProviders,
@@ -398,6 +399,18 @@ router.post("/auth/facebook/link/mobile", async (req, res) => {
     }
   } catch (err) {
     res.status(400).json({ error: 1, error_message: err.message });
+  }
+});
+
+router.get("/by-email/:email", async (req, res) => {
+  try {
+    const result = await readUserByEmail(req.params.email);
+    if (!result.error) {
+      return res.status(200).json({ when: "Users > ReadUserByEmail", result: result.result, error: 0 });
+    }
+    res.status(404).json({ when: "Users > ReadUserByEmail", error: result.error, error_message: result.error_message });
+  } catch (err) {
+    res.status(500).json({ when: "Users > ReadUserByEmail", error: 1, error_message: err.message });
   }
 });
 
