@@ -107,10 +107,6 @@ const SettingsPage = () => {
       <div className="settings-left">
         <div className="settings-left-categorie">
           <p>Paramètre utilisateur</p>
-          <hr />
-          <div className="settings-left-categorie-buttons">
-            <button onClick={() => navigate("/dashboard")}>Mon compte</button>
-          </div>
         </div>
       </div>
 

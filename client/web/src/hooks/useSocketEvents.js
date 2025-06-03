@@ -25,7 +25,8 @@ const useSocketEvents = ({
   setWorkspaces,
   setSelectedWorkspace,
   workspaces,
-  channels
+  channels,
+  updateGuiState
 }) => {
 
 
@@ -211,6 +212,9 @@ const useSocketEvents = ({
         workspace_id: selectedWorkspace.id,
       });
     }
+
+      updateGuiState("discoverWorkspaces", false);
+
   }, [selectedChannel?.id, selectedWorkspace?.id]);
   
   useEffect(() => {

@@ -485,6 +485,7 @@ const DashboardPage = () => {
     handleNewPublicWorkspace,
     messages,
     channels,
+    updateGuiState
   });
 
   const currentUserRoleId = workspaceUsers.find(
