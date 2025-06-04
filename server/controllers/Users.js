@@ -145,7 +145,10 @@ export const updateUser = async (request) => {
 
   // Si aucun champ à mettre à jour
   if (updateFields.length === 0) {
-    return createErrorResponse(ERRORS.DATA_MISSING, "Aucune donnée à mettre à jour");
+    return createErrorResponse(
+      ERRORS.DATA_MISSING,
+      "Aucune donnée à mettre à jour"
+    );
   }
 
   // Construction de la requête
@@ -159,9 +162,9 @@ export const updateUser = async (request) => {
     return createErrorResponse(ERRORS.INTERNAL_SERVER_ERROR);
   }
 
-  return { 
-    success: true, 
-    message: "Utilisateur mis à jour avec succès" 
+  return {
+    success: true,
+    message: "Utilisateur mis à jour avec succès",
   };
 };
 
@@ -196,7 +199,6 @@ export const restoreUser = async (request) => {
     request.params.id,
   ]);
 };
-
 
 export const loginUser = async (request) => {
   const rows = await pool.query(
@@ -320,13 +322,14 @@ export const getUserProviders = async (req, res) => {
     res.status(500).json(createErrorResponse(ERRORS.INTERNAL_SERVER_ERROR));
   }
 };
+
 export const unlinkProvider = async (req, res) => {
   const { user_id, provider } = req.body;
 
   if (!user_id || !provider) {
-    return res.status(400).json(
-      createErrorResponse(ERRORS.DATA_MISSING, "Données manquantes.")
-    );
+    return res
+      .status(400)
+      .json(createErrorResponse(ERRORS.DATA_MISSING, "Données manquantes."));
   }
 
   const connection = await pool.getConnection();
@@ -341,9 +344,14 @@ export const unlinkProvider = async (req, res) => {
 
     if (!currentLink || !currentLink.provider_id) {
       await connection.rollback();
-      return res.status(400).json(
-        createErrorResponse(ERRORS.OPERATION_FAILED, "Aucune liaison trouvée.")
-      );
+      return res
+        .status(400)
+        .json(
+          createErrorResponse(
+            ERRORS.OPERATION_FAILED,
+            "Aucune liaison trouvée."
+          )
+        );
     }
 
     const { provider_id, original_user_id } = currentLink;
@@ -356,14 +364,7 @@ export const unlinkProvider = async (req, res) => {
          WHERE provider_id = ? AND provider = ?`,
         [original_user_id, provider_id, provider]
       );
-    } else {
-      // Supprimer la liaison simple
-      await connection.query(
-        `DELETE FROM providers 
-         WHERE user_id = ? AND provider = ? AND provider_id = ?`,
-        [user_id, provider, provider_id]
-      );
-    }
+    } 
 
     await connection.commit();
 
@@ -374,12 +375,13 @@ export const unlinkProvider = async (req, res) => {
   } catch (err) {
     await connection.rollback();
     console.error("Erreur unlinkProvider :", err);
-    return res.status(500).json(createErrorResponse(ERRORS.INTERNAL_SERVER_ERROR));
+    return res
+      .status(500)
+      .json(createErrorResponse(ERRORS.INTERNAL_SERVER_ERROR));
   } finally {
     connection.release();
   }
 };
-
 
 export const exportUserData = async (req, res) => {
   const userId = req.params.id;
@@ -562,6 +564,6 @@ export const readUserByEmail = async (email) => {
 
   return {
     success: true,
-    result: user
+    result: user,
   };
 };

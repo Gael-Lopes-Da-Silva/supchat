@@ -20,8 +20,7 @@ import {
 
 const router = express.Router();
 
-// Configuration des URLs de redirection
-const WEB_URL = process.env.CLIENT_URL;  // URL du client web dans Docker
+const WEB_URL = process.env.WEB_URL
 
 router.post("/", validateUserCreation, handleValidationErrors, async (req, res) => {
   try {

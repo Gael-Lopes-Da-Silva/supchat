@@ -154,7 +154,6 @@ const SettingsPage = () => {
 
               {user.provider === "local" ? (
                 <>
-                  {/* Boutons de liaison : seulement si aucun compte social n’est déjà lié */}
                   {!isGoogleLinked && !isFacebookLinked && (
                     <>
                       <button onClick={() => handleLinkProvider("google")} className="google-btn">
@@ -166,7 +165,6 @@ const SettingsPage = () => {
                     </>
                   )}
 
-                  {/* Boutons de déliaison */}
                   {isGoogleLinked && (
                     <div className="linked-provider">
                       <button className="google-btn linked">
