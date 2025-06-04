@@ -11,7 +11,7 @@ import {
   uploadFile,
 } from "../../services/Channels";
 import { toast } from "react-toastify";
-
+import { readUser } from "../../services/Users";
 import { deleteWorkspaceMember } from "../../services/WorkspaceMembers";
 import { ReactComponent as EmojiIcon } from "../../assets/emoji-round-plus.svg";
 
@@ -44,6 +44,7 @@ const DashboardRight = ({
     useState(null);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [userSearchTerm, setUserSearchTerm] = useState("");
+  const [allUsers, setAllUsers] = useState([]);
 
   const [tooltip, setTooltip] = useState({
     visible: false,
@@ -71,6 +72,20 @@ const DashboardRight = ({
     y: 0,
     user: null,
   });
+
+  useEffect(() => {
+    const fetchAllUsers = async () => {
+      const apiUrl = process.env.REACT_APP_API_URL;
+      const res = await readUser({}, apiUrl);
+      if (!res.error && res.result) {
+        setAllUsers(res.result);
+      } else {
+        toast.error(`Erreur readUser (ligne 84 dashboardRight) : ${res.error}`);
+      }
+    };
+
+    fetchAllUsers();
+  }, []);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -426,9 +441,8 @@ const DashboardRight = ({
                     return (
                       <div
                         key={msg.id}
-                        className={`chat-message ${
-                          msg.user_id === user.id ? "from-me" : "from-others"
-                        }`}
+                        className={`chat-message ${msg.user_id === user.id ? "from-me" : "from-others"
+                          }`}
                       >
                         <div className="message-inner">
                           <div className="message-header">
@@ -672,24 +686,29 @@ const DashboardRight = ({
         className="dashboard-right-peoples"
         style={{ display: !guiVisibility.userList && "none" }}
       >
-        <h4>Utilisateurs Supchat ({workspaceUsers.length})</h4>
+        <h4>Utilisateurs Supchat connectés</h4>
         <ul>
-          {workspaceUsers.map((u) => {
-            const connectedUser = connectedUsers.find(
-              (cu) => cu.id === u.user_id
-            );
-            const status = connectedUser?.status;
-            const isOnline = Boolean(connectedUser);
-            const statusIcon = isOnline ? statusIcons[status] : "⚫";
+          {allUsers
+            .filter((u) => connectedUsers.some((cu) => cu.id === u.id))
+            .map((u) => {
+              const connectedUser = connectedUsers.find((cu) => cu.id === u.id);
+              const status = connectedUser ? connectedUser.status : "offline";
+              const statusIcon = statusIcons[status];
 
-            return (
-              <li key={u.user_id}>
-                <span className={isOnline ? "" : "user-offline"}>
+              return (
+                <li key={u.id}>
                   {statusIcon} {u.username}
-                </span>
+                </li>
+              );
+            })}
+
+          {allUsers
+            .filter((u) => !connectedUsers.some((cu) => cu.id === u.id))
+            .map((u) => (
+              <li key={u.id} className="user-offline">
+                ⚫ {u.username}
               </li>
-            );
-          })}
+            ))}
         </ul>
 
         <h4>
@@ -728,7 +747,7 @@ const DashboardRight = ({
                   <button
                     className={`user-button ${!isNotSelf ? "self-user" : ""}`}
                     onClick={async (e) => {
-                      if (!isNotSelf) return; 
+                      if (!isNotSelf) return;
                       e.stopPropagation();
                       const rect = e.currentTarget.getBoundingClientRect();
                       let x = rect.right + 5;

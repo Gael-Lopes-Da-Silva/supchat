@@ -15,27 +15,22 @@ export const createUser = async (userData) => {
     });
 };
 
-export const readUser = async (query, api_url) => {
-    let url;
+export const readUser = async (query = {}, api_url) => {
+  let url = `${api_url}users`;
 
-    if (query.id) {
-        url = `${api_url}users/${query.id}`;
-    } else if (query.confirm_token) {
-        url = `${api_url}users?confirm_token=${query.confirm_token}`;
-    } else {
-        return { error: true, message: "Paramètre requis manquant." };
-    }
+  const params = new URLSearchParams(query).toString();
+  if (params) url += `?${params}`;
 
-    return fetch(url, {
-        method: "GET",
-        headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json'
-        },
-    })
+  return fetch(url, {
+    method: "GET",
+    headers: {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json'
+    },
+  })
     .then((response) => response.json())
     .catch((error) => {
-        return { error: true, message: error.message };
+      return { error: true, message: error.message };
     });
 };
 
