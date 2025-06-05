@@ -712,7 +712,7 @@ const DashboardRight = ({
         </ul>
 
         <h4>
-          Membres du workspace connectés (
+          Membres du workspace (
           {
             filteredUsers.filter((u) =>
               connectedUsers.some((cu) => cu.id === u.user_id)
