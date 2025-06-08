@@ -86,6 +86,8 @@ docker exec -it supchat_db mariadb -u root -p
 -  Entrez le mot de passe root ou la valeur définie dans MYSQL_ROOT_PASSWORD de votre .env
 
 
+Application web disponible ici : https://web.supchat.fun
+
 --- 
 
 ## Crédit & contact
