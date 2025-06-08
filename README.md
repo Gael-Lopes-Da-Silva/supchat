@@ -65,8 +65,20 @@ Cela va lancer :
 
 ## Conseils de développement
 
-- **Hot reload** automatique avec `npm run dev` pour le backend et `npm start` pour le frontend
-- Utiliser [http://localhost:8080](http://localhost:8080) pour accéder à la base de données
+- Une fois buildé, le projet peut se lancer via
+```bash
+  docker compose up
+ ```
+- Il s'arrête via
+```bash
+  docker compose down
+ ```
+- Utiliser [http://localhost:8080](http://localhost:8080) pour accéder à la base de données via phpMyAdmin
+- sinon :
+```bash
+docker exec -it supchat_db mariadb -u root -p
+```
+ Entrez le mot de passe root ou la valeur définie dans MYSQL_ROOT_PASSWORD de votre .env
 
 ---
 
