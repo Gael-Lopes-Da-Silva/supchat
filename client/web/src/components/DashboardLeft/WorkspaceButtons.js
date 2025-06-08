@@ -1,4 +1,3 @@
-import React from 'react';
 import * as Fa from "react-icons/fa6";
 
 const WorkspaceButtons = ({ updateGuiState, updateModalState }) => {

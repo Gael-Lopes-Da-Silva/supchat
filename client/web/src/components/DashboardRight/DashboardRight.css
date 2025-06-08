@@ -697,3 +697,9 @@ ul {
   font-size: 12px;
   font-weight: bold;
 }
+
+.public-workspaces-grid p{
+ text-align: center;
+ font-weight: bold;
+ margin-top: 10%;
+}
