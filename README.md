@@ -73,30 +73,12 @@ Cela va lancer :
 ```bash
   docker compose down
  ```
-- Utiliser [http://localhost:8080](http://localhost:8080) pour accéder à la base de données via phpMyAdmin
-- sinon :
+- Utilisea [http://localhost:8080](http://localhost:8080) pour accéder à la base de données via phpMyAdmin
+- Sinon en ligne de commande :
 ```bash
 docker exec -it supchat_db mariadb -u root -p
 ```
  Entrez le mot de passe root ou la valeur définie dans MYSQL_ROOT_PASSWORD de votre .env
-
----
-
-## Connexion à la base de données (MariaDB)
-
-###  Prérequis
-- Le projet est lancé via `docker compose`
-- Le fichier `.env` contient les identifiants de la base (`MYSQL_ROOT_PASSWORD`, `MYSQL_USER`, etc.)
-
----
-
-### Ouvrir un shell MariaDB dans le conteneur
-
-```bash
-docker exec -it supchat_db mariadb -u root -p
-```
--  Entrez le mot de passe root ou la valeur définie dans MYSQL_ROOT_PASSWORD de votre .env
-
 
 
 --- 
