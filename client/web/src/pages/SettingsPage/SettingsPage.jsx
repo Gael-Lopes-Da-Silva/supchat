@@ -2,6 +2,11 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { FaGoogle, FaFacebook, FaTimes } from "react-icons/fa";
 import { MdOutlineCancel } from "react-icons/md";
+import {
+  getUserProviders,
+  updateUser,
+  unlinkProvider,
+} from "../../services/Users";
 
 import socket from "../../socket";
 import { toast } from "react-toastify";
@@ -38,17 +43,14 @@ const SettingsPage = () => {
     setUser(storedUser);
 
     if (storedUser?.id) {
-      fetch(`http://localhost:3000/users/${storedUser.id}/providers`, {
-        headers: { Authorization: `Bearer ${storedUser.token}` },
-      })
-        .then((res) => res.json())
-        .then((data) => {
+      getUserProviders(storedUser.id).then((data) => {
+        if (!data.error) {
           setIsGoogleLinked(data.isGoogleLinked);
           setIsFacebookLinked(data.isFacebookLinked);
-        })
-        .catch((err) =>
-          console.error("Erreur de fetching des providers:", err)
-        );
+        } else {
+          console.error("Erreur de récupération des providers:", data.message);
+        }
+      });
     }
   }, []);
 
@@ -56,13 +58,15 @@ const SettingsPage = () => {
     const user = JSON.parse(localStorage.getItem("user"));
     const token = user?.token;
 
+    console.log(token);
+
     if (!token) {
       toast.error("Vous devez être connecté pour lier un compte.", {
         position: "top-center",
       });
       return;
     }
-    window.location.href = `http://localhost:3000/users/auth/${provider}/link?token=${token}`;
+    window.location.href = `${process.env.REACT_APP_API_URL}users/auth/${provider}/link?token=${token}`;
   };
 
   const handleUnlinkProvider = async (provider) => {
@@ -73,34 +77,20 @@ const SettingsPage = () => {
     )
       return;
 
-    try {
-      const response = await fetch(
-        "http://localhost:3000/users/unlink-provider",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ user_id: user.id, provider }),
-        }
-      );
-
-      const data = await response.json();
-
-      if (data.success) {
-        if (provider === "google") setIsGoogleLinked(false);
-        if (provider === "facebook") setIsFacebookLinked(false);
-      } else {
-        toast.error(`Erreur de déliaison : ${data.error}`, {
-          position: "top-center",
-        });
-      }
-    } catch (error) {
-      console.error("Erreur de déliaison:", error);
+    const data = await unlinkProvider(user.id, provider);
+    if (!data.error && data.success) {
+      if (provider === "google") setIsGoogleLinked(false);
+      if (provider === "facebook") setIsFacebookLinked(false);
+    } else {
+      toast.error(`Erreur de déliaison : ${data.message}`, {
+        position: "top-center",
+      });
     }
   };
 
   const handleExportData = () => {
     if (user?.id) {
-      window.location.href = `http://localhost:3000/users/${user.id}/export`;
+window.location.href = `${process.env.REACT_APP_API_URL}users/${user.id}/export`;
     }
   };
 
@@ -123,37 +113,29 @@ const SettingsPage = () => {
       return;
     }
 
-    try {
-      const response = await fetch(`http://localhost:3000/users/${user.id}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${user.token}`,
-        },
-        body: JSON.stringify(payload),
+    const data = await updateUser(
+      user.id,
+      payload,
+      process.env.REACT_APP_API_URL
+    );
+    if (!data.error && data?.result?.success) {
+      toast.success(data.result.message || "Informations mises à jour.", {
+        position: "top-center",
       });
 
-      const data = await response.json();
-
-      if (data?.result?.success) {
-        toast.success(data.result.message || "Informations mises à jour.", {
-          position: "top-center",
-        });
-
-        if (newUsername) {
-          const updatedUser = { ...user, username: newUsername };
-          localStorage.setItem("user", JSON.stringify({ data: updatedUser }));
-          setUser(updatedUser);
-        }
-
-        setNewUsername("");
-        setNewPassword("");
-        return true;
-      } else {
-        toast.error(data?.result?.message, { position: "top-center" });
+      if (newUsername) {
+        const updatedUser = { ...user, username: newUsername };
+        localStorage.setItem("user", JSON.stringify({ data: updatedUser }));
+        setUser(updatedUser);
       }
-    } catch (err) {
-      toast.error("Erreur de mise à jour", { position: "top-center" });
+
+      setNewUsername("");
+      setNewPassword("");
+      return true;
+    } else {
+      toast.error(data?.result?.message || data.message, {
+        position: "top-center",
+      });
     }
   };
 
@@ -182,14 +164,14 @@ const SettingsPage = () => {
           {user && (
             <div className="settings-form-group">
               <p>
-                <strong>Nom d'utilisateur :  </strong> {user.username}
+                <strong>Nom d'utilisateur : </strong> {user.username}
               </p>
               <p>
                 <strong>Email : </strong> {user.email}
               </p>
 
               <div className="settings-row">
-                <label htmlFor="theme">Thème : </label> 
+                <label htmlFor="theme">Thème : </label>
                 <select
                   id="theme"
                   value={theme}

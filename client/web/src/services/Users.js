@@ -168,3 +168,20 @@ export const readUserByEmail = async (email, api_url) => {
         return { error: true, message: "Erreur serveur" };
     });
 };
+
+
+export const unlinkProvider = async (userId, provider) => {
+  return fetch(`${process.env.REACT_APP_API_URL}users/unlink-provider`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ user_id: userId, provider }),
+  })
+  .then((res) => res.json())
+  .catch((error) => ({
+    error: true,
+    message: "Erreur serveur",
+  }));
+};
+
