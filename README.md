@@ -66,15 +66,18 @@ Cela va lancer :
 ## Conseils de développement
 
 - Une fois buildé, le projet peut se lancer via
+
 ```bash
   docker compose up
  ```
 - Il s'arrête via
+
 ```bash
   docker compose down
  ```
 - Utilisea [http://localhost:8080](http://localhost:8080) pour accéder à la base de données via phpMyAdmin
 - Sinon en ligne de commande :
+
 ```bash
 docker exec -it supchat_db mariadb -u root -p
 ```
@@ -85,7 +88,7 @@ docker exec -it supchat_db mariadb -u root -p
 
 ## Crédit & contact
 
-Projet développé par Arthur, Gael et Zakaria. Pour toute demande : contacter un administrateur du projet.
+Projet développé par Arthur, Gael et Zakaria. Pour toute demande : contactez un administrateur du projet.
 
 
 Application web disponible ici : https://web.supchat.fun
