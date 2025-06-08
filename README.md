@@ -75,7 +75,8 @@ Cela va lancer :
 ```bash
   docker compose down
  ```
-- Utilisea [http://localhost:8080](http://localhost:8080) pour accéder à la base de données via phpMyAdmin
+- Utilisez [http://localhost:8080](http://localhost:8080) pour accéder à la base de données via phpMyAdmin
+
 - Sinon en ligne de commande :
 
 ```bash
