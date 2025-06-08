@@ -1,4 +1,5 @@
 import * as Fa from "react-icons/fa6";
+import './DashboardLeft.css';
 import WorkspaceButtons from "./WorkspaceButtons";
 import WorkspaceList from "./WorkspaceList";
 import ChannelList from "./ChannelList";
@@ -71,7 +72,6 @@ const DashboardLeft = ({
                     </span>
                 )}
                 </p>
-                <Fa.FaChevronDown className="workspace-chevron" />
             </div>
 </header>
 

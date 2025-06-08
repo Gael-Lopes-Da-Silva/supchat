@@ -1,4 +1,5 @@
 import * as Fa from "react-icons/fa";
+import "./DashboardRight.css"
 
 const HeaderButtons = ({
     guiVisibility,

@@ -15,7 +15,7 @@ const Modal = ({ content, display, goBack, ref, title = "", theme = "light", onC
                         <button onClick={onClose} title='Fermer'><Fa.FaXmark /></button>
                     </div>
                 </header>
-                {content}
+                {content} 
             </div>
         </div>
     );

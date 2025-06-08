@@ -1,4 +1,5 @@
 import * as Fa from "react-icons/fa6";
+import "./DashboardRight.css"
 
 const DiscoverWorkspaces = ({
   publicWorkspaces,

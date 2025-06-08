@@ -1,4 +1,4 @@
-import React from 'react';
+import "./DashboardRight.css"
 import * as Fa from "react-icons/fa6";
 
 const FooterButtons = ({ hideAllPopup, updatePopupState, setMousePosition }) => {

@@ -1,4 +1,5 @@
 /* eslint-disable react-hooks/exhaustive-deps */
+import "./DashboardRight.css"
 import { useEffect, useState, useRef } from "react";
 import socket from "../../socket";
 import HeaderButtons from "./HeaderButtons";

@@ -128,22 +128,23 @@ export const updateUser = async (request) => {
   let updateFields = [];
   let updateValues = [];
 
-  // Gestion du mot de passe
   if (request.body.password) {
     const hashedPassword = bcrypt.hashSync(request.body.password, 10);
     updateFields.push("password = ?");
     updateValues.push(hashedPassword);
   }
 
-  // Gestion du confirm_token
+  if (request.body.username) {
+    updateFields.push("username = ?");
+    updateValues.push(request.body.username);
+  }
+
   if (request.body.confirm_token === null) {
     updateFields.push("confirm_token = NULL");
   }
 
-  // Ajout de la date de mise à jour
   updateFields.push("updated_at = NOW()");
 
-  // Si aucun champ à mettre à jour
   if (updateFields.length === 0) {
     return createErrorResponse(
       ERRORS.DATA_MISSING,
@@ -151,7 +152,6 @@ export const updateUser = async (request) => {
     );
   }
 
-  // Construction de la requête
   const query = `UPDATE users SET ${updateFields.join(", ")} WHERE id = ?`;
   updateValues.push(request.params.id);
 
@@ -167,6 +167,9 @@ export const updateUser = async (request) => {
     message: "Utilisateur mis à jour avec succès",
   };
 };
+
+
+
 
 export const deleteUser = async (request) => {
   if (!request.params.id)
@@ -364,7 +367,7 @@ export const unlinkProvider = async (req, res) => {
          WHERE provider_id = ? AND provider = ?`,
         [original_user_id, provider_id, provider]
       );
-    } 
+    }
 
     await connection.commit();
 

@@ -1,4 +1,4 @@
-import { View, Text, Button } from 'react-native';
+import { View, Text, Button } from "react-native";
 
 const DashboardPopups = ({
   visibility,
@@ -8,12 +8,23 @@ const DashboardPopups = ({
   onLogout,
   notifications,
   handleClickNotification,
-  handleRemoveNotification
+  handleRemoveNotification,
 }) => {
   return (
     <View>
       {visibility.profile && (
-        <View>
+        <View
+          style={{
+            position: "absolute",
+            top: mousePosition.y,
+            left: mousePosition.x,
+            backgroundColor: theme === "dark" ? "#333" : "#fff",
+            padding: 10,
+            borderRadius: 8,
+            zIndex: 1000,
+          }}
+          ref={refs.profile}
+        >
           <Button title="Déconnexion" onPress={onLogout} />
         </View>
       )}
@@ -35,7 +46,10 @@ const DashboardPopups = ({
                 <Text onPress={() => handleClickNotification(index, notif)}>
                   {notif.message}
                 </Text>
-                <Button title="✖" onPress={() => handleRemoveNotification(index)} />
+                <Button
+                  title="✖"
+                  onPress={() => handleRemoveNotification(index)}
+                />
               </View>
             ))
           )}
@@ -46,13 +60,7 @@ const DashboardPopups = ({
         <Text>{joinedUsername} a rejoint ce workspace ! 🎉</Text>
       )}
 
-      {visibility.emojis && (
-        <Text>Emojis</Text>
-      )}
-
-      {visibility.workspace && (
-        <Text>Configuration de l'espace de travail</Text>
-      )}
+      {visibility.emojis && <Text>Emojis</Text>}
     </View>
   );
 };

@@ -99,7 +99,7 @@ const DashboardPopups = ({
           <div>
             <main>
               <p>
-                <strong>{joinedUsername}</strong> a rejoint ce workspace ! 🎉
+                <strong>{joinedUsername}</strong> a rejoint ce workspace ! 
               </p>
             </main>
           </div>
@@ -125,24 +125,6 @@ const DashboardPopups = ({
         left={mousePosition?.x}
       />
 
-    
-
-      <Popup
-        ref={refs.workspace}
-        theme={theme}
-        display={visibility.workspace}
-        content={
-          <div>
-            <header></header>
-            <main>
-              <p>Configuration de l'espace de travail</p>
-            </main>
-            <footer></footer>
-          </div>
-        }
-        top={100}
-        left={127}
-      />
     </>
   );
 };
