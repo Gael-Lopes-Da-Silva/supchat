@@ -77,7 +77,7 @@ Cela va lancer :
  ```
 - Utilisez [http://localhost:8080](http://localhost:8080) pour accéder à la base de données via phpMyAdmin
 
-- Sinon en ligne de commande :
+- Sinon en ligne de commande (par exemple) :
 
 ```bash
 docker exec -it supchat_db mariadb -u root -p
