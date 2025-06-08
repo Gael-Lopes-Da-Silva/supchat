@@ -89,6 +89,8 @@ const DashboardPopups = ({
             </main>
           </div>
         }
+           top={mousePosition?.y}
+        left={mousePosition?.x}
       />
 
       <Popup
