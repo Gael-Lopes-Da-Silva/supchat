@@ -20,7 +20,7 @@ import {
 
 const router = express.Router();
 
-const WEB_URL = process.env.
+const WEB_URL = process.env.WEB_URL
 
 router.post("/", validateUserCreation, handleValidationErrors, async (req, res) => {
   try {
