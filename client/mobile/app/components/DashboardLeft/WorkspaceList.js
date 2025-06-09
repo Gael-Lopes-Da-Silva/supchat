@@ -4,9 +4,9 @@ import {
   Text,
   TouchableOpacity,
   ScrollView,
-  StyleSheet,
 } from 'react-native';
 import { FontAwesome6 } from '@expo/vector-icons';
+import styles from './DashboardLeftStyle';
 
 const WorkspaceList = ({
   user,
@@ -32,7 +32,7 @@ const WorkspaceList = ({
     <ScrollView
       horizontal
       showsHorizontalScrollIndicator={false}
-      style={styles.container}
+      style={styles.workspaceListContainer}
     >
       {Object.values(workspaces).map((workspace) => {
         if (!workspace || !workspace.id || !workspace.name) return null;
@@ -41,7 +41,7 @@ const WorkspaceList = ({
           <TouchableOpacity
             key={workspace.id}
             style={[
-              styles.workspaceButton,
+              styles.workspaceListButton,
               selectedWorkspace?.id === workspace.id && styles.selectedWorkspace,
               { borderColor },
             ]}
@@ -79,44 +79,5 @@ const WorkspaceList = ({
     </ScrollView>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flexGrow: 0,
-  },
-  workspaceButton: {
-    width: 48,
-    height: 48,
-    borderRadius: 16,
-    marginHorizontal: 4,
-    borderWidth: 2,
-    overflow: 'hidden',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  selectedWorkspace: {
-    borderColor: '#007AFF',
-  },
-  workspaceAvatar: {
-    width: '100%',
-    height: '100%',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  workspaceInitial: {
-    fontSize: 20,
-    fontWeight: 'bold',
-  },
-  addButton: {
-    width: 48,
-    height: 48,
-    borderRadius: 16,
-    marginHorizontal: 4,
-    borderWidth: 2,
-    borderStyle: 'dashed',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-});
 
 export default WorkspaceList;

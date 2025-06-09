@@ -2,6 +2,7 @@
 import { useEffect } from 'react';
 import { readWorkspaceMember } from "../../services/WorkspaceMembers";
 import { readChannelMember } from "../../services/ChannelMembers";
+import Toast from 'react-native-toast-message';
 
 const useSocketEvents = ({
   socket,
@@ -187,7 +188,10 @@ const useSocketEvents = ({
         delete updated[workspace_id];
         return updated;
       });
-      alert("Vous avez été expulsé de ce workspace.");
+      Toast.show({
+        type: 'error',
+        text1: 'Vous avez été expulsé de ce workspace. 😂 🫵🏼'
+      });
     };
 
     socket.on("kickedFromWorkspace", handleKick);

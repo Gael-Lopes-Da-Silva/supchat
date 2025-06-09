@@ -13,7 +13,7 @@ import {
     sendEmail,
 } from '../../services/Email';
 import {
-    readUserByEmail,
+    readUser,
     updateUser,
 } from '../../services/Users';
 
@@ -42,9 +42,9 @@ const ResetPasswordPage = () => {
             setResetToken(token);
             
             // Récupérer l'utilisateur avec l'email
-            readUserByEmail(email, process.env.REACT_APP_API_URL).then((data) => {
+            readUser({email}, process.env.REACT_APP_API_URL).then((data) => {
                 if (!data.error && data.result) {
-                    setUser(data.result);
+                    setUser(data.result[0]);
                 } else {
                     toast.error("Lien de réinitialisation invalide.", {
                         position: "top-center",
@@ -114,7 +114,7 @@ const ResetPasswordPage = () => {
     const handleCheckEmail = async (event) => {
         event.preventDefault();
 
-        readUserByEmail(email, process.env.REACT_APP_API_URL).then((data) => {
+        readUser({email}, process.env.REACT_APP_API_URL).then((data) => {
             if (data.error || !data.result) {
                 toast.error("E-mail non valide.", {
                     position: "top-center",
@@ -122,8 +122,8 @@ const ResetPasswordPage = () => {
                 return;
             }
 
-            const user = data.result;
-            if (user.provider !== null) {
+            const user = data.result[0];
+            if (user.provider) {
                 toast.error("Ce compte utilise une connexion externe (Google/Facebook).", {
                     position: "top-center",
                 });
@@ -165,7 +165,7 @@ const ResetPasswordPage = () => {
 
             if (process.env.REACT_APP_DEBUG) {
                 console.trace({
-                    from: "readUserByEmail() -> ResetPasswordPage.jsx",
+                    from: "readUser() -> ResetPasswordPage.jsx",
                     error: error,
                 });
             }

@@ -1,6 +1,7 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity } from 'react-native';
 import { FontAwesome6 } from '@expo/vector-icons';
+import styles from './DashboardRightStyle';
 
 const HeaderButtons = ({
   selectedChannel,
@@ -10,7 +11,7 @@ const HeaderButtons = ({
   const isMuted = channelNotificationPrefs[selectedChannel?.id] === false;
 
   return (
-    <View style={styles.container}>
+    <View style={styles.headerContainer}>
       <View style={styles.channelInfo}>
         <FontAwesome6 name="hashtag" size={16} color="#666" style={styles.hashIcon} />
         <Text style={styles.channelName}>
@@ -43,37 +44,5 @@ const HeaderButtons = ({
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#ddd',
-    backgroundColor: '#fff',
-  },
-  channelInfo: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  hashIcon: {
-    marginRight: 8,
-  },
-  channelName: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#333',
-  },
-  actions: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  actionButton: {
-    padding: 8,
-    marginLeft: 8,
-  },
-});
 
 export default HeaderButtons;

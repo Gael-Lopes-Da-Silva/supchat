@@ -3,7 +3,6 @@ import {
   View,
   Text,
   TouchableOpacity,
-  StyleSheet,
   Dimensions,
   Platform,
 } from 'react-native';
@@ -17,10 +16,13 @@ import Reanimated, {
   withSpring,
   runOnJS,
 } from 'react-native-reanimated';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useRouter } from 'expo-router';
 
 import WorkspaceList from './WorkspaceList';
 import WorkspaceButtons from './WorkspaceButtons';
 import ChannelList from './ChannelList';
+import styles from './DashboardLeftStyle';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const DRAWER_WIDTH = SCREEN_WIDTH * 0.7;
@@ -45,6 +47,8 @@ const DashboardLeft = ({
   const [theme, setTheme] = useState('light');
   const [isReady, setIsReady] = useState(false);
   const translateX = useSharedValue(-DRAWER_WIDTH);
+  const insets = useSafeAreaInsets();
+  const router = useRouter();
 
   useEffect(() => {
     const loadTheme = async () => {
@@ -72,7 +76,6 @@ const DashboardLeft = ({
     );
   }, [guiVisibility.leftPanel, isReady]);
 
-  // Gestionnaire pour la fermeture du drawer
   const drawerGestureHandler = useAnimatedGestureHandler({
     onStart: (_, ctx) => {
       ctx.startX = translateX.value;
@@ -103,8 +106,7 @@ const DashboardLeft = ({
   if (!isReady) return null;
 
   return (
-    <GestureHandlerRootView style={StyleSheet.absoluteFill}>
-      {/* Le drawer avec gestion de la fermeture */}
+    <GestureHandlerRootView style={{ position: 'absolute', left: 0, top: 0, bottom: 0, right: 0 }}>
       <PanGestureHandler 
         onGestureEvent={drawerGestureHandler}
         activeOffsetX={[-5, 5]}
@@ -136,7 +138,7 @@ const DashboardLeft = ({
             />
           </View>
 
-          {selectedWorkspace?.id && (
+          {selectedWorkspace && (
             <>
               <TouchableOpacity
                 style={[styles.workspaceHeader, { borderBottomColor: borderColor }]}
@@ -169,7 +171,7 @@ const DashboardLeft = ({
             </>
           )}
 
-          <View style={[styles.footer, { borderTopColor: borderColor }]}>
+          <View style={styles.footer}>
             <TouchableOpacity
               style={styles.profileButton}
               onPress={hideAllPopup}
@@ -193,7 +195,7 @@ const DashboardLeft = ({
 
             <TouchableOpacity
               style={styles.settingsButton}
-              onPress={() => {}}
+              onPress={() => router.push('/screens/SettingsScreen/SettingsPage')}
             >
               <FontAwesome6 name="gear" size={20} color={textColor} />
             </TouchableOpacity>
@@ -203,86 +205,5 @@ const DashboardLeft = ({
     </GestureHandlerRootView>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    position: 'absolute',
-    left: 0,
-    top: 0,
-    bottom: 0,
-    width: DRAWER_WIDTH,
-    borderRightWidth: 1,
-    elevation: 5,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 2,
-      height: 0,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    zIndex: 1000,
-  },
-  workspacesSection: {
-    flexDirection: 'row',
-    height: 70,
-    paddingHorizontal: 8,
-    paddingVertical: 10,
-    borderBottomWidth: 1,
-  },
-  workspaceHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    padding: 16,
-    borderBottomWidth: 1,
-  },
-  workspaceInfo: {
-    flex: 1,
-    marginRight: 8,
-  },
-  workspaceName: {
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  workspaceDescription: {
-    fontSize: 12,
-    opacity: 0.7,
-    marginTop: 2,
-  },
-  channelsSection: {
-    flex: 1,
-  },
-  footer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    padding: 12,
-    borderTopWidth: 1,
-  },
-  profileButton: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  profileAvatar: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  profileInitial: {
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  username: {
-    marginLeft: 8,
-    fontSize: 14,
-    fontWeight: '500',
-  },
-  settingsButton: {
-    padding: 8,
-  },
-});
 
 export default DashboardLeft;

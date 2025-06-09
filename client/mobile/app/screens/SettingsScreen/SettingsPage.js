@@ -1,22 +1,17 @@
 import { useEffect, useState } from 'react';
-import { View, Text, Button, TouchableOpacity, StyleSheet, Linking, Platform } from 'react-native';
+import { View, Text, TouchableOpacity, TextInput, ScrollView } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-// import { GoogleSignin } from '@react-native-google-signin/google-signin';
-// import { LoginManager, AccessToken } from 'react-native-fbsdk-next';
 import Toast from 'react-native-toast-message';
 import Constants from 'expo-constants';
+import { FontAwesome6 } from '@expo/vector-icons';
 
 import socket from '../../socket';
 import styles from './SettingsPageStyles';
+import { updateUser, getUserProviders, unlinkProvider } from '../../../services/Users';
+import Modal from '../../components/Modal/Modal';
 
 const API_URL = Constants.expoConfig.extra.apiUrl;
-
-// Configuration de Google Sign-In
-// GoogleSignin.configure({
-//   webClientId: process.env.GOOGLE_MOBILE_CLIENT_ID,
-//   iosClientId: process.env.GOOGLE_IOS_CLIENT_ID,
-// });
 
 const SettingsPage = () => {
   const [user, setUser] = useState(null);
@@ -24,7 +19,10 @@ const SettingsPage = () => {
   const [status, setStatus] = useState('online');
   const [isGoogleLinked, setIsGoogleLinked] = useState(false);
   const [isFacebookLinked, setIsFacebookLinked] = useState(false);
-  const [forceRender, setForceRender] = useState(0);
+  const [newUsername, setNewUsername] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [showUsernameModal, setShowUsernameModal] = useState(false);
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
 
   const navigation = useNavigation();
 
@@ -33,15 +31,14 @@ const SettingsPage = () => {
       const parsed = JSON.parse(u)?.data;
       setUser(parsed);
       if (parsed?.id) {
-        fetch(`${API_URL}/users/${parsed.id}/providers`, {
-          headers: { Authorization: `Bearer ${parsed.token}` },
-        })
-          .then(res => res.json())
-          .then(data => {
+        getUserProviders(parsed.id).then(data => {
+          if (!data.error) {
             setIsGoogleLinked(data.isGoogleLinked);
             setIsFacebookLinked(data.isFacebookLinked);
-          })
-          .catch(err => console.error("Erreur:", err));
+          } else {
+            console.error("Erreur de récupération des providers:", data.message);
+          }
+        });
       }
     });
     AsyncStorage.getItem('gui.theme').then(setTheme);
@@ -49,21 +46,53 @@ const SettingsPage = () => {
   }, []);
 
   const handleLinkProvider = async (provider) => {
-    // Version temporaire pour le développement
-    Toast.show({
-      type: 'info',
-      text1: `Liaison ${provider} désactivée en développement`,
-      text2: 'Cette fonctionnalité nécessite un development build'
-    });
+    const user = await AsyncStorage.getItem('user');
+    const token = JSON.parse(user)?.token;
+
+    if (!token) {
+      Toast.show({
+        type: 'error',
+        text1: 'Vous devez être connecté pour lier un compte.',
+      });
+      return;
+    }
+    // Redirection vers l'URL d'authentification
+    Linking.openURL(`${API_URL}/users/auth/${provider}/link?token=${token}`);
   };
 
   const handleUnlinkProvider = async (provider) => {
-    // Version temporaire pour le développement
-    Toast.show({
-      type: 'info',
-      text1: `Déliaison ${provider} désactivée en développement`,
-      text2: 'Cette fonctionnalité nécessite un development build'
-    });
+    if (!user?.id) return;
+
+    // Alert de confirmation
+    Alert.alert(
+      "Confirmation",
+      `Voulez-vous vraiment délier votre compte ${provider} ?`,
+      [
+        {
+          text: "Annuler",
+          style: "cancel"
+        },
+        {
+          text: "Confirmer",
+          onPress: async () => {
+            const data = await unlinkProvider(user.id, provider);
+            if (!data.error && data.success) {
+              if (provider === "google") setIsGoogleLinked(false);
+              if (provider === "facebook") setIsFacebookLinked(false);
+              Toast.show({
+                type: 'success',
+                text1: 'Compte délié avec succès',
+              });
+            } else {
+              Toast.show({
+                type: 'error',
+                text1: `Erreur de déliaison : ${data.message}`,
+              });
+            }
+          }
+        }
+      ]
+    );
   };
 
   const handleExportData = () => {
@@ -77,60 +106,282 @@ const SettingsPage = () => {
     socket.emit("updateStatus", { user_id: user.id, status: newStatus });
   };
 
+  const handleSaveChanges = async () => {
+    const payload = {};
+    if (newUsername) payload.username = newUsername;
+    if (newPassword) payload.password = newPassword;
+
+    if (Object.keys(payload).length === 0) {
+      Toast.show({
+        type: 'warning',
+        text1: 'Aucune modification à envoyer',
+      });
+      return;
+    }
+
+    const data = await updateUser(user.id, payload);
+    if (!data.error && data?.result?.success) {
+      Toast.show({
+        type: 'success',
+        text1: data.result.message || 'Informations mises à jour',
+      });
+
+      if (newUsername) {
+        const updatedUser = { ...user, username: newUsername };
+        await AsyncStorage.setItem('user', JSON.stringify({ data: updatedUser }));
+        setUser(updatedUser);
+      }
+
+      setNewUsername('');
+      setNewPassword('');
+      return true;
+    } else {
+      Toast.show({
+        type: 'error',
+        text1: data?.result?.message || data.message,
+      });
+      return false;
+    }
+  };
+
+  const getStatusEmoji = (statusType) => {
+    switch (statusType) {
+      case 'online': return '🟢';
+      case 'busy': return '🔴';
+      case 'away': return '🟡';
+      case 'offline': return '⚫';
+      default: return '🟢';
+    }
+  };
+
   return (
-    <View style={[styles.container, styles[theme]]} key={forceRender}>
-      <View style={styles.leftPanel}>
-        <View style={styles.categoryBox}>
-          <Text style={styles.categoryTitle}>Paramètre utilisateur</Text>
-          <TouchableOpacity onPress={() => navigation.navigate("Dashboard")}>
-            <Text style={styles.link}>Mon compte</Text>
-          </TouchableOpacity>
+    <ScrollView style={[styles.container, styles[theme]]}>
+      <View style={styles.header}>
+        <Text style={[styles.headerTitle, styles[`${theme}Text`]]}>Paramètres</Text>
+        <TouchableOpacity 
+          style={styles.closeButton}
+          onPress={() => navigation.navigate("Dashboard")}
+        >
+          <FontAwesome6 name="times" size={20} color={theme === 'dark' ? '#fff' : '#000'} />
+        </TouchableOpacity>
+      </View>
+
+      {user && (
+        <View style={styles.content}>
+          <View style={[styles.section, styles[`${theme}Section`]]}>
+            <Text style={[styles.sectionTitle, styles[`${theme}Text`]]}>Informations du compte</Text>
+            <View style={styles.infoRow}>
+              <Text style={[styles.label, styles[`${theme}Text`]]}>Nom d'utilisateur :</Text>
+              <Text style={[styles.value, styles[`${theme}Text`]]}>{user.username}</Text>
+            </View>
+            <View style={styles.infoRow}>
+              <Text style={[styles.label, styles[`${theme}Text`]]}>Email :</Text>
+              <Text style={[styles.value, styles[`${theme}Text`]]}>{user.email}</Text>
+            </View>
+          </View>
+
+          <View style={[styles.section, styles[`${theme}Section`]]}>
+            <Text style={[styles.sectionTitle, styles[`${theme}Text`]]}>Apparence</Text>
+            <View style={styles.themeButtons}>
+              <TouchableOpacity
+                style={[
+                  styles.themeButton,
+                  theme === 'light' && styles.themeButtonActive,
+                  styles[`${theme}Button`]
+                ]}
+                onPress={() => {
+                  setTheme('light');
+                  AsyncStorage.setItem('gui.theme', 'light');
+                }}
+              >
+                <Text style={[styles.buttonText, styles[`${theme}Text`]]}>Thème clair</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[
+                  styles.themeButton,
+                  theme === 'dark' && styles.themeButtonActive,
+                  styles[`${theme}Button`]
+                ]}
+                onPress={() => {
+                  setTheme('dark');
+                  AsyncStorage.setItem('gui.theme', 'dark');
+                }}
+              >
+                <Text style={[styles.buttonText, styles[`${theme}Text`]]}>Thème sombre</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+
+          <View style={[styles.section, styles[`${theme}Section`]]}>
+            <Text style={[styles.sectionTitle, styles[`${theme}Text`]]}>Statut</Text>
+            <View style={styles.statusButtons}>
+              {[
+                { value: 'online', label: 'En ligne' },
+                { value: 'busy', label: 'Occupé' },
+                { value: 'away', label: 'Absent' },
+                { value: 'offline', label: 'Hors ligne' }
+              ].map((s) => (
+                <TouchableOpacity
+                  key={s.value}
+                  style={[
+                    styles.statusButton,
+                    status === s.value && styles.statusButtonActive,
+                    styles[`${theme}Button`]
+                  ]}
+                  onPress={() => handleStatusChange(s.value)}
+                >
+                  <Text style={[styles.buttonText, styles[`${theme}Text`]]}>
+                    {getStatusEmoji(s.value)} {s.label}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          </View>
+
+          <View style={[styles.section, styles[`${theme}Section`]]}>
+            <Text style={[styles.sectionTitle, styles[`${theme}Text`]]}>Actions du compte</Text>
+            <TouchableOpacity
+              style={[styles.actionButton, styles[`${theme}Button`]]}
+              onPress={() => setShowUsernameModal(true)}
+            >
+              <Text style={[styles.buttonText, styles[`${theme}Text`]]}>
+                Modifier le nom d'utilisateur
+              </Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[styles.actionButton, styles[`${theme}Button`]]}
+              onPress={() => setShowPasswordModal(true)}
+            >
+              <Text style={[styles.buttonText, styles[`${theme}Text`]]}>
+                Modifier le mot de passe
+              </Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[styles.actionButton, styles[`${theme}Button`]]}
+              onPress={handleExportData}
+            >
+              <Text style={[styles.buttonText, styles[`${theme}Text`]]}>
+                Exporter mes données
+              </Text>
+            </TouchableOpacity>
+          </View>
+
+          {user.provider === null && (
+            <View style={[styles.section, styles[`${theme}Section`]]}>
+              <Text style={[styles.sectionTitle, styles[`${theme}Text`]]}>Comptes liés</Text>
+              {isGoogleLinked ? (
+                <View style={styles.linkedAccount}>
+                  <Text style={[styles.linkedText, styles[`${theme}Text`]]}>
+                    ✅ Compte Google lié
+                  </Text>
+                  <TouchableOpacity
+                    style={[styles.unlinkButton, styles[`${theme}Button`]]}
+                    onPress={() => handleUnlinkProvider("google")}
+                  >
+                    <Text style={[styles.buttonText, styles[`${theme}Text`]]}>
+                      Délier
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+              ) : !isFacebookLinked && (
+                <TouchableOpacity
+                  style={[styles.actionButton, styles[`${theme}Button`]]}
+                  onPress={() => handleLinkProvider("google")}
+                >
+                  <Text style={[styles.buttonText, styles[`${theme}Text`]]}>
+                    Lier avec Google
+                  </Text>
+                </TouchableOpacity>
+              )}
+
+              {isFacebookLinked ? (
+                <View style={styles.linkedAccount}>
+                  <Text style={[styles.linkedText, styles[`${theme}Text`]]}>
+                    ✅ Compte Facebook lié
+                  </Text>
+                  <TouchableOpacity
+                    style={[styles.unlinkButton, styles[`${theme}Button`]]}
+                    onPress={() => handleUnlinkProvider("facebook")}
+                  >
+                    <Text style={[styles.buttonText, styles[`${theme}Text`]]}>
+                      Délier
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+              ) : !isGoogleLinked && (
+                <TouchableOpacity
+                  style={[styles.actionButton, styles[`${theme}Button`]]}
+                  onPress={() => handleLinkProvider("facebook")}
+                >
+                  <Text style={[styles.buttonText, styles[`${theme}Text`]]}>
+                    Lier avec Facebook
+                  </Text>
+                </TouchableOpacity>
+              )}
+            </View>
+          )}
         </View>
-      </View>
+      )}
 
-      <View style={styles.rightPanel}>
-        <Text style={styles.panelTitle}>Mon compte</Text>
-        {user && (
-          <>
-            <Text>Nom d'utilisateur : {user.username}</Text>
-            <Text>Email : {user.email}</Text>
+      <Modal
+        display={showUsernameModal}
+        theme={theme}
+        title="Modifier le nom d'utilisateur"
+        onClose={() => setShowUsernameModal(false)}
+        content={
+          <View style={styles.modalContent}>
+            <TextInput
+              style={[styles.modalInput, styles[`${theme}Input`]]}
+              value={newUsername}
+              onChangeText={setNewUsername}
+              placeholder="Nouveau nom d'utilisateur"
+              placeholderTextColor={theme === 'dark' ? '#999' : '#666'}
+            />
+            <TouchableOpacity
+              style={[styles.modalButton, !newUsername.trim() && styles.modalButtonDisabled]}
+              disabled={!newUsername.trim()}
+              onPress={async () => {
+                const success = await handleSaveChanges();
+                if (success) setShowUsernameModal(false);
+              }}
+            >
+              <Text style={styles.modalButtonText}>Enregistrer</Text>
+            </TouchableOpacity>
+          </View>
+        }
+      />
 
-            <Text>Thème :</Text>
-            <Button title="Clair" onPress={() => { setTheme("light"); AsyncStorage.setItem("gui.theme", "light"); }} />
-            <Button title="Sombre" onPress={() => { setTheme("dark"); AsyncStorage.setItem("gui.theme", "dark"); }} />
-
-            <Text>Statut :</Text>
-            {["online", "busy", "away", "offline"].map((s) => (
-              <Button key={s} title={s} onPress={() => handleStatusChange(s)} />
-            ))}
-
-            <Button title="Exporter mes données" onPress={handleExportData} />
-
-            {user.provider === null && (
-              <>
-                {isGoogleLinked ? (
-                  <View>
-                    <Text>✅ Google lié</Text>
-                    <Button title="❌ Délier Google" onPress={() => handleUnlinkProvider("google")} />
-                  </View>
-                ) : !isFacebookLinked && (
-                  <Button title="Lier Google" onPress={() => handleLinkProvider("google")} />
-                )}
-
-                {isFacebookLinked ? (
-                  <View>
-                    <Text>✅ Facebook lié</Text>
-                    <Button title="❌ Délier Facebook" onPress={() => handleUnlinkProvider("facebook")} />
-                  </View>
-                ) : !isGoogleLinked && (
-                  <Button title="Lier Facebook" onPress={() => handleLinkProvider("facebook")} />
-                )}
-              </>
-            )}
-          </>
-        )}
-      </View>
-    </View>
+      <Modal
+        display={showPasswordModal}
+        theme={theme}
+        title="Modifier le mot de passe"
+        onClose={() => setShowPasswordModal(false)}
+        content={
+          <View style={styles.modalContent}>
+            <TextInput
+              style={[styles.modalInput, styles[`${theme}Input`]]}
+              value={newPassword}
+              onChangeText={setNewPassword}
+              placeholder="Nouveau mot de passe"
+              placeholderTextColor={theme === 'dark' ? '#999' : '#666'}
+              secureTextEntry
+            />
+            <TouchableOpacity
+              style={[styles.modalButton, !newPassword.trim() && styles.modalButtonDisabled]}
+              disabled={!newPassword.trim()}
+              onPress={async () => {
+                const success = await handleSaveChanges();
+                if (success) setShowPasswordModal(false);
+              }}
+            >
+              <Text style={styles.modalButtonText}>Enregistrer</Text>
+            </TouchableOpacity>
+          </View>
+        }
+      />
+    </ScrollView>
   );
 };
 

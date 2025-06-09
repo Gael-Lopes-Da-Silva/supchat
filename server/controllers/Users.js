@@ -55,9 +55,13 @@ export const createUser = async (request) => {
 
 export const readUser = async (request) => {
   if (request.params.id) {
-    const [user] = await pool.query("SELECT * FROM users WHERE id = ?", [
-      request.params.id,
-    ]);
+    const [user] = await pool.query(
+      `SELECT u.*, p.provider as provider 
+       FROM users u 
+       LEFT JOIN providers p ON u.id = p.user_id 
+       WHERE u.id = ?`,
+      [request.params.id]
+    );
 
     if (!user) {
       return createErrorResponse(ERRORS.USER_NOT_FOUND);
@@ -66,29 +70,23 @@ export const readUser = async (request) => {
     return user;
   }
 
-  let query = "SELECT * FROM users";
+  let query = `SELECT u.*, p.provider as provider 
+               FROM users u 
+               LEFT JOIN providers p ON u.id = p.user_id`;
   let where = [];
   let params = [];
 
   if (request.query.username) {
-    where.push("username = ?");
+    where.push("u.username = ?");
     params.push(request.query.username);
   }
   if (request.query.email) {
-    where.push("email = ?");
+    where.push("u.email = ?");
     params.push(request.query.email);
   }
   if (request.query.confirm_token) {
-    where.push("confirm_token = ?");
+    where.push("u.confirm_token = ?");
     params.push(request.query.confirm_token);
-  }
-  if (request.query.password_reset_token) {
-    where.push("password_reset_token = ?");
-    params.push(request.query.password_reset_token);
-  }
-  if (request.query.provider) {
-    where.push("provider = ?");
-    params.push(request.query.provider);
   }
 
   if (where.length > 0) {
@@ -167,9 +165,6 @@ export const updateUser = async (request) => {
     message: "Utilisateur mis à jour avec succès",
   };
 };
-
-
-
 
 export const deleteUser = async (request) => {
   if (!request.params.id)
@@ -546,27 +541,4 @@ export const exportUserData = async (req, res) => {
     console.error("Erreur exportUserData PDF :", err);
     res.status(500).json(createErrorResponse(ERRORS.INTERNAL_SERVER_ERROR));
   }
-};
-
-export const readUserByEmail = async (email) => {
-  if (!email) {
-    return createErrorResponse(ERRORS.DATA_MISSING, "Email non fourni");
-  }
-
-  const [user] = await pool.query(
-    `SELECT u.*, p.provider 
-     FROM users u 
-     LEFT JOIN providers p ON u.id = p.user_id 
-     WHERE u.email = ?`,
-    [email]
-  );
-
-  if (!user) {
-    return createErrorResponse(ERRORS.USER_NOT_FOUND);
-  }
-
-  return {
-    success: true,
-    result: user,
-  };
 };

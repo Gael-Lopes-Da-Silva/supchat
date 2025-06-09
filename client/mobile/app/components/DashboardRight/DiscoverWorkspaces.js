@@ -1,4 +1,5 @@
 import { View, Text, Button, ScrollView } from 'react-native';
+import styles from './DashboardRightStyle';
 
 const DiscoverWorkspaces = ({
   publicWorkspaces,
@@ -19,7 +20,7 @@ const DiscoverWorkspaces = ({
           <Text>Aucun espace de travail public disponible.</Text>
         ) : (
           filteredWorkspaces.map(ws => (
-            <View key={ws.id} style={{ marginVertical: 10 }}>
+            <View key={ws.id} style={styles.workspaceItem}>
               <Text>{ws.name}</Text>
               <Text>{ws.description}</Text>
               <Button title="Rejoindre" onPress={() => onJoinWorkspace(ws)} />

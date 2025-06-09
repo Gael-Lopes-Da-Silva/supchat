@@ -94,49 +94,11 @@ const LoginPage = () => {
   };
 
   const handleGoogle = async () => {
-    // Version temporaire pour le développement
-    try {
-      const fakeToken = "fake_token_for_dev";
-      const fakeUser = {
-        id: 1,
-        email: "test@example.com",
-        username: "TestUser"
-      };
-      await AsyncStorage.setItem("user", JSON.stringify({
-        token: fakeToken,
-        data: fakeUser
-      }));
-      router.replace('/screens/DashboardScreen/DashboardPage');
-    } catch (error) {
-      Toast.show({
-        type: 'error',
-        text1: 'Erreur de connexion Google (DEV)',
-        text2: error.message,
-      });
-    }
+    
   };
 
   const handleFacebook = async () => {
-    // Version temporaire pour le développement
-    try {
-      const fakeToken = "fake_token_for_dev";
-      const fakeUser = {
-        id: 1,
-        email: "test@example.com",
-        username: "TestUser"
-      };
-      await AsyncStorage.setItem("user", JSON.stringify({
-        token: fakeToken,
-        data: fakeUser
-      }));
-      router.replace('/screens/DashboardScreen/DashboardPage');
-    } catch (error) {
-      Toast.show({
-        type: 'error',
-        text1: 'Erreur de connexion Facebook (DEV)',
-        text2: error.message,
-      });
-    }
+    
   };
 
   return (

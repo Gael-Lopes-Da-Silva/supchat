@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { View, Text, Image } from 'react-native';
+import { View, Text, Image, TextInput, TouchableOpacity, StyleSheet, Alert } from 'react-native';
 import { useRouter } from 'expo-router';
 import Constants from 'expo-constants';
 import Toast from 'react-native-toast-message';
@@ -8,7 +8,7 @@ import Button from '../../components/Button/Button';
 import InputField from '../../components/InputField/InputField';
 import Link from '../../components/Link/Link';
 
-import { readUserByEmail } from '../../../services/Users';
+import { readUser } from '../../../services/Users';
 import { sendEmail } from '../../../services/Email';
 import * as PasswordReset from '../../../emails/PasswordReset';
 
@@ -24,7 +24,7 @@ const ResetPasswordPage = () => {
 
     const handleCheckEmail = async () => {
         try {
-            const data = await readUserByEmail(email, API_URL);
+            const data = await readUser({email}, API_URL);
 
             if (data.error || !data.result) {
                 Toast.show({
@@ -34,11 +34,11 @@ const ResetPasswordPage = () => {
                 return;
             }
 
-            const user = data.result;
-            if (user.provider !== null) {
+            const user = data.result[0];
+            if (user.provider) {
                 Toast.show({
                     type: 'error',
-                    text1: 'Ce compte utilise une connexion externe (Google/Facebook).',
+                    text1: 'Ce compte utilise une connexion externe.',
                 });
                 return;
             }
@@ -49,11 +49,20 @@ const ResetPasswordPage = () => {
             // Construire l'URL complète de réinitialisation
             const resetUrl = `${WEB_URL}reset_password?token=${resetToken}&email=${encodeURIComponent(email)}`;
             
-            await sendEmail({
+            const emailResponse = await sendEmail({
                 to: user.email,
                 subject: PasswordReset.subject(),
                 content: PasswordReset.content(resetUrl),
             }, null);
+
+            if (emailResponse.error) {
+                Toast.show({
+                    type: 'error',
+                    text1: 'Erreur lors de l\'envoi de l\'email',
+                    text2: emailResponse.error_message || 'Une erreur inattendue est survenue.',
+                });
+                return;
+            }
 
             Toast.show({
                 type: 'success',
@@ -70,7 +79,7 @@ const ResetPasswordPage = () => {
 
             if (process.env.REACT_APP_DEBUG) {
                 console.trace({
-                    from: "readUserByEmail() -> ResetPasswordPage.js",
+                    from: "readUser() -> ResetPasswordPage.js",
                     error: error,
                 });
             }

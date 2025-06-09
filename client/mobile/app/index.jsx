@@ -1,16 +1,49 @@
 import React, { useEffect } from 'react';
 import { useRouter } from 'expo-router';
 import { View, ActivityIndicator } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { jwtDecode } from 'jwt-decode';
 import 'react-native-gesture-handler';
 
 export default function App() {
   const router = useRouter();
 
   useEffect(() => {
-    const delayNavigation = async () => {
-      await new Promise(resolve => setTimeout(resolve, 10)); // petit délai
-      router.replace('/screens/LoginScreen/LoginPage');
+    const checkAuthAndNavigate = async () => {
+      try {
+        const storedData = await AsyncStorage.getItem('user');
+        const userData = JSON.parse(storedData);
+        const token = userData?.token;
+
+        if (!token) {
+          router.replace('/screens/LoginScreen/LoginPage');
+          return;
+        }
+
+        const decoded = jwtDecode(token);
+        const isExpired = decoded.exp * 1000 < Date.now();
+
+        if (isExpired) {
+          await AsyncStorage.removeItem('user');
+          router.replace('/screens/LoginScreen/LoginPage');
+          return;
+        }
+
+        // Si l'utilisateur est authentifié et le token est valide,
+        // rediriger vers la page principale de l'application
+        router.replace('/screens/DashboardScreen/DashboardPage');
+      } catch (error) {
+        await AsyncStorage.removeItem('user');
+        router.replace('/screens/LoginScreen/LoginPage');
+      }
     };
+
+    // Petit délai pour éviter les problèmes de navigation
+    const delayNavigation = async () => {
+      await new Promise(resolve => setTimeout(resolve, 10));
+      checkAuthAndNavigate();
+    };
+    
     delayNavigation();
   }, []);
 

@@ -4,9 +4,9 @@ import {
   Text,
   TouchableOpacity,
   ScrollView,
-  StyleSheet,
 } from 'react-native';
 import { FontAwesome6 } from '@expo/vector-icons';
+import styles from './DashboardLeftStyle';
 
 const ChannelList = ({
   channels = {},
@@ -31,9 +31,9 @@ const ChannelList = ({
 
   if (sortedChannels.length === 0) {
     return (
-      <View style={styles.container}>
-        <View style={styles.section}>
-          <Text style={[styles.sectionTitle, { color: secondaryColor }]}>
+      <View style={styles.channelListContainer}>
+        <View style={styles.channelSection}>
+          <Text style={[styles.channelSectionTitle, { color: secondaryColor }]}>
             CANAUX
           </Text>
           <Text style={[styles.emptyText, { color: secondaryColor }]}>
@@ -45,9 +45,9 @@ const ChannelList = ({
   }
 
   return (
-    <ScrollView style={styles.container}>
-      <View style={styles.section}>
-        <Text style={[styles.sectionTitle, { color: secondaryColor }]}>
+    <ScrollView style={styles.channelListContainer}>
+      <View style={styles.channelSection}>
+        <Text style={[styles.channelSectionTitle, { color: secondaryColor }]}>
           CANAUX
         </Text>
 
@@ -84,52 +84,5 @@ const ChannelList = ({
     </ScrollView>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  section: {
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-  },
-  sectionTitle: {
-    fontSize: 12,
-    fontWeight: '600',
-    marginBottom: 8,
-    paddingHorizontal: 8,
-  },
-  channelButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 8,
-    paddingHorizontal: 8,
-    borderRadius: 4,
-  },
-  selectedChannel: {
-    backgroundColor: '#007AFF22',
-  },
-  channelInfo: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  channelIcon: {
-    marginRight: 8,
-    width: 16,
-  },
-  channelName: {
-    fontSize: 15,
-    flex: 1,
-  },
-  selectedChannelText: {
-    fontWeight: '600',
-  },
-  emptyText: {
-    textAlign: 'center',
-    fontSize: 14,
-    paddingVertical: 16,
-  },
-});
 
 export default ChannelList;

@@ -15,14 +15,14 @@ export const createUser = async (userData) => {
   }
 };
 
-export const readUser = async (query, api_url = API_URL) => {
-  let url = "";
+export const readUser = async (query = {}, api_url = API_URL) => {
+  let url = `${api_url}users`;
+
   if (query.id) {
     url = `${api_url}users/${query.id}`;
-  } else if (query.confirm_token) {
-    url = `${api_url}users?confirm_token=${query.confirm_token}`;
   } else {
-    return { error: true, message: "Paramètre requis manquant." };
+    const params = new URLSearchParams(query).toString();
+    if (params) url += `?${params}`;
   }
 
   try {
@@ -149,26 +149,20 @@ export const linkProvider = async (userId, provider, providerId) => {
   }
 };
 
-export const readUserByEmail = async (email, api_url = API_URL) => {
-  if (!email) {
-    return { error: true, message: "Email requis" };
-  }
-
-  const url = `${api_url}users/by-email/${email}`;
-
+export const unlinkProvider = async (userId, provider) => {
   try {
-    const response = await fetch(url, {
-      method: "GET",
+    const response = await fetch(`${API_URL}users/unlink-provider`, {
+      method: "POST",
       headers: {
-        Accept: "application/json",
         "Content-Type": "application/json",
       },
+      body: JSON.stringify({ user_id: userId, provider }),
     });
-    if (!response.ok) {
-      return { error: true, message: `Erreur HTTP ${response.status}` };
-    }
     return await response.json();
   } catch (error) {
-    return { error: true, message: "Erreur serveur" };
+    return {
+      error: true,
+      message: "Erreur serveur",
+    };
   }
 };

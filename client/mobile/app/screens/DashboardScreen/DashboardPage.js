@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
-import { View, StyleSheet, SafeAreaView, Platform, StatusBar } from 'react-native';
+import { View, SafeAreaView, StatusBar } from 'react-native';
 import { useRouter } from 'expo-router';
 import Toast from 'react-native-toast-message';
 import Constants from 'expo-constants';
@@ -14,6 +14,7 @@ import { createWorkspaceInvitation } from '../../../services/WorkspaceInvitation
 import { getPublicWorkspaces } from '../../../services/Workspaces';
 import { getBackground, getForeground } from '../../../utils/colorUtils';
 import socket from '../../socket';
+import styles from './DashboardPageStyles';
 
 const API_URL = Constants.expoConfig.extra.apiUrl;
 
@@ -317,27 +318,6 @@ const DashboardPage = () => {
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-  },
-  safeArea: {
-    flex: 1,
-    backgroundColor: '#fff',
-    paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
-  },
-  mainContainer: {
-    flex: 1,
-  },
-  leftPanelContainer: {
-    position: 'absolute',
-    left: 0,
-    top: 0,
-    bottom: 0,
-    width: '100%',
-    zIndex: 1000,
-  },
-});
+
 
 export default DashboardPage; 
