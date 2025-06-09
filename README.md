@@ -87,10 +87,6 @@ docker exec -it supchat_db mariadb -u root -p
 
 --- 
 
-## Crédit & contact
-
-Projet développé par Arthur, Gael et Zakaria. Pour toute demande : contactez un administrateur du projet.
-
 
 Application web disponible ici : https://web.supchat.fun
 
