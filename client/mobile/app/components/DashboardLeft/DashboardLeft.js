@@ -3,6 +3,7 @@ import {
   View,
   Text,
   TouchableOpacity,
+  TextInput,
   Dimensions,
   Platform,
 } from 'react-native';
@@ -35,17 +36,18 @@ const DashboardLeft = ({
   selectedChannel = null,
   user = null,
   guiVisibility = { leftPanel: false },
-  updateGuiState = () => {},
-  setSelectedWorkspace = () => {},
-  setSelectedChannel = () => {},
-  hideAllPopup = () => {},
+  updateGuiState = () => { },
+  setSelectedWorkspace = () => { },
+  setSelectedChannel = () => { },
+  hideAllPopup = () => { },
   getBackground = () => '#ccc',
   getForeground = () => '#000',
   publicWorkspaces = [],
-  handleJoinPublicWorkspace = () => {},
+  handleJoinPublicWorkspace = () => { },
 }) => {
   const [theme, setTheme] = useState('light');
   const [isReady, setIsReady] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
   const translateX = useSharedValue(-DRAWER_WIDTH);
   const insets = useSafeAreaInsets();
   const router = useRouter();
@@ -66,7 +68,7 @@ const DashboardLeft = ({
 
   useEffect(() => {
     if (!isReady) return;
-    
+
     translateX.value = withSpring(
       guiVisibility.leftPanel ? 0 : -DRAWER_WIDTH,
       {
@@ -102,12 +104,21 @@ const DashboardLeft = ({
   const backgroundColor = theme === 'dark' ? '#1a1a1a' : '#ffffff';
   const textColor = theme === 'dark' ? '#ffffff' : '#000000';
   const borderColor = theme === 'dark' ? '#333333' : '#e5e5e5';
+  const inputBackgroundColor = theme === 'dark' ? '#333333' : '#f0f0f0';
 
   if (!isReady) return null;
 
+  const filteredChannels = searchQuery
+    ? Object.fromEntries(
+      Object.entries(channels).filter(([_, channel]) =>
+        channel.name.toLowerCase().includes(searchQuery.toLowerCase())
+      )
+    )
+    : channels;
+
   return (
     <GestureHandlerRootView style={{ position: 'absolute', left: 0, top: 0, bottom: 0, right: 0 }}>
-      <PanGestureHandler 
+      <PanGestureHandler
         onGestureEvent={drawerGestureHandler}
         activeOffsetX={[-5, 5]}
       >
@@ -118,7 +129,7 @@ const DashboardLeft = ({
             { backgroundColor, borderRightColor: borderColor },
           ]}
         >
-          <View style={styles.workspacesSection}>
+          <View style={[styles.workspacesSection, { borderRightColor: borderColor }]}>
             <WorkspaceList
               user={user}
               workspaces={workspaces}
@@ -138,67 +149,79 @@ const DashboardLeft = ({
             />
           </View>
 
-          {selectedWorkspace && (
-            <>
-              <TouchableOpacity
-                style={[styles.workspaceHeader, { borderBottomColor: borderColor }]}
-                onPress={hideAllPopup}
-              >
-                <View style={styles.workspaceInfo}>
-                  <Text style={[styles.workspaceName, { color: textColor }]}>
-                    {selectedWorkspace.name || 'Sans nom'}
-                  </Text>
-                  {selectedWorkspace.description && (
-                    <Text style={[styles.workspaceDescription, { color: textColor }]}>
-                      {selectedWorkspace.description}
+          <View style={styles.mainContent}>
+            {selectedWorkspace && (
+              <>
+                <View style={[styles.workspaceHeader, { borderBottomColor: borderColor }]}>
+                  <View style={styles.workspaceInfo}>
+                    <Text style={[styles.workspaceName, { color: textColor }]}>
+                      {selectedWorkspace.name || ''}
                     </Text>
+                    {selectedChannel && (
+                      <Text style={[styles.channelName, { color: textColor }]}>
+                        {selectedChannel.name}
+                      </Text>
+                    )}
+                  </View>
+                </View>
+
+                {Object.keys(channels).length > 0 && (
+                  <View style={[styles.searchContainer, { borderBottomColor: borderColor }]}>
+                    <TextInput
+                      style={[
+                        styles.searchInput,
+                        { backgroundColor: inputBackgroundColor, color: textColor }
+                      ]}
+                      placeholder="Rechercher un canal..."
+                      placeholderTextColor={theme === 'dark' ? '#999999' : '#666666'}
+                      value={searchQuery}
+                      onChangeText={setSearchQuery}
+                    />
+                  </View>
+                )}
+
+                <View style={styles.channelsSection}>
+                  {Object.keys(channels).length > 0 && (
+                    <ChannelList
+                      channels={filteredChannels}
+                      setSelectedChannel={setSelectedChannel}
+                      selectedChannel={selectedChannel}
+                      getBackground={getBackground}
+                      getForeground={getForeground}
+                      user={user}
+                      theme={theme}
+                    />
                   )}
                 </View>
-                <FontAwesome6 name="chevron-down" size={16} color={textColor} />
-              </TouchableOpacity>
+              </>
+            )}
 
-              <View style={styles.channelsSection}>
-                <ChannelList
-                  channels={channels}
-                  setSelectedChannel={setSelectedChannel}
-                  selectedChannel={selectedChannel}
-                  getBackground={getBackground}
-                  getForeground={getForeground}
-                  user={user}
-                  theme={theme}
-                />
-              </View>
-            </>
-          )}
-
-          <View style={styles.footer}>
-            <TouchableOpacity
-              style={styles.profileButton}
-              onPress={hideAllPopup}
-            >
-              <View
-                style={[
-                  styles.profileAvatar,
-                  {
-                    backgroundColor: getBackground(user?.username || '?'),
-                  },
-                ]}
-              >
-                <Text style={[styles.profileInitial, { color: getForeground(user?.username || '?') }]}>
-                  {(user?.username?.[0] || '?').toUpperCase()}
+            <View style={[styles.footer, { borderTopColor: borderColor }]}>
+              <View style={styles.profileButton}>
+                <View
+                  style={[
+                    styles.profileAvatar,
+                    {
+                      backgroundColor: getBackground(user?.username || '?'),
+                    },
+                  ]}
+                >
+                  <Text style={[styles.profileInitial, { color: getForeground(user?.username || '?') }]}>
+                    {(user?.username?.[0] || '?').toUpperCase()}
+                  </Text>
+                </View>
+                <Text style={[styles.username, { color: textColor }]}>
+                  {user?.username || 'Utilisateur'}
                 </Text>
               </View>
-              <Text style={[styles.username, { color: textColor }]}>
-                {user?.username || 'Utilisateur'}
-              </Text>
-            </TouchableOpacity>
 
-            <TouchableOpacity
-              style={styles.settingsButton}
-              onPress={() => router.push('/screens/SettingsScreen/SettingsPage')}
-            >
-              <FontAwesome6 name="gear" size={20} color={textColor} />
-            </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.settingsButton}
+                onPress={() => router.push('/screens/SettingsScreen/SettingsPage')}
+              >
+                <FontAwesome6 name="gear" size={20} color={textColor} />
+              </TouchableOpacity>
+            </View>
           </View>
         </Reanimated.View>
       </PanGestureHandler>

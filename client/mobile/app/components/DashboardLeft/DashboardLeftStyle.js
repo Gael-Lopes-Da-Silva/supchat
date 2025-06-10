@@ -2,6 +2,7 @@ import { StyleSheet, Dimensions, Platform } from 'react-native';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const DRAWER_WIDTH = SCREEN_WIDTH * 0.7;
+const WORKSPACE_SIDEBAR_WIDTH = 70;
 
 export default StyleSheet.create({
   // DashboardLeft Styles
@@ -21,33 +22,43 @@ export default StyleSheet.create({
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
     zIndex: 1000,
+    flexDirection: 'row',
   },
   workspacesSection: {
-    flexDirection: 'row',
-    height: 70,
-    paddingHorizontal: 8,
+    width: WORKSPACE_SIDEBAR_WIDTH,
+    height: '100%',
+    borderRightWidth: 1,
     paddingVertical: 10,
-    borderBottomWidth: 1,
-  },
-  workspaceHeader: {
-    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
+  },
+  mainContent: {
+    flex: 1,
+  },
+  workspaceHeader: {
     padding: 16,
     borderBottomWidth: 1,
   },
   workspaceInfo: {
-    flex: 1,
-    marginRight: 8,
+    marginBottom: 4,
   },
   workspaceName: {
     fontSize: 16,
     fontWeight: 'bold',
   },
-  workspaceDescription: {
-    fontSize: 12,
+  channelName: {
+    fontSize: 14,
     opacity: 0.7,
-    marginTop: 2,
+  },
+  searchContainer: {
+    padding: 12,
+    borderBottomWidth: 1,
+  },
+  searchInput: {
+    height: 36,
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    fontSize: 14,
   },
   channelsSection: {
     flex: 1,
@@ -60,7 +71,6 @@ export default StyleSheet.create({
     paddingTop: 16,
     paddingBottom: 0,
     borderTopWidth: 1,
-    backgroundColor: '#fff',
   },
   profileButton: {
     flex: 1,
@@ -89,17 +99,54 @@ export default StyleSheet.create({
 
   // WorkspaceButtons Styles
   workspaceButtonsContainer: {
-    flexDirection: 'row',
+    width: '100%',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
     alignItems: 'center',
-    marginLeft: 8,
   },
   workspaceButton: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
+    width: 48,
+    height: 48,
+    borderRadius: 24,
     justifyContent: 'center',
     alignItems: 'center',
-    marginHorizontal: 4,
+    marginVertical: 4,
+  },
+  addButton: {
+    backgroundColor: '#4CAF50',
+  },
+  helpButton: {
+    backgroundColor: '#E0E0E0',
+  },
+
+  // WorkspaceList Styles
+  workspaceListContainer: {
+    flex: 1,
+    width: '100%',
+    alignItems: 'center',
+  },
+  workspaceListButton: {
+    width: 48,
+    height: 48,
+    borderRadius: 16,
+    marginVertical: 4,
+    borderWidth: 2,
+    overflow: 'hidden',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  selectedWorkspace: {
+    borderColor: '#007AFF',
+  },
+  workspaceAvatar: {
+    width: '100%',
+    height: '100%',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  workspaceInitial: {
+    fontSize: 20,
+    fontWeight: 'bold',
   },
 
   // ChannelList Styles
@@ -135,7 +182,7 @@ export default StyleSheet.create({
     marginRight: 8,
     width: 16,
   },
-  channelName: {
+  channelItemName: {
     fontSize: 15,
     flex: 1,
   },
@@ -146,43 +193,5 @@ export default StyleSheet.create({
     textAlign: 'center',
     fontSize: 14,
     paddingVertical: 16,
-  },
-
-  // WorkspaceList Styles
-  workspaceListContainer: {
-    flexGrow: 0,
-  },
-  workspaceListButton: {
-    width: 48,
-    height: 48,
-    borderRadius: 16,
-    marginHorizontal: 4,
-    borderWidth: 2,
-    overflow: 'hidden',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  selectedWorkspace: {
-    borderColor: '#007AFF',
-  },
-  workspaceAvatar: {
-    width: '100%',
-    height: '100%',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  workspaceInitial: {
-    fontSize: 20,
-    fontWeight: 'bold',
-  },
-  addButton: {
-    width: 48,
-    height: 48,
-    borderRadius: 16,
-    marginHorizontal: 4,
-    borderWidth: 2,
-    borderStyle: 'dashed',
-    justifyContent: 'center',
-    alignItems: 'center',
   },
 });

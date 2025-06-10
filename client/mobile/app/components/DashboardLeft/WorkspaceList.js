@@ -5,56 +5,39 @@ import {
   TouchableOpacity,
   ScrollView,
 } from 'react-native';
-import { FontAwesome6 } from '@expo/vector-icons';
 import styles from './DashboardLeftStyle';
 
 const WorkspaceList = ({
-  user,
-  workspaces = {},
-  publicWorkspaces = [],
+  workspaces,
   selectedWorkspace,
   updateGuiState,
   setSelectedWorkspace,
   getBackground,
   getForeground,
-  handleJoinPublicWorkspace,
   theme,
 }) => {
-  const textColor = theme === 'dark' ? '#ffffff' : '#000000';
   const borderColor = theme === 'dark' ? '#333333' : '#e5e5e5';
 
-  const getWorkspaceInitial = (name) => {
-    if (!name || typeof name !== 'string') return '?';
-    return name.charAt(0).toUpperCase();
-  };
-
   return (
-    <ScrollView
-      horizontal
-      showsHorizontalScrollIndicator={false}
-      style={styles.workspaceListContainer}
-    >
-      {Object.values(workspaces).map((workspace) => {
-        if (!workspace || !workspace.id || !workspace.name) return null;
-        
-        return (
+    <View style={styles.workspaceListContainer}>
+      <ScrollView showsVerticalScrollIndicator={false}>
+        {Object.entries(workspaces).map(([id, workspace]) => (
           <TouchableOpacity
-            key={workspace.id}
+            key={id}
             style={[
               styles.workspaceListButton,
-              selectedWorkspace?.id === workspace.id && styles.selectedWorkspace,
-              { borderColor },
+              selectedWorkspace?.id === id && styles.selectedWorkspace,
+              { borderColor: borderColor },
             ]}
             onPress={() => {
               setSelectedWorkspace(workspace);
+              updateGuiState('leftPanel', true);
             }}
           >
             <View
               style={[
                 styles.workspaceAvatar,
-                {
-                  backgroundColor: getBackground(workspace.name),
-                },
+                { backgroundColor: getBackground(workspace.name) },
               ]}
             >
               <Text
@@ -63,20 +46,13 @@ const WorkspaceList = ({
                   { color: getForeground(workspace.name) },
                 ]}
               >
-                {getWorkspaceInitial(workspace.name)}
+                {workspace.name[0].toUpperCase()}
               </Text>
             </View>
           </TouchableOpacity>
-        );
-      })}
-
-      <TouchableOpacity
-        style={[styles.addButton, { borderColor }]}
-        onPress={() => updateGuiState('discoverWorkspaces', true)}
-      >
-        <FontAwesome6 name="plus" size={20} color={textColor} />
-      </TouchableOpacity>
-    </ScrollView>
+        ))}
+      </ScrollView>
+    </View>
   );
 };
 

@@ -14,6 +14,7 @@ import Link from '../../components/Link/Link';
 import styles from './LoginPageStyles';
 import { useRouter } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import socket from '../../socket';
 
 import { loginUser, updateUser } from '../../../services/Users';
 
@@ -79,10 +80,17 @@ const LoginPage = () => {
       }
 
       const decodedToken = jwtDecode(data.token);
-      AsyncStorage.setItem("user", JSON.stringify({
+      await AsyncStorage.setItem("user", JSON.stringify({
         token: data.token,
         data: decodedToken,
       }));
+
+      // Réinitialiser le socket
+      if (!socket.connected) {
+        socket.connect();
+      }
+      socket.emit("registerUser", decodedToken.id);
+      socket.emit("getUserWorkspaces", { user_id: decodedToken.id });
 
       router.replace('/screens/DashboardScreen/DashboardPage');
     } catch (error) {

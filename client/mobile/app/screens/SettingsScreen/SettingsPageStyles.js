@@ -50,6 +50,16 @@ export default StyleSheet.create({
     fontSize: 24,
     fontWeight: 'bold',
   },
+  headerButtons: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  headerButton: {
+    padding: 8,
+    borderRadius: 10,
+    borderWidth: 2,
+    borderColor: '#333',
+  },
   closeButton: {
     padding: 8,
   },

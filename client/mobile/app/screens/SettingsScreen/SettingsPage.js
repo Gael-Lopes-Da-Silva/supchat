@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
-import { View, Text, TouchableOpacity, TextInput, ScrollView } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { View, Text, TouchableOpacity, TextInput, ScrollView, Alert } from 'react-native';
+import { useRouter } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Toast from 'react-native-toast-message';
 import Constants from 'expo-constants';
@@ -24,7 +24,7 @@ const SettingsPage = () => {
   const [showUsernameModal, setShowUsernameModal] = useState(false);
   const [showPasswordModal, setShowPasswordModal] = useState(false);
 
-  const navigation = useNavigation();
+  const router = useRouter();
 
   useEffect(() => {
     AsyncStorage.getItem('user').then((u) => {
@@ -154,13 +154,20 @@ const SettingsPage = () => {
     }
   };
 
+  const handleLogout = async () => {
+    socket.disconnect();
+    socket.connect();
+    await AsyncStorage.removeItem('user');
+    router.push('/screens/LoginScreen/LoginPage');
+  };
+
   return (
     <ScrollView style={[styles.container, styles[theme]]}>
       <View style={styles.header}>
         <Text style={[styles.headerTitle, styles[`${theme}Text`]]}>Paramètres</Text>
         <TouchableOpacity 
-          style={styles.closeButton}
-          onPress={() => navigation.navigate("Dashboard")}
+          style={styles.headerButton}
+          onPress={() => router.push("/screens/DashboardScreen/DashboardPage")}
         >
           <FontAwesome6 name="times" size={20} color={theme === 'dark' ? '#fff' : '#000'} />
         </TouchableOpacity>
@@ -264,6 +271,15 @@ const SettingsPage = () => {
             >
               <Text style={[styles.buttonText, styles[`${theme}Text`]]}>
                 Exporter mes données
+              </Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[styles.actionButton, styles[`${theme}Button`]]}
+              onPress={handleLogout}
+            >
+              <Text style={[styles.buttonText, styles[`${theme}Text`]]}>
+                Se déconnecter
               </Text>
             </TouchableOpacity>
           </View>
