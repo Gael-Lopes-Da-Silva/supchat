@@ -55,7 +55,7 @@ const WorkspaceModalManager = ({
       }
       onClose={() => updateModalState("workspace", false)}
       onGoBack={handleGoBack}
-      title="Ajouter/Rejoindre un espace de travail,créer un channel, gérer les rôles"
+      title="Gérer les espaces de travail, channels et rôles"
       theme={theme}
       content={
         <div>
