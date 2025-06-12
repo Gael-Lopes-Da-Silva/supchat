@@ -152,17 +152,19 @@ const DashboardRight = ({
     setChannelNotificationPrefs((prev) => {
       const updated = { ...prev };
 
-      // Si c'est la 1ere fois qu'on clique sur mute de pour ce chan, on désactive les notifications pour ce canal
+      // lorsque je vais cliquer sur le bouton, je vais en fait commencer à construire l'objet ChannelnotificationsPrefs
+      //  ce sera surement la première fois pour un channel en particulier alors la valeur associé au channelId sera undefined donc on le met
+      // on le set à false. 
       if (updated[channelId] === undefined) {
-        updated[channelId] = true;
+        updated[channelId] = false;
       } else {
-        // Sinon, on inverse l'état actuel
-        updated[channelId] = !updated[channelId];
+        // Pour les autres clicks il yaura plus de valeur undefined associé au chan en question donc on inverse l'état actuel
+        updated[channelId] = !updated[channelId]; 
       }
 
       localStorage.setItem("channelNotificationPrefs", JSON.stringify(updated));
 
-      return updated; // maj de prev
+      return updated; // maj 
     });
   };
 

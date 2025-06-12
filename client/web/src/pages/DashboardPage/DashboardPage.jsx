@@ -89,9 +89,14 @@ const DashboardPage = () => {
 
   const navigate = useNavigate();
 
+
+  
+
   // stocke les notifs en localstorag
   useEffect(() => {
     localStorage.setItem("notifications", JSON.stringify(notifications));
+    console.log(channelNotificationPrefs)
+    
   }, [notifications]);
 
   //get les workspaces publics uniquement si l'utilisateur ouvre la vue discover
@@ -118,7 +123,7 @@ const DashboardPage = () => {
   const handleJoinPublicWorkspace = (workspace) => {
     if (!workspace || !workspace.id || !user?.id) return;
     if (!workspaces[workspace.id]) {
-      // met à jour le ws pour trigger le useEffect (ligne 87)
+      // met à jour le ws pour trigger le useEffect
       // qui va mettre à jour la liste des membres du ws. La condition dit grossomodo si ya plus de workspace dans la liste
       // des ws public (dans discover, du coup ça veut dire qu'on a cliqué sur rejoindre) alors on met à jour le state
       setWorkspaceIdToSelect(workspace.id);
