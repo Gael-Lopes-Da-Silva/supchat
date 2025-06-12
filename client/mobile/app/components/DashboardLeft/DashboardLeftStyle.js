@@ -21,7 +21,6 @@ export default StyleSheet.create({
     },
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
-    zIndex: 1000,
     flexDirection: 'row',
   },
   workspacesSection: {
@@ -135,8 +134,28 @@ export default StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
+  workspaceText: {
+    fontSize: 20,
+    fontWeight: 'bold',
+  },
+  lockIcon: {
+    position: 'absolute',
+    bottom: 4,
+    right: 4,
+  },
+  workspaceIndicator: {
+    position: 'absolute',
+    left: 0,
+    top: '20%',
+    height: '60%',
+    width: 4,
+    backgroundColor: '#f77066',
+    borderTopRightRadius: 4,
+    borderBottomRightRadius: 4,
+  },
   selectedWorkspace: {
-    borderColor: '#007AFF',
+    borderLeftWidth: 8,
+    borderLeftColor: '#fffceb',
   },
   workspaceAvatar: {
     width: '100%',
@@ -193,5 +212,15 @@ export default StyleSheet.create({
     textAlign: 'center',
     fontSize: 14,
     paddingVertical: 16,
+  },
+  noChannelsContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: 20,
+  },
+  noChannelsText: {
+    fontSize: 16,
+    fontStyle: 'italic',
   },
 });

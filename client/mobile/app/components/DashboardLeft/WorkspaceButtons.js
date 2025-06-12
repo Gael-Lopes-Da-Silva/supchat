@@ -15,7 +15,7 @@ const WorkspaceButtons = ({ updateGuiState }) => {
       
       <TouchableOpacity
         style={[styles.workspaceButton, styles.helpButton]}
-        onPress={() => updateGuiState('help', true)}
+        onPress={() => updateGuiState('discoverWorkspaces', true)}
       >
         <FontAwesome6 name="question" size={24} color="#666666" />
       </TouchableOpacity>

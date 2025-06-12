@@ -1,5 +1,15 @@
-import { View, Text, Button, ScrollView } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, SafeAreaView, Dimensions } from 'react-native';
+import { FontAwesome6 } from '@expo/vector-icons';
+import { GestureHandlerRootView, PanGestureHandler } from 'react-native-gesture-handler';
+import Reanimated, {
+  useAnimatedGestureHandler,
+  runOnJS,
+} from 'react-native-reanimated';
 import styles from './DashboardRightStyle';
+
+const { width: SCREEN_WIDTH } = Dimensions.get('window');
+const EDGE_WIDTH = 20;
+const SWIPE_THRESHOLD = 50;
 
 const DiscoverWorkspaces = ({
   publicWorkspaces,
@@ -10,25 +20,78 @@ const DiscoverWorkspaces = ({
 }) => {
   const filteredWorkspaces = publicWorkspaces?.filter(ws => !workspaces[ws.id]);
 
+  // Gestionnaire pour l'ouverture du drawer depuis le bord gauche
+  const edgeGestureHandler = useAnimatedGestureHandler({
+    onStart: (event, ctx) => {
+      ctx.startX = event.absoluteX;
+    },
+    onActive: (event, ctx) => {
+      if (ctx.startX <= EDGE_WIDTH && event.translationX > 0) {
+        runOnJS(toggleLeftPanel)();
+      }
+    },
+    onEnd: (event) => {
+      if (event.velocityX > 200 || event.translationX > SWIPE_THRESHOLD) {
+        runOnJS(toggleLeftPanel)();
+      }
+    },
+  });
+
   return (
-    <ScrollView>
-      <View>
-        <Button title="Afficher/Masquer le panneau de gauche" onPress={toggleLeftPanel} />
-        <Text>Découvrir de nouveaux espaces de travail</Text>
-        <Button title="Fermer" onPress={onClose} />
-        {filteredWorkspaces.length === 0 ? (
-          <Text>Aucun espace de travail public disponible.</Text>
-        ) : (
-          filteredWorkspaces.map(ws => (
-            <View key={ws.id} style={styles.workspaceItem}>
-              <Text>{ws.name}</Text>
-              <Text>{ws.description}</Text>
-              <Button title="Rejoindre" onPress={() => onJoinWorkspace(ws)} />
-            </View>
-          ))
-        )}
-      </View>
-    </ScrollView>
+    <SafeAreaView style={styles.discoverContainer}>
+      <PanGestureHandler 
+        onGestureEvent={edgeGestureHandler}
+        activeOffsetX={[-5, 5]}
+        failOffsetY={[-20, 20]}
+      >
+        <Reanimated.View style={[styles.gestureContainer]}>
+          <View style={styles.discoverheaderContainer}>
+            <TouchableOpacity
+              style={styles.actionButton}
+              onPress={toggleLeftPanel}
+            >
+              <FontAwesome6 name="bars" size={20} color="#666" />
+            </TouchableOpacity>
+            <Text style={styles.headerTitle}>Découvrir de nouveaux espaces</Text>
+            <TouchableOpacity
+              style={styles.actionButton}
+              onPress={onClose}
+            >
+              <FontAwesome6 name="xmark" size={20} color="#666" />
+            </TouchableOpacity>
+          </View>
+
+          <ScrollView style={styles.workspaceList} contentContainerStyle={styles.workspaceListContent}>
+            {filteredWorkspaces?.length === 0 ? (
+              <View style={styles.emptyContainer}>
+                <Text style={styles.emptyText}>
+                  Aucun espace de travail public disponible.
+                  {'\n'}
+                  N'hésitez pas à en créer un !
+                </Text>
+              </View>
+            ) : (
+              filteredWorkspaces.map(ws => (
+                <View key={ws.id} style={styles.workspaceCard}>
+                  <View style={styles.workspaceInfo}>
+                    <Text style={styles.workspaceName}>{ws.name}</Text>
+                    {ws.description && (
+                      <Text style={styles.workspaceDescription}>{ws.description}</Text>
+                    )}
+                  </View>
+                  <TouchableOpacity
+                    style={styles.joinButton}
+                    onPress={() => onJoinWorkspace(ws)}
+                  >
+                    <Text style={styles.joinButtonText}>Rejoindre</Text>
+                  </TouchableOpacity>
+                </View>
+              ))
+            )}
+          </ScrollView>
+        </Reanimated.View>
+      </PanGestureHandler>
+    </SafeAreaView>
   );
 };
 

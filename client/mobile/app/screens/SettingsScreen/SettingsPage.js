@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { View, Text, TouchableOpacity, TextInput, ScrollView, Alert } from 'react-native';
+import { View, Text, TouchableOpacity, TextInput, ScrollView, Alert, Linking } from 'react-native';
 import { useRouter } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Toast from 'react-native-toast-message';
@@ -97,13 +97,20 @@ const SettingsPage = () => {
 
   const handleExportData = () => {
     if (!user?.id) return;
-    Linking.openURL(`${API_URL}/users/${user.id}/export`);
+    Linking.openURL(`${API_URL}users/${user.id}/export`);
   };
 
   const handleStatusChange = (newStatus) => {
     setStatus(newStatus);
     AsyncStorage.setItem("user.status", newStatus);
     socket.emit("updateStatus", { user_id: user.id, status: newStatus });
+    
+    // Écouter la confirmation du serveur
+    socket.once("userStatusBroadcast", ({ user_id, status }) => {
+      if (user_id === user.id) {
+        setStatus(status);
+      }
+    });
   };
 
   const handleSaveChanges = async () => {
@@ -161,15 +168,21 @@ const SettingsPage = () => {
     router.push('/screens/LoginScreen/LoginPage');
   };
 
+  const handleLinkGoogle = async () => {
+  };
+
+  const handlLinkeFacebook = async () => {
+  };
+
   return (
     <ScrollView style={[styles.container, styles[theme]]}>
       <View style={styles.header}>
         <Text style={[styles.headerTitle, styles[`${theme}Text`]]}>Paramètres</Text>
-        <TouchableOpacity 
+        <TouchableOpacity
           style={styles.headerButton}
           onPress={() => router.push("/screens/DashboardScreen/DashboardPage")}
         >
-          <FontAwesome6 name="times" size={20} color={theme === 'dark' ? '#fff' : '#000'} />
+          <FontAwesome6 name="xmark" size={20} color={theme === 'dark' ? '#fff' : '#000'} />
         </TouchableOpacity>
       </View>
 
@@ -280,6 +293,26 @@ const SettingsPage = () => {
             >
               <Text style={[styles.buttonText, styles[`${theme}Text`]]}>
                 Se déconnecter
+              </Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[styles.actionButton, styles[`${theme}Button`]]}
+              onPress={handleLinkGoogle}
+            >
+              <FontAwesome6 name="google" size={20} />
+              <Text style={[styles.buttonText, styles[`${theme}Text`]]}>
+                Lier mon compte Google
+              </Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[styles.actionButton, styles[`${theme}Button`]]}
+              onPress={handlLinkeFacebook}
+            >
+              <FontAwesome6 name="facebook-f" size={20} color="#4267B2" />
+              <Text style={[styles.buttonText, styles[`${theme}Text`]]}>
+                Lier mon compte Facebook
               </Text>
             </TouchableOpacity>
           </View>

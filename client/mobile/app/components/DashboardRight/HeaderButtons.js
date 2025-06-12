@@ -5,42 +5,43 @@ import styles from './DashboardRightStyle';
 
 const HeaderButtons = ({
   selectedChannel,
-  channelNotificationPrefs,
   toggleChannelNotifications,
+  channelNotificationPrefs,
+  toggleLeftPanel,
+  theme,
 }) => {
-  const isMuted = channelNotificationPrefs[selectedChannel?.id] === false;
+  const textColor = theme === 'dark' ? '#fffceb' : '#333';
 
   return (
     <View style={styles.headerContainer}>
-      <View style={styles.channelInfo}>
-        <FontAwesome6 name="hashtag" size={16} color="#666" style={styles.hashIcon} />
-        <Text style={styles.channelName}>
-          {selectedChannel?.name || "Aucun canal sélectionné"}
-        </Text>
-      </View>
+      <View style={styles.actions}>
+        <TouchableOpacity
+          style={[styles.actionButton, styles.leftButton]}
+          onPress={toggleLeftPanel}
+        >
+          <FontAwesome6 name="bars" size={20} color={textColor} />
+        </TouchableOpacity>
 
-      {selectedChannel?.id && (
-        <View style={styles.actions}>
-          <TouchableOpacity
-            style={styles.actionButton}
-            onPress={() => toggleChannelNotifications(selectedChannel.id)}
-          >
-            <FontAwesome6
-              name={isMuted ? "bell-slash" : "bell"}
-              size={20}
-              color="#666"
-            />
+        <View style={styles.centerButtons}>
+          <TouchableOpacity style={styles.actionButton}>
+            <FontAwesome6 name="thumbtack" size={20} color={textColor} />
           </TouchableOpacity>
 
           <TouchableOpacity style={styles.actionButton}>
-            <FontAwesome6 name="users" size={20} color="#666" />
+            <FontAwesome6 name="bell" size={20} color={textColor} />
           </TouchableOpacity>
 
           <TouchableOpacity style={styles.actionButton}>
-            <FontAwesome6 name="search" size={20} color="#666" />
+            <FontAwesome6 name="users" size={20} color={textColor} />
           </TouchableOpacity>
         </View>
-      )}
+      </View>
+
+      <View style={styles.channelInfo}>
+        <Text style={[styles.channelName, { color: textColor }]}>
+          {selectedChannel?.id ? selectedChannel.name : "Aucun canal sélectionné"}
+        </Text>
+      </View>
     </View>
   );
 };

@@ -1,11 +1,16 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
-import { View, SafeAreaView, StatusBar } from 'react-native';
+import { View, SafeAreaView, StatusBar, Text, Dimensions, TouchableOpacity } from 'react-native';
 import { useRouter } from 'expo-router';
 import Toast from 'react-native-toast-message';
 import Constants from 'expo-constants';
 import * as Audio from 'expo-audio';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { GestureHandlerRootView, PanGestureHandler } from 'react-native-gesture-handler';
+import Reanimated, {
+  useAnimatedGestureHandler,
+  runOnJS,
+} from 'react-native-reanimated';
+import { FontAwesome6 } from '@expo/vector-icons';
 
 import DashboardLeft from '../../components/DashboardLeft/DashboardLeft';
 import DashboardRight from '../../components/DashboardRight/DashboardRight';
@@ -15,8 +20,12 @@ import { getPublicWorkspaces } from '../../../services/Workspaces';
 import { getBackground, getForeground } from '../../../utils/colorUtils';
 import socket from '../../socket';
 import styles from './DashboardPageStyles';
+import DiscoverWorkspaces from '../../components/DashboardRight/DiscoverWorkspaces';
 
 const API_URL = Constants.expoConfig.extra.apiUrl;
+const { width: SCREEN_WIDTH } = Dimensions.get('window');
+const EDGE_WIDTH = 20;
+const SWIPE_THRESHOLD = 50;
 
 const DashboardPage = () => {
   const [theme] = useState('light');
@@ -35,7 +44,7 @@ const DashboardPage = () => {
   const [channelToSelect, setChannelToSelect] = useState(null);
   const [joinedUsername, setJoinedUsername] = useState('');
   const [guiVisibility, setGuiVisibility] = useState({
-    leftPanel: true,
+    leftPanel: false,
     userList: false,
     discoverWorkspaces: false,
   });
@@ -63,7 +72,7 @@ const DashboardPage = () => {
       try {
         const stored = await AsyncStorage.getItem('notifications');
         if (stored) setNotifications(JSON.parse(stored));
-        
+
         const prefs = await AsyncStorage.getItem('channelNotificationPrefs');
         if (prefs) setChannelNotificationPrefs(JSON.parse(prefs));
       } catch (error) {
@@ -102,6 +111,18 @@ const DashboardPage = () => {
   }, [router]);
 
   useEffect(() => {
+    if (guiVisibility.discoverWorkspaces) {
+      getPublicWorkspaces()
+        .then((data) => {
+          setPublicWorkspaces(data);
+        })
+        .catch((err) => {
+          console.error("Erreur chargement workspaces publics :", err);
+        });
+    }
+  }, [guiVisibility.discoverWorkspaces]);
+
+  useEffect(() => {
     if (!user?.id) return;
 
     socket.emit('getUserWorkspaces', { user_id: user.id });
@@ -118,6 +139,12 @@ const DashboardPage = () => {
         const first = workspaceList[0];
         setSelectedWorkspace(first);
         socket.emit('joinWorkspace', { workspace_id: first.id });
+      } else {
+        // pas encore join de workspace -> affichage de discover workspace
+        setGuiVisibility(prev => ({
+          ...prev,
+          discoverWorkspaces: true,
+        }));
       }
     });
   }, [user]);
@@ -128,6 +155,49 @@ const DashboardPage = () => {
       setSelectedWorkspace(workspaceArray[0]);
     }
   }, [workspaces, selectedWorkspace?.id]);
+
+  useEffect(() => {
+    if (selectedWorkspace?.id) {
+      // Charger les channels du workspace sélectionné
+      socket.emit('joinWorkspace', { workspace_id: selectedWorkspace.id }, (response) => {
+        if (response?.channels) {
+          const channelMap = {};
+          response.channels.forEach(channel => {
+            channelMap[channel.id] = channel;
+          });
+          setChannels(channelMap);
+          
+          // Sélectionner le premier canal si disponible
+          const workspaceChannels = Object.values(channelMap).filter(
+            channel => channel.workspace_id === selectedWorkspace.id
+          );
+          if (workspaceChannels.length > 0) {
+            setSelectedChannel(workspaceChannels[0]);
+          } else {
+            setSelectedChannel({});
+          }
+        }
+      });
+    }
+  }, [selectedWorkspace?.id]);
+
+  useEffect(() => {
+    // Dès qu'on change de workspace, on remet à zéro le canal sélectionné sinon ça va faire un bazar
+    setSelectedChannel({});
+  }, [selectedWorkspace?.id]);
+
+  // auto select du premier channel si aucun n'est sélectionné
+  useEffect(() => {
+    if (!selectedWorkspace?.id) return;
+
+    const channelList = Object.values(channels).filter(
+      (c) => c.workspace_id === selectedWorkspace.id
+    );
+
+    if (channelList.length > 0 && !selectedChannel?.id) {
+      setSelectedChannel(channelList[0]);
+    }
+  }, [selectedWorkspace?.id, channels, selectedChannel?.id]);
 
   const pushNotification = useCallback(
     (notif) => {
@@ -179,7 +249,7 @@ const DashboardPage = () => {
 
   const handleJoinPublicWorkspace = workspace => {
     if (!workspace?.id || !user?.id) return;
-    
+
     const isAlreadyMember = !!workspaces[workspace.id];
     if (workspace.is_private && !isAlreadyMember) {
       Toast.show({
@@ -262,62 +332,141 @@ const DashboardPage = () => {
     channels,
   });
 
+  const edgeGestureHandler = useAnimatedGestureHandler({
+    onStart: (event, ctx) => {
+      ctx.startX = event.absoluteX;
+    },
+    onActive: (event, ctx) => {
+      if (ctx.startX <= EDGE_WIDTH && event.translationX > 0) {
+        runOnJS(updateGuiState)('leftPanel', true);
+      }
+    },
+    onEnd: (event) => {
+      if (event.velocityX > 200 || event.translationX > SWIPE_THRESHOLD) {
+        runOnJS(updateGuiState)('leftPanel', true);
+      }
+    },
+  });
+
+  const handleClickNotification = (index, notif) => {
+    markNotificationAsRead(index);
+
+    if (notif.type === "newPublicWorkspace") {
+      updateGuiState("discoverWorkspaces", true);
+      return;
+    }
+    const workspaceId = notif.workspaceId;
+    const channelId = notif.channelId;
+
+    switchToChannel(workspaceId, channelId);
+  };
+
   return (
     <GestureHandlerRootView style={styles.container}>
-      <StatusBar 
+      <StatusBar
         barStyle="dark-content"
         backgroundColor="#fff"
         translucent={false}
       />
       <SafeAreaView style={styles.safeArea}>
-        <View style={styles.mainContainer}>
-          <DashboardRight
-            selectedChannel={selectedChannel}
+        {!guiVisibility.leftPanel && (
+          <DashboardLeft
+            workspaces={workspaces}
             selectedWorkspace={selectedWorkspace}
-            messages={messages}
+            channels={channels}
+            selectedChannel={selectedChannel}
             user={user}
-            workspaceUsers={workspaceUsers}
             guiVisibility={guiVisibility}
             updateGuiState={updateGuiState}
+            setSelectedWorkspace={setSelectedWorkspace}
+            setSelectedChannel={setSelectedChannel}
+            hideAllPopup={hideAllPopup}
             getBackground={getBackground}
             getForeground={getForeground}
-            hideAllPopup={hideAllPopup}
-            connectedUsers={connectedUsers}
-            hasNoChannels={Object.keys(channels).length === 0}
-            channels={channels}
-            notifications={notifications}
-            setSelectedChannel={setSelectedChannel}
-            channelNotificationPrefs={channelNotificationPrefs}
-            setChannelNotificationPrefs={setChannelNotificationPrefs}
-            currentUserRoleId={user?.role_id}
+            publicWorkspaces={publicWorkspaces}
+            handleJoinPublicWorkspace={handleJoinPublicWorkspace}
           />
-          
-          <View style={styles.leftPanelContainer}>
-            <DashboardLeft
-              workspaces={workspaces}
-              selectedWorkspace={selectedWorkspace}
-              channels={channels}
+        )}
+
+        <View style={[styles.mainContainer, { position: 'relative' }]}>
+          {selectedWorkspace.id && !guiVisibility.discoverWorkspaces ? (
+            <DashboardRight
               selectedChannel={selectedChannel}
+              selectedWorkspace={selectedWorkspace}
+              messages={messages}
               user={user}
+              workspaceUsers={workspaceUsers}
               guiVisibility={guiVisibility}
               updateGuiState={updateGuiState}
-              setSelectedWorkspace={setSelectedWorkspace}
-              setSelectedChannel={setSelectedChannel}
-              hideAllPopup={hideAllPopup}
               getBackground={getBackground}
               getForeground={getForeground}
-              publicWorkspaces={publicWorkspaces}
-              handleJoinPublicWorkspace={handleJoinPublicWorkspace}
+              hideAllPopup={hideAllPopup}
+              connectedUsers={connectedUsers}
+              hasNoChannels={Object.keys(channels).length === 0}
+              channels={channels}
+              notifications={notifications}
+              setSelectedChannel={setSelectedChannel}
+              channelNotificationPrefs={channelNotificationPrefs}
+              setChannelNotificationPrefs={setChannelNotificationPrefs}
+              currentUserRoleId={user?.role_id}
+              theme={theme}
             />
-          </View>
+          ) : !guiVisibility.discoverWorkspaces ? (
+            <PanGestureHandler 
+              onGestureEvent={edgeGestureHandler}
+              activeOffsetX={[-10, 10]}
+              activeOffsetY={[-20, 20]}
+            >
+              <Reanimated.View style={[styles.gestureContainer]} pointerEvents="box-none">
+                <View style={styles.headerContainer}>
+                  <TouchableOpacity
+                    style={styles.actionButton}
+                    onPress={() => updateGuiState("leftPanel", !guiVisibility.leftPanel)}
+                  >
+                    <FontAwesome6 name="bars" size={20} color="#666" />
+                  </TouchableOpacity>
+                  <Text style={styles.headerTitle}>Bienvenue sur SupChat</Text>
+                  <View style={styles.actionButton} />
+                </View>
+                <View style={styles.emptyStateContainer}>
+                  <Text style={styles.emptyStateText}>Aucun espace de travail sélectionné</Text>
+                </View>
+              </Reanimated.View>
+            </PanGestureHandler>
+          ) : (
+            <DiscoverWorkspaces
+              publicWorkspaces={publicWorkspaces}
+              workspaces={workspaces}
+              onJoinWorkspace={handleJoinPublicWorkspace}
+              onClose={() => updateGuiState("discoverWorkspaces", false)}
+              toggleLeftPanel={() => updateGuiState("leftPanel", !guiVisibility.leftPanel)}
+            />
+          )}
         </View>
+
+        {guiVisibility.leftPanel && (
+          <DashboardLeft
+            workspaces={workspaces}
+            selectedWorkspace={selectedWorkspace}
+            channels={channels}
+            selectedChannel={selectedChannel}
+            user={user}
+            guiVisibility={guiVisibility}
+            updateGuiState={updateGuiState}
+            setSelectedWorkspace={setSelectedWorkspace}
+            setSelectedChannel={setSelectedChannel}
+            hideAllPopup={hideAllPopup}
+            getBackground={getBackground}
+            getForeground={getForeground}
+            publicWorkspaces={publicWorkspaces}
+            handleJoinPublicWorkspace={handleJoinPublicWorkspace}
+          />
+        )}
 
         <Toast />
       </SafeAreaView>
     </GestureHandlerRootView>
   );
 };
-
-
 
 export default DashboardPage; 

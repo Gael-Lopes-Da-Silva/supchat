@@ -131,6 +131,12 @@ export default StyleSheet.create({
   },
   statusButtonActive: {
     backgroundColor: '#007AFF22',
+    borderColor: '#007AFF',
+    shadowColor: '#007AFF',
+    shadowOffset: { width: 2, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 2,
+    elevation: 3,
   },
   actionButton: {
     paddingVertical: 12,
@@ -138,8 +144,11 @@ export default StyleSheet.create({
     borderRadius: 10,
     borderWidth: 2,
     borderColor: '#333',
-    alignItems: 'center',
     marginBottom: 8,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
   },
   buttonText: {
     fontWeight: 'bold',

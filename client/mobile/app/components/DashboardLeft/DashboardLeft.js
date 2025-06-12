@@ -61,7 +61,6 @@ const DashboardLeft = ({
         console.error('Erreur chargement thème:', error);
       }
       setIsReady(true);
-      updateGuiState('leftPanel', false);
     };
     loadTheme();
   }, []);
@@ -128,6 +127,7 @@ const DashboardLeft = ({
             animatedStyle,
             { backgroundColor, borderRightColor: borderColor },
           ]}
+          pointerEvents={guiVisibility.leftPanel ? "auto" : "none"}
         >
           <View style={[styles.workspacesSection, { borderRightColor: borderColor }]}>
             <WorkspaceList
@@ -137,6 +137,8 @@ const DashboardLeft = ({
               selectedWorkspace={selectedWorkspace}
               updateGuiState={updateGuiState}
               setSelectedWorkspace={setSelectedWorkspace}
+              setSelectedChannel={setSelectedChannel}
+              channels={channels}
               getBackground={getBackground}
               getForeground={getForeground}
               handleJoinPublicWorkspace={handleJoinPublicWorkspace}
@@ -150,14 +152,14 @@ const DashboardLeft = ({
           </View>
 
           <View style={styles.mainContent}>
-            {selectedWorkspace && (
+            {selectedWorkspace?.id && (
               <>
                 <View style={[styles.workspaceHeader, { borderBottomColor: borderColor }]}>
                   <View style={styles.workspaceInfo}>
                     <Text style={[styles.workspaceName, { color: textColor }]}>
                       {selectedWorkspace.name || ''}
                     </Text>
-                    {selectedChannel && (
+                    {selectedChannel?.id && (
                       <Text style={[styles.channelName, { color: textColor }]}>
                         {selectedChannel.name}
                       </Text>
@@ -165,7 +167,7 @@ const DashboardLeft = ({
                   </View>
                 </View>
 
-                {Object.keys(channels).length > 0 && (
+                {Object.keys(channels).length > 0 && selectedWorkspace?.id && (
                   <View style={[styles.searchContainer, { borderBottomColor: borderColor }]}>
                     <TextInput
                       style={[
@@ -181,7 +183,7 @@ const DashboardLeft = ({
                 )}
 
                 <View style={styles.channelsSection}>
-                  {Object.keys(channels).length > 0 && (
+                  {Object.keys(channels).length > 0 ? (
                     <ChannelList
                       channels={filteredChannels}
                       setSelectedChannel={setSelectedChannel}
@@ -191,6 +193,12 @@ const DashboardLeft = ({
                       user={user}
                       theme={theme}
                     />
+                  ) : (
+                    <View style={styles.noChannelsContainer}>
+                      <Text style={[styles.noChannelsText, { color: textColor }]}>
+                        Aucun canal trouvé
+                      </Text>
+                    </View>
                   )}
                 </View>
               </>

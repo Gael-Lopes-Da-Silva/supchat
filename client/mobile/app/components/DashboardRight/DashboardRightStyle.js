@@ -6,10 +6,21 @@ export default StyleSheet.create({
   // Styles from DashboardRight.js
   container: {
     flex: 1,
+    width: '100%',
+    backgroundColor: '#fff',
+  },
+  contentContainer: {
+    flex: 1,
+    width: '100%',
+  },
+  // Container spécifique pour DiscoverWorkspaces
+  discoverContainer: {
+    flex: 1,
     backgroundColor: '#fff',
   },
   gestureContainer: {
     flex: 1,
+    width: '100%',
   },
   messagesList: {
     flex: 1,
@@ -88,10 +99,10 @@ export default StyleSheet.create({
   inputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 4,
-    paddingBottom: 8,
+    paddingHorizontal: 16,
+    paddingTop: 8,
     borderTopWidth: 1,
-    borderTopColor: '#ddd',
+    borderTopColor: '#e5e5e5',
     backgroundColor: '#fff',
   },
   attachButton: {
@@ -125,33 +136,49 @@ export default StyleSheet.create({
 
   // Styles from HeaderButtons.js
   headerContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: 16,
+    flexDirection: 'column',
+    paddingVertical: 12,
+    paddingHorizontal: 16,
     borderBottomWidth: 1,
-    borderBottomColor: '#ddd',
+    borderBottomColor: '#e5e5e5',
     backgroundColor: '#fff',
-  },
-  channelInfo: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  hashIcon: {
-    marginRight: 8,
-  },
-  channelName: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#333',
   },
   actions: {
     flexDirection: 'row',
     alignItems: 'center',
+    marginBottom: 12,
+    position: 'relative',
+  },
+  centerButtons: {
+    flex: 1,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: 24,
+  },
+  leftButton: {
+    position: 'absolute',
+    left: 0,
   },
   actionButton: {
     padding: 8,
-    marginLeft: 8,
+  },
+  channelInfo: {
+    alignItems: 'center',
+  },
+  channelName: {
+    fontSize: 16,
+    fontWeight: '500',
+    textAlign: 'center',
+  },
+  hashIcon: {
+    marginRight: 8,
+  },
+  headerTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#333',
+    flex: 1,
+    textAlign: 'center',
   },
 
   // Styles from FooterButtons.js
@@ -161,7 +188,88 @@ export default StyleSheet.create({
   },
 
   // Styles from DiscoverWorkspaces.js
+  discoverheaderContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#e5e5e5',
+    backgroundColor: '#fff',
+  },
   workspaceItem: {
     marginVertical: 10,
+  },
+  workspaceList: {
+    flex: 1,
+  },
+  workspaceListContent: {
+    padding: 16,
+  },
+  workspaceCard: {
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: '#e0e0e0',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    elevation: 3,
+  },
+  workspaceInfo: {
+    marginBottom: 12,
+  },
+  workspaceName: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 4,
+    color: '#333',
+  },
+  workspaceDescription: {
+    fontSize: 14,
+    color: '#666',
+  },
+  joinButton: {
+    backgroundColor: '#007AFF',
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    alignSelf: 'flex-start',
+  },
+  joinButtonText: {
+    color: '#fff',
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  emptyContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 32,
+  },
+  emptyText: {
+    fontSize: 16,
+    color: '#666',
+    textAlign: 'center',
+    lineHeight: 24,
+  },
+  noChannelsContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#f5f5f5',
+    width: '100%',
+  },
+  noChannelsText: {
+    fontSize: 16,
+    fontWeight: '500',
+    textAlign: 'center',
+    opacity: 0.8,
   },
 });

@@ -39,51 +39,53 @@ const EDGE_WIDTH = 20; // Zone de détection sur le bord gauche
 const SWIPE_THRESHOLD = 50; // Seuil pour l'ouverture
 
 const DashboardRight = ({
-    selectedWorkspace,
-    selectedChannel,
-    user,
-    guiVisibility,
-    updateGuiState,
-    hideAllPopup,
-    updatePopupState,
-    setMousePosition,
-    connectedUsers,
-    hasNoChannels,
-    channels,
-    workspaceUsers,
-    notifications,
-    setSelectedChannel,
-    messages,
-    channelNotificationPrefs,
-    setChannelNotificationPrefs,
+  selectedWorkspace,
+  selectedChannel,
+  user,
+  guiVisibility,
+  updateGuiState,
+  hideAllPopup,
+  updatePopupState,
+  setMousePosition,
+  connectedUsers,
+  hasNoChannels,
+  channels,
+  workspaceUsers,
+  notifications,
+  setSelectedChannel,
+  messages,
+  channelNotificationPrefs,
+  setChannelNotificationPrefs,
   currentUserRoleId,
+  theme,
 }) => {
-    const [input, setInput] = useState('');
-    const [channelMembers, setChannelMembers] = useState([]);
-    const [messageSearchTerm, setMessageSearchTerm] = useState('');
-    const [mentionSuggestions, setMentionSuggestions] = useState([]);
-    const [showMentions, setShowMentions] = useState(false);
-    const [showEmojiPicker, setShowEmojiPicker] = useState(false);
-    const [userSearchTerm, setUserSearchTerm] = useState('');
+  const [input, setInput] = useState('');
+  const [channelMembers, setChannelMembers] = useState([]);
+  const [messageSearchTerm, setMessageSearchTerm] = useState('');
+  const [mentionSuggestions, setMentionSuggestions] = useState([]);
+  const [showMentions, setShowMentions] = useState(false);
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const [userSearchTerm, setUserSearchTerm] = useState('');
   const [activeEmojiPickerMessageId, setActiveEmojiPickerMessageId] = useState(null);
 
-    const isAdmin = currentUserRoleId === 1;
+  const isAdmin = currentUserRoleId === 1;
   const flatListRef = useRef(null);
   const insets = useSafeAreaInsets();
+  const textColor = theme === 'dark' ? '#fffceb' : '#333';
 
-    useEffect(() => {
-        const fetchChannelMembers = async () => {
-            if (!selectedChannel?.id || !selectedChannel?.is_private) return;
+  useEffect(() => {
+    const fetchChannelMembers = async () => {
+      if (!selectedChannel?.id || !selectedChannel?.is_private) return;
 
-            try {
-                const data = await getChannelMembers(selectedChannel.id);
-                if (data.result) setChannelMembers(data.result);
-            } catch (err) {
-                console.error("Erreur chargement membres du canal:", err);
-            }
-        };
-        fetchChannelMembers();
-    }, [selectedChannel?.id]);
+      try {
+        const data = await getChannelMembers(selectedChannel.id);
+        if (data.result) setChannelMembers(data.result);
+      } catch (err) {
+        console.error("Erreur chargement membres du canal:", err);
+      }
+    };
+    fetchChannelMembers();
+  }, [selectedChannel?.id]);
 
   const handleEmojiSelect = (emoji) => {
     if (activeEmojiPickerMessageId) {
@@ -110,7 +112,7 @@ const DashboardRight = ({
 
   const handleImagePick = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    
+
     if (status !== 'granted') {
       Alert.alert('Permission refusée', 'Nous avons besoin de votre permission pour accéder à vos photos.');
       return;
@@ -123,27 +125,27 @@ const DashboardRight = ({
     });
 
     if (!result.canceled && result.assets[0]) {
-        const formData = new FormData();
+      const formData = new FormData();
       formData.append('file', {
         uri: result.assets[0].uri,
         type: 'image/jpeg',
         name: 'photo.jpg',
       });
-        formData.append('channel_id', selectedChannel.id);
-        formData.append('user_id', user.id);
+      formData.append('channel_id', selectedChannel.id);
+      formData.append('user_id', user.id);
 
       try {
         const data = await uploadFile(formData);
         if (data.error === 0 && data.result?.fileUrl && data.result?.message_id) {
-            socket.emit("broadcastAttachedMsg", {
-                id: data.result.message_id,
-                user_id: user.id,
-                username: user.username,
-                content: "",
-                attachment: data.result.fileUrl,
-                channel_id: selectedChannel.id,
-                channel_name: selectedChannel.name,
-                workspace_id: selectedWorkspace.id,
+          socket.emit("broadcastAttachedMsg", {
+            id: data.result.message_id,
+            user_id: user.id,
+            username: user.username,
+            content: "",
+            attachment: data.result.fileUrl,
+            channel_id: selectedChannel.id,
+            channel_name: selectedChannel.name,
+            workspace_id: selectedWorkspace.id,
           });
         }
       } catch (error) {
@@ -152,11 +154,11 @@ const DashboardRight = ({
     }
   };
 
-    const sendMessage = () => {
+  const sendMessage = () => {
     if (!input.trim() && !selectedChannel?.id) return;
 
     socket.emit("message", {
-                user_id: user.id,
+      user_id: user.id,
       username: user.username,
       content: input.trim(),
       channel_id: selectedChannel.id,
@@ -164,7 +166,7 @@ const DashboardRight = ({
       workspace_id: selectedWorkspace.id,
     });
 
-            setInput('');
+    setInput('');
   };
 
   const toggleChannelNotifications = (channelId) => {
@@ -176,13 +178,13 @@ const DashboardRight = ({
         updated[channelId] = !updated[channelId];
       }
       return updated;
-        });
-    };
+    });
+  };
 
   const renderMessage = ({ item: message }) => {
     const isCurrentUser = message.user_id === user.id;
 
-        return (
+    return (
       <View style={[
         styles.messageContainer,
         isCurrentUser ? styles.currentUserMessage : styles.otherUserMessage
@@ -193,7 +195,7 @@ const DashboardRight = ({
             {new Date(message.created_at).toLocaleTimeString()}
           </Text>
         </View>
-        
+
         <View style={styles.messageContent}>
           {message.content && (
             <Text style={styles.messageText}>{message.content}</Text>
@@ -232,7 +234,7 @@ const DashboardRight = ({
         </View>
       </View>
     );
-    };
+  };
 
   // Gestionnaire pour l'ouverture du drawer depuis le bord gauche
   const edgeGestureHandler = useAnimatedGestureHandler({
@@ -257,7 +259,7 @@ const DashboardRight = ({
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 25}
     >
-      <PanGestureHandler 
+      <PanGestureHandler
         onGestureEvent={edgeGestureHandler}
         activeOffsetX={[-5, 5]}
         failOffsetY={[-20, 20]}
@@ -267,77 +269,90 @@ const DashboardRight = ({
             selectedChannel={selectedChannel}
             channelNotificationPrefs={channelNotificationPrefs}
             toggleChannelNotifications={toggleChannelNotifications}
+            toggleLeftPanel={() => updateGuiState("leftPanel", !guiVisibility.leftPanel)}
           />
 
-          <FlatList
-            ref={flatListRef}
-            data={messages}
-            renderItem={renderMessage}
-            keyExtractor={(item) => item.id}
-            style={styles.messagesList}
-            contentContainerStyle={[
-              styles.messagesContent,
-              { paddingBottom: 12 }
-            ]}
-            inverted
-            removeClippedSubviews={true}
-            maxToRenderPerBatch={10}
-            windowSize={10}
-          />
+          {selectedChannel?.id ? (
+            <View style={styles.contentContainer}>
+              <FlatList
+                ref={flatListRef}
+                data={messages}
+                renderItem={renderMessage}
+                keyExtractor={(item) => item.id}
+                style={styles.messagesList}
+                contentContainerStyle={[
+                  styles.messagesContent,
+                  { paddingBottom: 12 }
+                ]}
+                inverted
+                removeClippedSubviews={true}
+                maxToRenderPerBatch={10}
+                windowSize={10}
+              />
+            </View>
+          ) : (
+            <View style={styles.noChannelsContainer}>
+              <Text style={[styles.noChannelsText, { color: textColor }]}>
+                Sélectionnez un canal ou créez en un pour voir les messages.
+              </Text>
+            </View>
+          )}
         </Reanimated.View>
       </PanGestureHandler>
 
-      <View style={[
-        styles.inputContainer,
-        { 
-          paddingBottom: Platform.OS === 'ios' 
-            ? insets.bottom + 8
-            : Math.max(insets.bottom + 12, 20)
-        }
-      ]}>
-        <TouchableOpacity
-          style={styles.attachButton}
-          onPress={handleImagePick}
-        >
-          <FontAwesome6 name="paperclip" size={18} color="#666" />
-        </TouchableOpacity>
+      {selectedChannel?.id && (
+        <View style={[
+          styles.inputContainer,
+          {
+            paddingBottom: Platform.OS === 'ios'
+              ? insets.bottom + 8
+              : Math.max(insets.bottom + 12, 20)
+          }
+        ]}>
+          <TouchableOpacity
+            style={styles.attachButton}
+            onPress={handleImagePick}
+          >
+            <FontAwesome6 name="paperclip" size={18} color="#666" />
+          </TouchableOpacity>
 
-        <TextInput
-          style={styles.input}
-                                value={input}
-          onChangeText={setInput}
-          placeholder="Écrivez votre message..."
-          multiline
-          maxHeight={80}
-          returnKeyType="send"
-          onSubmitEditing={sendMessage}
-          blurOnSubmit={false}
-        />
-
-        <TouchableOpacity
-          style={styles.emojiButton}
-          onPress={() => setShowEmojiPicker(true)}
-        >
-          <FontAwesome6 name="face-smile" size={18} color="#666" />
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={styles.sendButton}
-          onPress={sendMessage}
-          disabled={!input.trim()}
-        >
-          <FontAwesome6
-            name="paper-plane"
-            size={18}
-            color={input.trim() ? '#007AFF' : '#666'}
+          <TextInput
+            style={styles.input}
+            value={input}
+            onChangeText={setInput}
+            placeholder="Écrivez votre message..."
+            multiline
+            maxHeight={80}
+            returnKeyType="send"
+            onSubmitEditing={sendMessage}
+            blurOnSubmit={false}
           />
-        </TouchableOpacity>
-      </View>
+
+          <TouchableOpacity
+            style={styles.emojiButton}
+            onPress={() => setShowEmojiPicker(true)}
+          >
+            <FontAwesome6 name="face-smile" size={18} color="#666" />
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.sendButton}
+            onPress={sendMessage}
+            disabled={!input.trim()}
+          >
+            <FontAwesome6
+              name="paper-plane"
+              size={18}
+              color={input.trim() ? '#007AFF' : '#666'}
+            />
+          </TouchableOpacity>
+        </View>
+      )}
 
       {showEmojiPicker && (
         <View style={[
           styles.emojiPickerContainer,
-          { 
+          {
             paddingBottom: Platform.OS === 'ios'
               ? insets.bottom + 8
               : Math.max(insets.bottom + 12, 20)
