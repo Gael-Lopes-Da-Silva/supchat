@@ -29,9 +29,6 @@ const ChannelList = ({ channels, setSelectedChannel, selectedChannel, getBackgro
                             title={channel.name}
                             onClick={() => setSelectedChannel(channel)}
                             style={{
-                                background: getBackground(channel.name),
-                                color: getForeground(channel.name),
-                                border: isSelected ? "2px solid white" : "1px solid transparent",
                                 fontWeight: isSelected ? "bold" : "normal",
                                 position: "relative",
                             }}

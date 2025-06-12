@@ -408,12 +408,6 @@ const DashboardRight = ({
             channelNotificationPrefs={channelNotificationPrefs}
             toggleChannelNotifications={toggleChannelNotifications}
           />
-
-          <h2 className="channel-title">
-            {selectedChannel?.name
-              ? `#${selectedChannel.name}`
-              : "Aucun canal sélectionné"}
-          </h2>
         </header>
 
         <main>

@@ -9,14 +9,14 @@
 
 
 .channel-header-info {
-  display: flex;
-  flex-direction: column;
+    display: flex;
+    flex-direction: column;
 }
 
 .channel-description {
-  font-size: 0.85rem;
-  color: #666;
-  margin-top: 2px;
+    font-size: 0.85rem;
+    color: #666;
+    margin-top: 2px;
 }
 
 .notification-item {
@@ -24,29 +24,29 @@
     justify-content: space-between;
     align-items: center;
     gap: 0.5rem;
-  }
-  
-  .notification-remove {
+}
+
+.notification-remove {
     border: none;
     background: transparent;
     cursor: pointer;
     font-weight: bold;
     color: inherit;
     font-size: 1rem;
-  }
-  
-  .notification-remove:hover {
+}
+
+.notification-remove:hover {
     color: red;
-  }
-  
+}
+
 .dashboard-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
-  }
+}
 
 
 .dashboard-container.dark,
 .dashboard-container.dark * {
-  color: #f1f1f1 !important;
+    color: #f1f1f1 !important;
 }

@@ -7,10 +7,10 @@ const WorkspaceList = ({ workspaces, selectedWorkspace, updateGuiState, setSelec
 
             {workspaces && Object.values(workspaces).map((workspace) => {
 
-                // POURQUOI CETTE CONDITION??
+                // POURQUOI CETTE CONDITION?? Réponse: pour feur
                 // au moment de la création, le composant reçoit pas tout dsuite les workspaces (ya un pti délai),
                 // et ca provoque donc une valeur null temporaire. donc la condition permet
-                // d'éviter une erreur inutile.    
+                // d'éviter une erreur inutile.
                 if (!workspace || !workspace.name) {
                     return null;
                 }
