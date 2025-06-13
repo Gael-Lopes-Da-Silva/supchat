@@ -94,9 +94,7 @@ const DashboardPage = () => {
 
   // stocke les notifs en localstorag
   useEffect(() => {
-    localStorage.setItem("notifications", JSON.stringify(notifications));
-    console.log(channelNotificationPrefs)
-    
+    localStorage.setItem("notifications", JSON.stringify(notifications));    
   }, [notifications]);
 
   //get les workspaces publics uniquement si l'utilisateur ouvre la vue discover

@@ -1,5 +1,5 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import "./DashboardRight.css"
+import "./DashboardRight.css";
 import { useEffect, useState, useRef } from "react";
 import socket from "../../socket";
 import HeaderButtons from "./HeaderButtons";
@@ -73,13 +73,21 @@ const DashboardRight = ({
     y: 0,
     user: null,
   });
-
+  
   useEffect(() => {
     const fetchAllUsers = async () => {
       const apiUrl = process.env.REACT_APP_API_URL;
       const res = await readUser({}, apiUrl);
+
       if (!res.error && res.result) {
-        setAllUsers(res.result);
+        // quand on link son compte à un provider, le compte prend le meme id que le provider donc il peut yavoir un doublon au niveau des usernames
+        // pour ce call Api, readUser rend un format tel que [{}] donc pour faire plus simple je peux utiliser new Map qui va 
+        // ecraser le doublon et rendre une valeur unique.
+        const uniqueUsers = Array.from(
+          new Map(res.result.map((u) => [u.id, u])).values()
+        );
+
+        setAllUsers(uniqueUsers);
       } else {
         toast.error(`Erreur readUser (ligne 84 dashboardRight) : ${res.error}`);
       }
@@ -154,17 +162,17 @@ const DashboardRight = ({
 
       // lorsque je vais cliquer sur le bouton, je vais en fait commencer à construire l'objet ChannelnotificationsPrefs
       //  ce sera surement la première fois pour un channel en particulier alors la valeur associé au channelId sera undefined donc on le met
-      // on le set à false. 
+      // on le set à false.
       if (updated[channelId] === undefined) {
         updated[channelId] = false;
       } else {
         // Pour les autres clicks il yaura plus de valeur undefined associé au chan en question donc on inverse l'état actuel
-        updated[channelId] = !updated[channelId]; 
+        updated[channelId] = !updated[channelId];
       }
 
       localStorage.setItem("channelNotificationPrefs", JSON.stringify(updated));
 
-      return updated; // maj 
+      return updated; // maj
     });
   };
 
@@ -438,8 +446,9 @@ const DashboardRight = ({
                     return (
                       <div
                         key={msg.id}
-                        className={`chat-message ${msg.user_id === user.id ? "from-me" : "from-others"
-                          }`}
+                        className={`chat-message ${
+                          msg.user_id === user.id ? "from-me" : "from-others"
+                        }`}
                       >
                         <div className="message-inner">
                           <div className="message-header">
@@ -685,19 +694,22 @@ const DashboardRight = ({
       >
         <h4>Utilisateurs Supchat connectés</h4>
         <ul>
-          {allUsers
-            .filter((u) => connectedUsers.some((cu) => cu.id === u.id))
-            .map((u) => {
-              const connectedUser = connectedUsers.find((cu) => cu.id === u.id);
-              const status = connectedUser ? connectedUser.status : "offline";
-              const statusIcon = statusIcons[status];
-
-              return (
-                <li key={u.id}>
-                  {statusIcon} {u.username}
-                </li>
-              );
-            })}
+          {Array.from(
+            new Map(
+              allUsers
+                .filter((u) => connectedUsers.some((cu) => cu.id === u.id))
+                .map((u) => [u.username, u]) // key = username pour eviter doublons (au cas où on a lié son compte à un provider car quand on lie un compteà  un provider on prend le meme id et ça affiche l'username connecté en double )
+            ).values()
+          ).map((u) => {
+            const connectedUser = connectedUsers.find((cu) => cu.id === u.id);
+            const status = connectedUser ? connectedUser.status : "offline";
+            const statusIcon = statusIcons[status];
+            return (
+              <li key={u.id}>
+                {statusIcon} {u.username}
+              </li>
+            );
+          })}
 
           {allUsers
             .filter((u) => !connectedUsers.some((cu) => cu.id === u.id))

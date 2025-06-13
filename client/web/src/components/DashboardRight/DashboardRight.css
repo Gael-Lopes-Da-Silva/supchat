@@ -280,6 +280,8 @@
     border: solid 3px #333;
     box-shadow: #333 5px 5px 0px;
     box-sizing: border-box;
+    overflow-y: auto;
+    padding-right: 5px;
 }
 
 .dashboard-right-peoples h4 {
