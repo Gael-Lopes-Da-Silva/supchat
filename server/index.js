@@ -77,4 +77,3 @@ pool.getConnection().then((connection) => {
 });
 
 export default app;
-x
