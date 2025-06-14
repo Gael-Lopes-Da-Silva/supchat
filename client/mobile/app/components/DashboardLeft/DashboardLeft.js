@@ -40,6 +40,7 @@ const DashboardLeft = ({
   setSelectedWorkspace = () => { },
   setSelectedChannel = () => { },
   hideAllPopup = () => { },
+  updateModalState,
   getBackground = () => '#ccc',
   getForeground = () => '#000',
   publicWorkspaces = [],
@@ -147,6 +148,7 @@ const DashboardLeft = ({
 
             <WorkspaceButtons
               updateGuiState={updateGuiState}
+              updateModalState={updateModalState}
               theme={theme}
             />
           </View>
@@ -225,7 +227,7 @@ const DashboardLeft = ({
 
               <TouchableOpacity
                 style={styles.settingsButton}
-                onPress={() => router.push('/screens/SettingsScreen/SettingsPage')}
+                onPress={() => router.push('/screens/SettingsScreen/SettingsScreen')}
               >
                 <FontAwesome6 name="gear" size={20} color={textColor} />
               </TouchableOpacity>

@@ -24,6 +24,7 @@ const CreateChannelForm = ({
       <Checkbox
         label="Channel privé"
         theme={theme}
+        checked={isPrivate}
         onChange={onPrivacyToggle}
       />
       <Button type="submit" text="Créer" theme={theme} onClick={onSubmit} />

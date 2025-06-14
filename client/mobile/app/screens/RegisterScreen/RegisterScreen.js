@@ -4,7 +4,7 @@ import Button from '../../components/Button/Button';
 import Checkbox from '../../components/Checkbox/Checkbox';
 import InputField from '../../components/InputField/InputField';
 import Link from '../../components/Link/Link';
-import styles from './RegisterPageStyles';
+import styles from './RegisterScreenStyles';
 import { useRouter } from 'expo-router';
 
 import { createUser } from '../../../services/Users';
@@ -69,7 +69,7 @@ const RegisterPage = () => {
         type: 'success', // 'success' | 'error' | 'info'
         text1: 'Votre compte a été créé. Vérifiez votre boîte mail pour confirmer votre compte.',
       });
-      router.replace('/screens/LoginScreen/LoginPage');
+      router.replace('/screens/LoginScreen/LoginScreen');
     } catch (error) {
       Toast.show({
         type: 'error', // 'success' | 'error' | 'info'
@@ -123,13 +123,13 @@ const RegisterPage = () => {
                 <Text style={styles.termsText}>
                   J'ai lu et j'accepte les{' '}
                 </Text>
-                <Text style={[styles.termsText, styles.link]} onPress={() => router.push('/screens/TermsScreen/TermsPage')}>
+                <Text style={[styles.termsText, styles.link]} onPress={() => router.push('/screens/TermsScreen/TermsScreen')}>
                   conditions d'utilisation
                 </Text>
                 <Text style={styles.termsText}>
                   {' '}et la{' '}
                 </Text>
-                <Text style={[styles.termsText, styles.link]} onPress={() => router.push('/screens/PrivacyScreen/PrivacyPage')}>
+                <Text style={[styles.termsText, styles.link]} onPress={() => router.push('/screens/PrivacyScreen/PrivacyScreen')}>
                   politique de confidentialité
                 </Text>
                 <Text style={styles.termsText}>
@@ -142,7 +142,7 @@ const RegisterPage = () => {
 
         <Button type="submit" text="S'enregistrer" theme={theme} disabled={!checked} onClick={handleSubmit} />
         <Text style={styles.termsText}>
-          Déjà un compte ? <Text style={styles.link} onPress={() => router.replace('/screens/LoginScreen/LoginPage')}>Se connecter maintenant !</Text>
+          Déjà un compte ? <Text style={styles.link} onPress={() => router.replace('/screens/LoginScreen/LoginScreen')}>Se connecter maintenant !</Text>
         </Text>
       </View>
     </ScrollView >

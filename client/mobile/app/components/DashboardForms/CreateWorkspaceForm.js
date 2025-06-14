@@ -34,6 +34,7 @@ const CreateWorkspaceForm = ({
       <Checkbox
         label="Espace de travail privé"
         theme={theme}
+        checked={isPrivate}
         onChange={onPrivacyToggle}
       />
       <Button type="submit" text="Créer" theme={theme} onClick={onSubmit} />

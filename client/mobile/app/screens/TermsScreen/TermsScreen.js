@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { View, Text, ScrollView, Linking } from 'react-native';
-import styles from './TermsPageStyles';
+import styles from './TermsScreenStyles';
 import { useRouter } from 'expo-router';
 
 const TermsPage = () => {
@@ -23,7 +23,7 @@ const TermsPage = () => {
             <Text style={styles.paragraph}>Ces Conditions d'utilisation sont essentielles pour garantir un usage équitable et conforme de nos Services. Elles expliquent vos droits et responsabilités en tant qu'utilisateur, ainsi que les nôtres en tant que fournisseur de services. Nous vous encourageons à lire attentivement ces Conditions pour comprendre les règles qui encadrent votre expérience sur Supchat.</Text>
             <Text style={styles.paragraph}>
               En utilisant Supchat, vous acceptez également notre
-              <Text style={styles.link} onPress={() => router.replace('/screens/privacy')}> Politique de confidentialité</Text>, qui décrit comment nous collectons, utilisons et protégeons vos données personnelles.
+              <Text style={styles.link} onPress={() => router.replace('/screens/PrivacyScreen/PrivacyScreen')}> Politique de confidentialité</Text>, qui décrit comment nous collectons, utilisons et protégeons vos données personnelles.
             </Text>
 
             <Text style={styles.section}>2. Admissibilité</Text>

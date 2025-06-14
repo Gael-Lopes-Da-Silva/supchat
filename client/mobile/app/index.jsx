@@ -16,7 +16,7 @@ export default function App() {
         const token = userData?.token;
 
         if (!token) {
-          router.replace('/screens/LoginScreen/LoginPage');
+          router.replace('/screens/LoginScreen/LoginScreen');
           return;
         }
 
@@ -25,16 +25,16 @@ export default function App() {
 
         if (isExpired) {
           await AsyncStorage.removeItem('user');
-          router.replace('/screens/LoginScreen/LoginPage');
+          router.replace('/screens/LoginScreen/LoginScreen');
           return;
         }
 
         // Si l'utilisateur est authentifié et le token est valide,
         // rediriger vers la page principale de l'application
-        router.replace('/screens/DashboardScreen/DashboardPage');
+        router.replace('/screens/DashboardScreen/DashboardScreen');
       } catch (error) {
         await AsyncStorage.removeItem('user');
-        router.replace('/screens/LoginScreen/LoginPage');
+        router.replace('/screens/LoginScreen/LoginScreen');
       }
     };
 

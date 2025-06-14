@@ -7,7 +7,7 @@ import Constants from 'expo-constants';
 import { FontAwesome6 } from '@expo/vector-icons';
 
 import socket from '../../socket';
-import styles from './SettingsPageStyles';
+import styles from './SettingsScreenStyles';
 import { updateUser, getUserProviders, unlinkProvider } from '../../../services/Users';
 import Modal from '../../components/Modal/Modal';
 
@@ -165,7 +165,7 @@ const SettingsPage = () => {
     socket.disconnect();
     socket.connect();
     await AsyncStorage.removeItem('user');
-    router.push('/screens/LoginScreen/LoginPage');
+    router.push('/screens/LoginScreen/LoginScreen');
   };
 
   const handleLinkGoogle = async () => {
@@ -180,7 +180,7 @@ const SettingsPage = () => {
         <Text style={[styles.headerTitle, styles[`${theme}Text`]]}>Paramètres</Text>
         <TouchableOpacity
           style={styles.headerButton}
-          onPress={() => router.push("/screens/DashboardScreen/DashboardPage")}
+          onPress={() => router.push("/screens/DashboardScreen/DashboardScreen")}
         >
           <FontAwesome6 name="xmark" size={20} color={theme === 'dark' ? '#fff' : '#000'} />
         </TouchableOpacity>

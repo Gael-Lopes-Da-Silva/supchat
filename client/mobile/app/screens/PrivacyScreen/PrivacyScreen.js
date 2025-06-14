@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { View, Text, ScrollView, Linking } from 'react-native';
-import styles from './PrivacyPageStyles';
+import styles from './PrivacyScreenStyles';
 
 const PrivacyPage = () => {
   const [theme] = useState('light');

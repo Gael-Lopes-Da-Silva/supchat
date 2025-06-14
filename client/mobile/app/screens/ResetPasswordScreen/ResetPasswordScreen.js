@@ -12,7 +12,7 @@ import { readUser } from '../../../services/Users';
 import { sendEmail } from '../../../services/Email';
 import * as PasswordReset from '../../../emails/PasswordReset';
 
-import styles from './ResetPasswordPageStyles';
+import styles from './ResetPasswordScreenStyles';
 
 const API_URL = Constants.expoConfig.extra.apiUrl;
 const WEB_URL = Constants.expoConfig.extra.clientWebUrl;
@@ -70,7 +70,7 @@ const ResetPasswordPage = () => {
                 text2: 'Veuillez vérifier votre boîte mail.',
             });
 
-            router.replace('/screens/LoginScreen/LoginPage');
+            router.replace('/screens/LoginScreen/LoginScreen');
         } catch (error) {
             Toast.show({
                 type: 'error',
@@ -79,7 +79,7 @@ const ResetPasswordPage = () => {
 
             if (process.env.REACT_APP_DEBUG) {
                 console.trace({
-                    from: "readUser() -> ResetPasswordPage.js",
+                    from: "readUser() -> ResetPasswordScreen.js",
                     error: error,
                 });
             }
@@ -103,7 +103,7 @@ const ResetPasswordPage = () => {
                     onChange={setEmail}
                 />
                 <Button type="submit" text="Vérifier" theme={theme} onClick={handleCheckEmail} />
-                <Link text="Retour à la connexion" onClick={() => router.replace('/screens/LoginScreen/LoginPage')} />
+                <Link text="Retour à la connexion" onClick={() => router.replace('/screens/LoginScreen/LoginScreen')} />
             </View>
         </View>
     );

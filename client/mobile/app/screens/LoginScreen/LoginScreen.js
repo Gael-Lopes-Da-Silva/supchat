@@ -11,7 +11,7 @@ import * as WebBrowser from 'expo-web-browser';
 import Button from '../../components/Button/Button';
 import InputField from '../../components/InputField/InputField';
 import Link from '../../components/Link/Link';
-import styles from './LoginPageStyles';
+import styles from './LoginScreenStyles';
 import { useRouter } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import socket from '../../socket';
@@ -45,7 +45,7 @@ const LoginPage = () => {
           token: token,
           data: decodedToken,
         }));
-        router.replace('/screens/DashboardScreen/DashboardPage');
+        router.replace('/screens/DashboardScreen/DashboardScreen');
       } catch (error) {
         Toast.show({
           type: 'error', // 'success' | 'error' | 'info'
@@ -92,7 +92,7 @@ const LoginPage = () => {
       socket.emit("registerUser", decodedToken.id);
       socket.emit("getUserWorkspaces", { user_id: decodedToken.id });
 
-      router.replace('/screens/DashboardScreen/DashboardPage');
+      router.replace('/screens/DashboardScreen/DashboardScreen');
     } catch (error) {
       Toast.show({
         type: 'error', // 'success' | 'error' | 'info'
@@ -134,11 +134,11 @@ const LoginPage = () => {
             required
             onChange={setPassword}
           />
-          <Link text="Mot de passe oublié ?" onClick={() => router.push('/screens/ResetPasswordScreen/ResetPasswordPage')} />
+          <Link text="Mot de passe oublié ?" onClick={() => router.push('/screens/ResetPasswordScreen/ResetPasswordScreen')} />
         </View>
         <View>
           <Button type="submit" text="Se connecter" theme={theme} onClick={handleSubmit} />
-          <Link text="Pas de compte ? En créer un maintenant !" onClick={() => router.push('/screens/RegisterScreen/RegisterPage')} />
+          <Link text="Pas de compte ? En créer un maintenant !" onClick={() => router.push('/screens/RegisterScreen/RegisterScreen')} />
         </View>
         <View style={styles.socials}>
           <Button icon={<FontAwesome6 name="google" size={20} />} onClick={handleGoogle} type="button" text="Google" theme={theme} />
