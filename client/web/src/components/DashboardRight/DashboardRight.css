@@ -700,8 +700,14 @@ ul {
   font-weight: bold;
 }
 
-.public-workspaces-grid p{
- text-align: center;
- font-weight: bold;
- margin-top: 10%;
+
+.public-workspaces-grid p {
+    text-align: center;
+    font-weight: bold;
+    margin-top: 10%;
+}
+
+.my-role-label {
+   font-style: italic;
+   color: #888;
 }

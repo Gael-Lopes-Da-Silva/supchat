@@ -10,7 +10,8 @@ const HeaderButtons = ({
     notifications,
     selectedChannel,
     channelNotificationPrefs,
-    toggleChannelNotifications
+    toggleChannelNotifications,
+    myRoleLabel
 }) => {
 
     return (
@@ -23,6 +24,14 @@ const HeaderButtons = ({
                     <Fa.FaBars />
                 </button>
             </div>
+            <p className="my-role-label">Mon rôle : {myRoleLabel}</p>
+
+            <h2 className="channel-title">
+                {selectedChannel?.name
+                    ? `#${selectedChannel.name}`
+                    : "Aucun canal sélectionné"}
+            </h2>
+            
             <div className="dashboard-right-header-buttons">
                 <button
                     onClick={(event) => {
@@ -75,7 +84,9 @@ const HeaderButtons = ({
                             ? <Fa.FaVolumeMute />
                             : <Fa.FaVolumeUp />}
                     </button>
+
                 )}
+                
             </div>
         </>
     );

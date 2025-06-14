@@ -15,6 +15,7 @@ import { toast } from "react-toastify";
 import { readUser } from "../../services/Users";
 import { deleteWorkspaceMember } from "../../services/WorkspaceMembers";
 import { ReactComponent as EmojiIcon } from "../../assets/emoji-round-plus.svg";
+import { isSafeUrl } from "../../utils/securityUtils"
 
 const DashboardRight = ({
   selectedWorkspace,
@@ -61,6 +62,18 @@ const DashboardRight = ({
   const messagesEndRef = useRef(null);
   const isAdmin = currentUserRoleId === 1;
 
+  const myRoleLabel =
+  currentUserRoleId === 1
+    ? "Admin"
+    : currentUserRoleId === 2
+    ? "Membre"
+    : currentUserRoleId === 3
+    ? "Invité"
+    : "";
+
+
+  
+
   const statusIcons = {
     online: "🟢",
     busy: "🔴",
@@ -73,7 +86,7 @@ const DashboardRight = ({
     y: 0,
     user: null,
   });
-  
+
   useEffect(() => {
     const fetchAllUsers = async () => {
       const apiUrl = process.env.REACT_APP_API_URL;
@@ -179,8 +192,10 @@ const DashboardRight = ({
   const getAttachmentUrl = (path) => {
     if (!path) return null;
     const API_URL = process.env.REACT_APP_API_URL?.replace(/\/$/, "");
-    return path.startsWith("http") ? path : `${API_URL}${path}`;
+    const url = path.startsWith("http") ? path : `${API_URL}${path}`;
+    return isSafeUrl(url) ? url : null;
   };
+
 
   const formatTimestamp = (timestamp) => {
     const date = new Date(timestamp);
@@ -262,6 +277,7 @@ const DashboardRight = ({
     return decodeURIComponent(path.split("/").pop());
   };
 
+
   const prevMessageCountRef = useRef(0); // compteur reste le meme entre les renders et fais pas de rerender quand elle change
 
   useEffect(() => {
@@ -326,6 +342,7 @@ const DashboardRight = ({
       sendMessage();
     }
   };
+
 
   const filteredMessages = messages.filter((msg) => {
     const searchTerm = messageSearchTerm.toLowerCase();
@@ -403,10 +420,32 @@ const DashboardRight = ({
     setShowMentions(false);
   };
 
+  const getUserRoleFromWorkspace = (userId) => {
+    const match = workspaceUsers.find(
+      (u) => u.user_id === userId || u.id === userId
+    );
+    return match?.role_id ?? null;
+  };
+
+
+  const getRoleLabel = (roleId) => {
+    switch (roleId) {
+      case 1:
+        return "Admin";
+      case 2:
+        return "Membre";
+      case 3:
+        return "Invité";
+      default:
+        return "";
+    }
+  };
+
   return (
     <div className="dashboard-right">
       <div className="dashboard-right-content">
         <header className="dashboard-header">
+          
           <HeaderButtons
             guiVisibility={guiVisibility}
             updateGuiState={updateGuiState}
@@ -417,13 +456,9 @@ const DashboardRight = ({
             selectedChannel={selectedChannel}
             channelNotificationPrefs={channelNotificationPrefs}
             toggleChannelNotifications={toggleChannelNotifications}
+            myRoleLabel={myRoleLabel}
           />
 
-          <h2 className="channel-title">
-            {selectedChannel?.name
-              ? `#${selectedChannel.name}`
-              : "Aucun canal sélectionné"}
-          </h2>
         </header>
 
         <main>
@@ -452,9 +487,8 @@ const DashboardRight = ({
                     return (
                       <div
                         key={msg.id}
-                        className={`chat-message ${
-                          msg.user_id === user.id ? "from-me" : "from-others"
-                        }`}
+                        className={`chat-message ${msg.user_id === user.id ? "from-me" : "from-others"
+                          }`}
                       >
                         <div className="message-inner">
                           <div className="message-header">
@@ -469,48 +503,27 @@ const DashboardRight = ({
                             {renderMessageContent(msg.content)}
                           </div>
 
-                          {msg.attachment && (
-                            <div className="chat-attachment">
-                              {msg.attachment.match(
-                                /\.(jpg|jpeg|png|gif|webp)$/i
-                              ) ? (
-                                <a
-                                  href={getAttachmentUrl(msg.attachment)}
-                                  download
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                >
-                                  <img
-                                    src={getAttachmentUrl(msg.attachment)}
-                                    alt="uploaded"
-                                    className="uploaded-image"
-                                  />
+                          {msg.attachment && (() => {
+                            const url = getAttachmentUrl(msg.attachment);
+                            const isSafe = isSafeUrl(url);
+
+                            if (!isSafe) return null;
+
+                            return (
+                              <div className="chat-attachment">
+                                <a href={url} download target="_blank" rel="noopener noreferrer">
+                                  {msg.attachment.match(/\.(jpg|jpeg|png|gif|webp)$/i) ? (
+                                    <img src={url} alt="uploaded" className="uploaded-image" />
+                                  ) : msg.attachment.match(/\.(mp4|webm)$/i) ? (
+                                    <video src={url} controls className="uploaded-video" />
+                                  ) : (
+                                    getFileName(msg.attachment)
+                                  )}
                                 </a>
-                              ) : msg.attachment.match(/\.(mp4|webm)$/i) ? (
-                                <a
-                                  href={getAttachmentUrl(msg.attachment)}
-                                  download
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                >
-                                  <video
-                                    src={getAttachmentUrl(msg.attachment)}
-                                    controls
-                                    className="uploaded-video"
-                                  />
-                                </a>
-                              ) : (
-                                <a
-                                  href={getAttachmentUrl(msg.attachment)}
-                                  download
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                >
-                                  {getFileName(msg.attachment)}
-                                </a>
-                              )}
-                            </div>
-                          )}
+                              </div>
+                            );
+                          })()}
+
 
                           <div className="reaction-action">
                             {activeEmojiPickerMessageId !== msg.id &&
@@ -700,6 +713,7 @@ const DashboardRight = ({
       >
         <h4>Utilisateurs Supchat connectés</h4>
         <ul>
+
           {Array.from(
             new Map(
               allUsers
@@ -711,7 +725,7 @@ const DashboardRight = ({
             const status = connectedUser ? connectedUser.status : "offline";
             const statusIcon = statusIcons[status];
             return (
-              <li key={u.id}>
+              <li key={u.user_id || u.id}>
                 {statusIcon} {u.username}
               </li>
             );

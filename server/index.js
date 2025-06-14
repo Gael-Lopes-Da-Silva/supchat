@@ -21,6 +21,8 @@ import "./services/GoogleStrategy.js";
 import setupSocketServer from './socket.js'; 
 
 const app = express();
+app.disable('x-powered-by'); // permet d'éviter de montrer qu'on utilise Express en désactivant l'entete http (comme suggeré par Snyk)
+
 const PORT = process.env.PORT;
 
 const corsOptions = {
@@ -75,3 +77,4 @@ pool.getConnection().then((connection) => {
 });
 
 export default app;
+x

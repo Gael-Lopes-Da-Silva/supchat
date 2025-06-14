@@ -7,7 +7,7 @@ import {
   updateUser,
   unlinkProvider,
 } from "../../services/Users";
-
+import { isSafeUrl } from "../../utils/securityUtils";
 import socket from "../../socket";
 import { toast } from "react-toastify";
 import Modal from "../../components/Modal/Modal";
@@ -90,7 +90,14 @@ const SettingsPage = () => {
 
   const handleExportData = () => {
     if (user?.id) {
-window.location.href = `${process.env.REACT_APP_API_URL}users/${user.id}/export`;
+      const baseUrl = process.env.REACT_APP_API_URL;
+      if (!baseUrl?.startsWith("https://")) {
+        toast.error("URL non sécurisée.");
+        return;
+      }
+
+      const exportUrl = `${baseUrl.replace(/\/$/, "")}/users/${user.id}/export`;
+      window.location.href = exportUrl;
     }
   };
 
