@@ -23,11 +23,6 @@ const HeaderButtons = ({
                     <Fa.FaBars />
                 </button>
             </div>
-            <h2 className="channel-title">
-                {selectedChannel?.name
-                    ? `#${selectedChannel.name}`
-                    : "Aucun canal sélectionné"}
-            </h2>
             <div className="dashboard-right-header-buttons">
                 <button
                     onClick={(event) => {
