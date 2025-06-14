@@ -58,11 +58,10 @@ const LoginPage = () => {
   const handleSubmit = async () => {
     try {
       const data = await loginUser({ email, password });
-
       if (data.error !== 0) {
         Toast.show({
           type: 'error', // 'success' | 'error' | 'info'
-          text1: `Erreur de connexion ${data.error}`,
+          text1: `Erreur de connexion ${data.error_message}`,
         });
         return;
       }

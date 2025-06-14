@@ -233,15 +233,13 @@ export const loginUser = async (request) => {
     if (!match) {
       console.error("Mot de passe incorrect !");
       return createErrorResponse(
-        ERRORS.WRONG_PASSWORD,
-        "Mot de passe incorrect."
+        ERRORS.WRONG_PASSWORD
       );
     }
   } catch (err) {
     console.error(" ERREUR pendant bcrypt.compare :", err);
     return createErrorResponse(
-      ERRORS.INTERNAL_SERVER_ERROR,
-      "Erreur lors de la vérification du mot de passe."
+      ERRORS.INTERNAL_SERVER_ERROR
     );
   }
 
