@@ -63,16 +63,13 @@ const DashboardRight = ({
   const isAdmin = currentUserRoleId === 1;
 
   const myRoleLabel =
-  currentUserRoleId === 1
-    ? "Admin"
-    : currentUserRoleId === 2
-    ? "Membre"
-    : currentUserRoleId === 3
-    ? "Invité"
-    : "";
-
-
-  
+    currentUserRoleId === 1
+      ? "Admin"
+      : currentUserRoleId === 2
+        ? "Membre"
+        : currentUserRoleId === 3
+          ? "Invité"
+          : "";
 
   const statusIcons = {
     online: "🟢",
@@ -445,7 +442,7 @@ const DashboardRight = ({
     <div className="dashboard-right">
       <div className="dashboard-right-content">
         <header className="dashboard-header">
-          
+
           <HeaderButtons
             guiVisibility={guiVisibility}
             updateGuiState={updateGuiState}
