@@ -10,11 +10,9 @@ import { FontAwesome6 } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import Reanimated, {
-  useAnimatedGestureHandler,
   useAnimatedStyle,
   useSharedValue,
   withSpring,
-  runOnJS,
 } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
@@ -99,7 +97,7 @@ const DashboardLeft = ({
 
   return (
     <GestureHandlerRootView style={{ position: 'absolute', left: 0, top: 0, bottom: 0, right: 0 }}>
-      
+
       {guiVisibility.leftPanel && (
         <TouchableOpacity
           activeOpacity={1}
