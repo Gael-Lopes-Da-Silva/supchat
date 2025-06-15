@@ -91,8 +91,8 @@
       "typedRoutes": true
     },
     "extra": {
-      "apiUrl": "http://192.168.1.21:3000/",
-      "clientWebUrl": "http://192.168.1.21:5000/",
+      "apiUrl": "${API_URL}",
+      "clientWebUrl": "${CLIENT_WEB_URL}",
       "googleClientId": "$(GOOGLE_MOBILE_CLIENT_ID)",
       "googleIosClientId": "$(GOOGLE_IOS_CLIENT_ID)",
       "facebookAppId": "$(FACEBOOK_CLIENT_ID)"
