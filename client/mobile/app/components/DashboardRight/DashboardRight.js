@@ -161,33 +161,38 @@ const DashboardRight = ({
   const handleImagePick = async () => {
     try {
       const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-
       if (status !== 'granted') {
-        Alert.alert('Permission refusée', 'Nous avons besoin de votre permission pour accéder à vos photos.');
+        Alert.alert(
+          'Permission refusée',
+          'Désolé, nous avons besoin des permissions de la galerie pour partager des images.'
+        );
         return;
       }
 
-      console.log('Lancement du sélecteur d\'images');
       const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: [ImagePicker.MediaType.IMAGE],
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
         allowsEditing: true,
+        aspect: [4, 3],
         quality: 1,
-        base64: false,
       });
 
-      if (!result.canceled && result.assets && result.assets[0]) {
-        const formData = new FormData();
-        formData.append('file', {
+      if (!result.canceled) {
+        const file = {
           uri: result.assets[0].uri,
           type: 'image/jpeg',
           name: 'photo.jpg',
-        });
-        formData.append('channel_id', selectedChannel.id);
-        formData.append('user_id', user.id);
+        };
+
+        if (!file || !selectedChannel?.id || !user?.id) return;
+
+        const formData = new FormData();
+        formData.append("file", file);
+        formData.append("channel_id", selectedChannel.id);
+        formData.append("user_id", user.id);
 
         try {
           const data = await uploadFile(formData);
-          
+
           if (data.error === 0 && data.result?.fileUrl && data.result?.message_id) {
             socket.emit("broadcastAttachedMsg", {
               id: data.result.message_id,
@@ -198,15 +203,20 @@ const DashboardRight = ({
               channel_id: selectedChannel.id,
               channel_name: selectedChannel.name,
               workspace_id: selectedWorkspace.id,
+              workspace_name: selectedWorkspace.name,
+              mentioned_user_ids: [],
             });
+          } else {
+            Alert.alert('Erreur', `Erreur upload : ${data.error_message || 'Erreur inconnue'}`);
           }
-        } catch (error) {
-          Alert.alert('Erreur', 'Impossible d\'envoyer l\'image.');
+        } catch (uploadError) {
+          console.error('Erreur lors de l\'upload:', uploadError);
+          Alert.alert('Erreur', 'Impossible de se connecter au serveur. Vérifiez votre connexion internet.');
         }
-      } else {
       }
     } catch (error) {
-      Alert.alert('Erreur', 'Une erreur est survenue lors de la sélection de l\'image.');
+      console.error('Erreur détaillée:', error);
+      Alert.alert('Erreur', 'Une erreur est survenue lors de la sélection de l\'image');
     }
   };
 
