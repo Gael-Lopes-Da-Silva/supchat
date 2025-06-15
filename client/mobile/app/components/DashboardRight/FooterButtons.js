@@ -1,7 +1,7 @@
 import { View, Button } from 'react-native';
 import styles from './DashboardRightStyle';
 
-const FooterButtons = ({ hideAllPopup, updatePopupState, setMousePosition }) => {
+const FooterButtons = ({ hideAllPopup, updatePopupState }) => {
   return (
     <View style={styles.footerContainer}>
       <Button title="Uploader un fichier" onPress={() => {}} />

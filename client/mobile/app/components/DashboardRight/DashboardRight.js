@@ -6,7 +6,6 @@ import {
   TouchableOpacity,
   Image,
   Alert,
-  Dimensions,
   ScrollView,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -16,27 +15,13 @@ import EmojiSelector from 'react-native-emoji-selector';
 import socket from '../../socket';
 import Constants from 'expo-constants';
 import {
-  getUserChannelIds,
-  getUsersReactions,
   getChannelMembers,
   uploadFile,
 } from '../../../services/Channels';
-import { deleteWorkspaceMember } from '../../../services/WorkspaceMembers';
 import HeaderButtons from './HeaderButtons';
-import { GestureHandlerRootView, PanGestureHandler } from 'react-native-gesture-handler';
-import Reanimated, {
-  useAnimatedGestureHandler,
-  useAnimatedStyle,
-  useSharedValue,
-  withSpring,
-  runOnJS,
-} from 'react-native-reanimated';
 import { isSafeUrl } from '../../../utils/securityUtils';
 import styles from './DashboardRightStyle';
 
-const { width: SCREEN_WIDTH } = Dimensions.get('window');
-const EDGE_WIDTH = 20; // Zone de détection sur le bord gauche
-const SWIPE_THRESHOLD = 50; // Seuil pour l'ouverture
 
 const DashboardRight = ({
   selectedWorkspace,
@@ -47,12 +32,8 @@ const DashboardRight = ({
   hideAllPopup,
   updatePopupState,
   setMousePosition,
-  connectedUsers,
   hasNoChannels,
-  channels,
-  workspaceUsers,
   notifications,
-  setSelectedChannel,
   messages,
   channelNotificationPrefs,
   setChannelNotificationPrefs,
@@ -60,15 +41,10 @@ const DashboardRight = ({
   theme,
 }) => {
   const [input, setInput] = useState('');
-  const [channelMembers, setChannelMembers] = useState([]);
   const [messageSearchTerm, setMessageSearchTerm] = useState('');
-  const [mentionSuggestions, setMentionSuggestions] = useState([]);
-  const [showMentions, setShowMentions] = useState(false);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
-  const [userSearchTerm, setUserSearchTerm] = useState('');
   const [activeEmojiPickerMessageId, setActiveEmojiPickerMessageId] = useState(null);
 
-  // Émojis prédéfinis uniquement pour les réactions
   const predefinedEmojis = React.useMemo(() => ["❤️", "😂", "👍", "👎", "🔥", "😢", "😡"], []);
 
   const isAdmin = currentUserRoleId === 1;
@@ -84,8 +60,6 @@ const DashboardRight = ({
   const flatListRef = useRef(null);
   const insets = useSafeAreaInsets();
   const textColor = theme === 'dark' ? '#fffceb' : '#333';
-
-  const scrollViewRef = useRef(null);
 
   const filteredMessages = messages.filter((msg) => {
     const searchTerm = messageSearchTerm.toLowerCase();
@@ -304,7 +278,6 @@ const DashboardRight = ({
     
     const isCurrentUser = message.user_id === user.id;
 
-    // Vérification de la structure des réactions
     const reactions = Array.isArray(message.reactions) ? message.reactions : [];
 
     return (
@@ -376,7 +349,7 @@ const DashboardRight = ({
   };
 
   return (
-    <View style={[styles.container, { backgroundColor: theme === 'dark' ? '#1a1a1a' : '#fff' }]}>
+    <View style={[styles.container, { backgroundColor: theme === 'dark' ? '#1a1a1a' : '#FEFCEB' }]}>
       <HeaderButtons
         selectedWorkspace={selectedWorkspace}
         selectedChannel={selectedChannel}

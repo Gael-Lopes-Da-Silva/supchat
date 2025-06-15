@@ -1,15 +1,8 @@
-import { View, Text, TouchableOpacity, ScrollView, SafeAreaView, Dimensions } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, SafeAreaView } from 'react-native';
 import { FontAwesome6 } from '@expo/vector-icons';
-import { GestureHandlerRootView, PanGestureHandler } from 'react-native-gesture-handler';
-import Reanimated, {
-  useAnimatedGestureHandler,
-  runOnJS,
-} from 'react-native-reanimated';
+import Reanimated from 'react-native-reanimated';
 import styles from './DashboardRightStyle';
 
-const { width: SCREEN_WIDTH } = Dimensions.get('window');
-const EDGE_WIDTH = 20;
-const SWIPE_THRESHOLD = 50;
 
 const DiscoverWorkspaces = ({
   publicWorkspaces,
@@ -20,29 +13,9 @@ const DiscoverWorkspaces = ({
 }) => {
   const filteredWorkspaces = publicWorkspaces?.filter(ws => !workspaces[ws.id]);
 
-  const edgeGestureHandler = useAnimatedGestureHandler({
-    onStart: (event, ctx) => {
-      ctx.startX = event.absoluteX;
-    },
-    onActive: (event, ctx) => {
-      if (ctx.startX <= EDGE_WIDTH && event.translationX > 0) {
-        runOnJS(toggleLeftPanel)();
-      }
-    },
-    onEnd: (event) => {
-      if (event.velocityX > 200 || event.translationX > SWIPE_THRESHOLD) {
-        runOnJS(toggleLeftPanel)();
-      }
-    },
-  });
 
   return (
     <SafeAreaView style={styles.discoverContainer}>
-      <PanGestureHandler 
-        onGestureEvent={edgeGestureHandler}
-        activeOffsetX={[-5, 5]}
-        failOffsetY={[-20, 20]}
-      >
         <Reanimated.View style={[styles.gestureContainer]}>
           <View style={styles.discoverheaderContainer}>
             <TouchableOpacity
@@ -89,7 +62,6 @@ const DiscoverWorkspaces = ({
             )}
           </ScrollView>
         </Reanimated.View>
-      </PanGestureHandler>
     </SafeAreaView>
   );
 };

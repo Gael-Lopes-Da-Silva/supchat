@@ -1,4 +1,4 @@
-import { View, StyleSheet } from 'react-native';
+import { View } from 'react-native';
 import styles from './PopupStyles';
 
 const Popup = ({ content, display, theme = "light" }) => {

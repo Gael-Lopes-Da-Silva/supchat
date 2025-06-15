@@ -1,12 +1,11 @@
-import { StyleSheet, Dimensions } from 'react-native';
+import { StyleSheet } from 'react-native';
 
-const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
 export default StyleSheet.create({
   container: {
     flex: 1,
     width: '100%',
-    backgroundColor: '#fff',
+    backgroundColor: '#FEFCEB',
   },
   contentContainer: {
     flex: 1,
@@ -14,7 +13,7 @@ export default StyleSheet.create({
   },
   discoverContainer: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: '#FEFCEB',
   },
   gestureContainer: {
     flex: 1,
@@ -87,7 +86,7 @@ export default StyleSheet.create({
   reactionButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#fff',
+    backgroundColor: '#FEFCEB',
     borderRadius: 10,
     paddingHorizontal: 6,
     paddingVertical: 2,
@@ -111,7 +110,7 @@ export default StyleSheet.create({
     paddingTop: 8,
     borderTopWidth: 1,
     borderTopColor: '#e5e5e5',
-    backgroundColor: '#fff',
+    backgroundColor: '#FEFCEB',
   },
   attachButton: {
     padding: 4,
@@ -135,7 +134,7 @@ export default StyleSheet.create({
   emojiReactContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    backgroundColor: '#fff',
+    backgroundColor: '#FEFCEB',
     borderRadius: 8,
     padding: 8,
     marginTop: 4,
@@ -153,7 +152,7 @@ export default StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
-    backgroundColor: '#fff',
+    backgroundColor: '#FEFCEB',
     borderTopWidth: 1,
     borderTopColor: '#ddd',
     zIndex: 1000,
@@ -167,7 +166,7 @@ export default StyleSheet.create({
   },
   emojiSelectorContainer: {
     height: 250,
-    backgroundColor: '#fff',
+    backgroundColor: '#FEFCEB',
   },
 
   // Styles from HeaderButtons.js
@@ -177,7 +176,7 @@ export default StyleSheet.create({
     paddingHorizontal: 16,
     borderBottomWidth: 1,
     borderBottomColor: '#e5e5e5',
-    backgroundColor: '#fff',
+    backgroundColor: '#FEFCEB',
   },
   actions: {
     flexDirection: 'row',
@@ -237,7 +236,7 @@ export default StyleSheet.create({
     padding: 16,
     borderBottomWidth: 1,
     borderBottomColor: '#e5e5e5',
-    backgroundColor: '#fff',
+    backgroundColor: '#FEFCEB',
   },
   workspaceItem: {
     marginVertical: 10,
@@ -249,7 +248,7 @@ export default StyleSheet.create({
     padding: 16,
   },
   workspaceCard: {
-    backgroundColor: '#fff',
+    backgroundColor: '#FEFCEB',
     borderRadius: 12,
     padding: 16,
     marginBottom: 16,

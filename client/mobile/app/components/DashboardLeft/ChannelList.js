@@ -1,4 +1,3 @@
-import React from 'react';
 import {
   View,
   Text,
@@ -12,9 +11,6 @@ const ChannelList = ({
   channels = {},
   setSelectedChannel,
   selectedChannel,
-  getBackground,
-  getForeground,
-  user,
   theme,
 }) => {
   const textColor = theme === 'dark' ? '#ffffff' : '#000000';

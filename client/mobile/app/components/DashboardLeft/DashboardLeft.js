@@ -1,11 +1,10 @@
-import React, { useEffect, useState } from 'react';
+import  { useEffect, useState } from 'react';
 import {
   View,
   Text,
   TouchableOpacity,
   TextInput,
   Dimensions,
-  Platform,
 } from 'react-native';
 import { FontAwesome6 } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -101,8 +100,8 @@ const DashboardLeft = ({
     transform: [{ translateX: translateX.value }],
   }));
 
-  const backgroundColor = theme === 'dark' ? '#1a1a1a' : '#ffffff';
-  const textColor = theme === 'dark' ? '#ffffff' : '#000000';
+  const backgroundColor = theme === 'dark' ? '#1a1a1a' : '#FEFCEB';
+  const textColor = theme === 'dark' ? '#FEFCEB' : '#000000';
   const borderColor = theme === 'dark' ? '#333333' : '#e5e5e5';
   const inputBackgroundColor = theme === 'dark' ? '#333333' : '#f0f0f0';
 
@@ -126,10 +125,16 @@ const DashboardLeft = ({
           style={[
             styles.container,
             animatedStyle,
-            { backgroundColor, borderRightColor: borderColor },
+            {
+              backgroundColor,
+              borderRightColor: borderColor,
+              paddingTop: insets.top,
+              paddingBottom: insets.bottom,
+            },
           ]}
           pointerEvents={guiVisibility.leftPanel ? "auto" : "none"}
         >
+
           <View style={[styles.workspacesSection, { borderRightColor: borderColor }]}>
             <WorkspaceList
               user={user}

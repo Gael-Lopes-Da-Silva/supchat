@@ -14,9 +14,7 @@ import { useRouter } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import socket from '../../socket';
 
-import { loginUser, updateUser } from '../../../services/Users';
-
-const API_URL = Constants.expoConfig.extra.apiUrl;
+import { loginUser } from '../../../services/Users';
 
 WebBrowser.maybeCompleteAuthSession();
 

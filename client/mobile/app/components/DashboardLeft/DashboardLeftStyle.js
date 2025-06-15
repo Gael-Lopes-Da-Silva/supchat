@@ -1,11 +1,10 @@
-import { StyleSheet, Dimensions, Platform } from 'react-native';
+import { StyleSheet, Dimensions } from 'react-native';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const DRAWER_WIDTH = SCREEN_WIDTH * 0.7;
 const WORKSPACE_SIDEBAR_WIDTH = 70;
 
 export default StyleSheet.create({
-  // DashboardLeft Styles
   container: {
     position: 'absolute',
     left: 0,
@@ -23,6 +22,7 @@ export default StyleSheet.create({
     shadowRadius: 3.84,
     flexDirection: 'row',
   },
+  
   workspacesSection: {
     width: WORKSPACE_SIDEBAR_WIDTH,
     height: '100%',
@@ -96,7 +96,6 @@ export default StyleSheet.create({
     padding: 8,
   },
 
-  // WorkspaceButtons Styles
   workspaceButtonsContainer: {
     width: '100%',
     paddingHorizontal: 8,
@@ -118,7 +117,6 @@ export default StyleSheet.create({
     backgroundColor: '#E0E0E0',
   },
 
-  // WorkspaceList Styles
   workspaceListContainer: {
     flex: 1,
     width: '100%',
@@ -168,7 +166,6 @@ export default StyleSheet.create({
     fontWeight: 'bold',
   },
 
-  // ChannelList Styles
   channelListContainer: {
     flex: 1,
   },

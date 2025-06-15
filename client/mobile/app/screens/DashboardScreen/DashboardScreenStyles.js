@@ -7,7 +7,7 @@ export default StyleSheet.create({
   },
   safeArea: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: '#FEFCEB',
     paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
   },
   mainContainer: {
@@ -23,7 +23,7 @@ export default StyleSheet.create({
     padding: 16,
     borderBottomWidth: 1,
     borderBottomColor: '#ddd',
-    backgroundColor: '#fff',
+    backgroundColor: '#FEFCEB',
   },
   headerTitle: {
     fontSize: 18,
@@ -40,7 +40,7 @@ export default StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#fff',
+    backgroundColor: '#FEFCEB',
   },
   emptyStateText: {
     fontSize: 16,

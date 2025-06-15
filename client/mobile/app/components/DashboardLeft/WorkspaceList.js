@@ -1,11 +1,9 @@
-import React from 'react';
 import {
   View,
   Text,
   TouchableOpacity,
   ScrollView,
 } from 'react-native';
-import { FontAwesome6 } from '@expo/vector-icons';
 import styles from './DashboardLeftStyle';
 
 const WorkspaceList = ({
@@ -13,13 +11,9 @@ const WorkspaceList = ({
   selectedWorkspace,
   updateGuiState,
   setSelectedWorkspace,
-  setSelectedChannel,
-  channels,
   getBackground,
   getForeground,
-  theme,
 }) => {
-  const borderColor = theme === 'dark' ? '#333333' : '#e5e5e5';
 
   return (
     <View style={styles.workspaceListContainer}>
