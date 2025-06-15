@@ -41,8 +41,12 @@ const SettingsPage = () => {
         });
       }
     });
-    AsyncStorage.getItem('gui.theme').then(setTheme);
-    AsyncStorage.getItem('user.status').then(setStatus);
+
+    const loadTheme = async () => {
+      const savedTheme = await AsyncStorage.getItem('gui.theme');
+      setTheme(savedTheme || 'light');
+    };
+    loadTheme(); AsyncStorage.getItem('user.status').then(setStatus);
   }, []);
 
   const handleLinkProvider = async (provider) => {
@@ -102,7 +106,7 @@ const SettingsPage = () => {
     setStatus(newStatus);
     AsyncStorage.setItem("user.status", newStatus);
     socket.emit("updateStatus", { user_id: user.id, status: newStatus });
-    
+
     socket.once("userStatusBroadcast", ({ user_id, status }) => {
       if (user_id === user.id) {
         setStatus(status);

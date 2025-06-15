@@ -6,7 +6,7 @@ export default StyleSheet.create({
     padding: 16,
   },
   light: {
-    backgroundColor: '#FEFCEB',
+    backgroundColor: '#E4E2D2',
   },
   dark: {
     backgroundColor: '#4d4d4d',
