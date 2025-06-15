@@ -652,6 +652,7 @@ ul {
   flex-direction: column;
   justify-content: space-between;
   text-align: center;
+  margin : 5%;
 }
 
 .public-workspace-card:hover {

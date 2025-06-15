@@ -91,7 +91,7 @@ const SettingsPage = () => {
   const handleExportData = () => {
     if (user?.id) {
       const baseUrl = process.env.REACT_APP_API_URL;
-      if (!baseUrl?.startsWith("https://")) {
+      if (!baseUrl?.startsWith("http://")) {
         toast.error("URL non sécurisée.");
         return;
       }
@@ -208,7 +208,7 @@ const SettingsPage = () => {
 
               <button onClick={handleExportData}>Exporter mes données</button>
 
-              <hr />
+           
 
               <button onClick={() => setShowUsernameModal(true)}>
                 Modifier le nom d'utilisateur
@@ -218,7 +218,6 @@ const SettingsPage = () => {
                 Modifier le mot de passe
               </button>
 
-              <hr />
 
               {user.provider === "local" ? (
                 <>

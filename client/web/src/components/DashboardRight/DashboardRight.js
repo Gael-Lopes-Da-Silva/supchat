@@ -417,31 +417,9 @@ const DashboardRight = ({
     setShowMentions(false);
   };
 
-  const getUserRoleFromWorkspace = (userId) => {
-    const match = workspaceUsers.find(
-      (u) => u.user_id === userId || u.id === userId
-    );
-    return match?.role_id ?? null;
-  };
-
-
-  const getRoleLabel = (roleId) => {
-    switch (roleId) {
-      case 1:
-        return "Admin";
-      case 2:
-        return "Membre";
-      case 3:
-        return "Invité";
-      default:
-        return "";
-    }
-  };
-
   return (
     <div className="dashboard-right">
       <div className="dashboard-right-content">
-        <header className="dashboard-header">
 
           <HeaderButtons
             guiVisibility={guiVisibility}
@@ -456,7 +434,6 @@ const DashboardRight = ({
             myRoleLabel={myRoleLabel}
           />
 
-        </header>
 
         <main>
           {selectedWorkspace.id && selectedChannel?.id ? (
