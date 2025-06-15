@@ -3,6 +3,7 @@ import { BaseToast, ErrorToast } from 'react-native-toast-message';
 const successColor = '#00C851'; 
 const errorColor = '#ff4444';  
 const errorBgColor = '#FFE8E8';  
+const successBgColor = '#E6F9ED'
 
 export const toastConfig = {
   success: (props) => (
