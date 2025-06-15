@@ -1,11 +1,9 @@
 import { useEffect, useState } from 'react';
-import { View, Text, Image, TouchableOpacity, StyleSheet, Platform } from 'react-native';
+import { View, Text, Image } from 'react-native';
 import { FontAwesome6, FontAwesome } from '@expo/vector-icons';
 import { jwtDecode } from 'jwt-decode';
 import Constants from 'expo-constants';
 import Toast from 'react-native-toast-message';
-// import { GoogleSignin } from '@react-native-google-signin/google-signin';
-// import { LoginManager, AccessToken } from 'react-native-fbsdk-next';
 import * as WebBrowser from 'expo-web-browser';
 
 import Button from '../../components/Button/Button';
@@ -20,14 +18,7 @@ import { loginUser, updateUser } from '../../../services/Users';
 
 const API_URL = Constants.expoConfig.extra.apiUrl;
 
-// Initialisation de WebBrowser pour l'authentification Expo
 WebBrowser.maybeCompleteAuthSession();
-
-// Configuration de Google Sign-In
-// GoogleSignin.configure({
-//   webClientId: Constants.expoConfig.extra.googleClientId,
-//   iosClientId: Constants.expoConfig.extra.googleIosClientId,
-// });
 
 const LoginPage = () => {
   const [email, setEmail] = useState('');
@@ -36,8 +27,8 @@ const LoginPage = () => {
   const router = useRouter();
 
   useEffect(() => {
-    // Login auto à partir d'un token passé par URL
-    const token = null; // Pas d'URL en RN, pourrait venir d'un deep link ou autre
+    
+    const token = null; 
     if (token) {
       try {
         const decodedToken = jwtDecode(token);
@@ -48,7 +39,7 @@ const LoginPage = () => {
         router.replace('/screens/DashboardScreen/DashboardScreen');
       } catch (error) {
         Toast.show({
-          type: 'error', // 'success' | 'error' | 'info'
+          type: 'error',
           text1: 'Token invalide',
         });
       }
@@ -60,7 +51,7 @@ const LoginPage = () => {
       const data = await loginUser({ email, password });
       if (data.error !== 0) {
         Toast.show({
-          type: 'error', // 'success' | 'error' | 'info'
+          type: 'error', 
           text1: `Erreur de connexion ${data.error_message}`,
         });
         return;
@@ -68,7 +59,7 @@ const LoginPage = () => {
 
       if (!data.token) {
         Toast.show({
-          type: 'error', // 'success' | 'error' | 'info'
+          type: 'error', 
           text1: 'Aucun token retourné',
         });
         return;
@@ -80,7 +71,6 @@ const LoginPage = () => {
         data: decodedToken,
       }));
 
-      // Réinitialiser le socket
       if (!socket.connected) {
         socket.connect();
       }
@@ -90,7 +80,7 @@ const LoginPage = () => {
       router.replace('/screens/DashboardScreen/DashboardScreen');
     } catch (error) {
       Toast.show({
-        type: 'error', // 'success' | 'error' | 'info'
+        type: 'error', 
         text1: `Erreur inattendue ${error}`,
       });
     }

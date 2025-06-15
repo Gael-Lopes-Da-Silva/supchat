@@ -29,8 +29,6 @@ export default function App() {
           return;
         }
 
-        // Si l'utilisateur est authentifié et le token est valide,
-        // rediriger vers la page principale de l'application
         router.replace('/screens/DashboardScreen/DashboardScreen');
       } catch (error) {
         await AsyncStorage.removeItem('user');
@@ -38,7 +36,6 @@ export default function App() {
       }
     };
 
-    // Petit délai pour éviter les problèmes de navigation
     const delayNavigation = async () => {
       await new Promise(resolve => setTimeout(resolve, 10));
       checkAuthAndNavigate();

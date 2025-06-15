@@ -1,12 +1,8 @@
-import React from 'react';
 import { BaseToast, ErrorToast } from 'react-native-toast-message';
 
-// Couleurs par défaut :
-const successColor = '#00C851'; // vert
-const errorColor = '#ff4444';   // rouge
-// Couleurs de fond plus claires
-const successBgColor = '#E6F9ED'; // vert clair
-const errorBgColor = '#FFE8E8';   // rouge clair
+const successColor = '#00C851'; 
+const errorColor = '#ff4444';  
+const errorBgColor = '#FFE8E8';  
 
 export const toastConfig = {
   success: (props) => (

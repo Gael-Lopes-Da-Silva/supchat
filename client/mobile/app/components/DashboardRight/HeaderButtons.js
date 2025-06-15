@@ -5,8 +5,6 @@ import styles from './DashboardRightStyle';
 
 const HeaderButtons = ({
   selectedChannel,
-  toggleChannelNotifications,
-  channelNotificationPrefs,
   toggleLeftPanel,
   theme,
   myRoleLabel,

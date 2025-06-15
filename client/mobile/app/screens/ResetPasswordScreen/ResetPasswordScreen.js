@@ -43,10 +43,8 @@ const ResetPasswordPage = () => {
                 return;
             }
 
-            // Générer un token unique pour la réinitialisation
             const resetToken = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
             
-            // Construire l'URL complète de réinitialisation
             const resetUrl = `${WEB_URL}reset_password?token=${resetToken}&email=${encodeURIComponent(email)}`;
             
             const emailResponse = await sendEmail({

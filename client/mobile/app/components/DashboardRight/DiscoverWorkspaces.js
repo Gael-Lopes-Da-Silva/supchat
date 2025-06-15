@@ -20,7 +20,6 @@ const DiscoverWorkspaces = ({
 }) => {
   const filteredWorkspaces = publicWorkspaces?.filter(ws => !workspaces[ws.id]);
 
-  // Gestionnaire pour l'ouverture du drawer depuis le bord gauche
   const edgeGestureHandler = useAnimatedGestureHandler({
     onStart: (event, ctx) => {
       ctx.startX = event.absoluteX;

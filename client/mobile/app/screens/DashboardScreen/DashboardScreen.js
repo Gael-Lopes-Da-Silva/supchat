@@ -164,7 +164,7 @@ const DashboardPage = () => {
         setSelectedWorkspace(first);
         socket.emit('joinWorkspace', { workspace_id: first.id });
       } else {
-        // pas encore join de workspace -> affichage de discover workspace
+
         setGuiVisibility(prev => ({
           ...prev,
           discoverWorkspaces: true,
@@ -182,7 +182,6 @@ const DashboardPage = () => {
 
   useEffect(() => {
     if (selectedWorkspace?.id) {
-      // Charger les channels du workspace sélectionné
       socket.emit('joinWorkspace', { workspace_id: selectedWorkspace.id }, (response) => {
         if (response?.channels) {
           const channelMap = {};
@@ -191,7 +190,6 @@ const DashboardPage = () => {
           });
           setChannels(channelMap);
 
-          // Sélectionner le premier canal si disponible
           const workspaceChannels = Object.values(channelMap).filter(
             channel => channel.workspace_id === selectedWorkspace.id
           );
@@ -206,11 +204,9 @@ const DashboardPage = () => {
   }, [selectedWorkspace?.id]);
 
   useEffect(() => {
-    // Dès qu'on change de workspace, on remet à zéro le canal sélectionné sinon ça va faire un bazar
     setSelectedChannel({});
   }, [selectedWorkspace?.id]);
 
-  // auto select du premier channel si aucun n'est sélectionné
   useEffect(() => {
     if (!selectedWorkspace?.id) return;
 
@@ -322,7 +318,7 @@ const DashboardPage = () => {
   
       if (workspaceIdToSelect === workspace.id || !selectedWorkspace?.id) {
         setSelectedWorkspace(workspace);
-        setWorkspaceIdToSelect(null); // reset
+        setWorkspaceIdToSelect(null);
       }
   
       if (channelToSelect) {
@@ -385,7 +381,6 @@ const DashboardPage = () => {
     },
   });
 
-  // Fonction pour tout fermer (popups, modals, clavier)
   const handlePressOutside = () => {
     hideAllPopup();
     hideAllModal();
@@ -456,7 +451,6 @@ const DashboardPage = () => {
     updateModalState("workspace", false);
   };
 
-  // Ajout : rôle courant de l'utilisateur dans le workspace sélectionné
   const currentUserRoleId = workspaceUsers.find(
     (u) => u.user_id === user.id
   )?.role_id;

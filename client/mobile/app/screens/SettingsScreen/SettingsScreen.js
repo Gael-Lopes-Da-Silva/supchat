@@ -56,14 +56,12 @@ const SettingsPage = () => {
       });
       return;
     }
-    // Redirection vers l'URL d'authentification
     Linking.openURL(`${API_URL}/users/auth/${provider}/link?token=${token}`);
   };
 
   const handleUnlinkProvider = async (provider) => {
     if (!user?.id) return;
 
-    // Alert de confirmation
     Alert.alert(
       "Confirmation",
       `Voulez-vous vraiment délier votre compte ${provider} ?`,
@@ -105,7 +103,6 @@ const SettingsPage = () => {
     AsyncStorage.setItem("user.status", newStatus);
     socket.emit("updateStatus", { user_id: user.id, status: newStatus });
     
-    // Écouter la confirmation du serveur
     socket.once("userStatusBroadcast", ({ user_id, status }) => {
       if (user_id === user.id) {
         setStatus(status);

@@ -3,7 +3,6 @@ import { StyleSheet, Dimensions } from 'react-native';
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
 export default StyleSheet.create({
-  // Styles from DashboardRight.js
   container: {
     flex: 1,
     width: '100%',
@@ -13,7 +12,6 @@ export default StyleSheet.create({
     flex: 1,
     width: '100%',
   },
-  // Container spécifique pour DiscoverWorkspaces
   discoverContainer: {
     flex: 1,
     backgroundColor: '#fff',

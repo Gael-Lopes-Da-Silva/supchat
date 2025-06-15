@@ -28,21 +28,21 @@ const RegisterPage = () => {
         switch (data.error) {
           case 4:
             Toast.show({
-              type: 'error', // 'success' | 'error' | 'info'
+              type: 'error', 
               text1: 'Ce pseudo est déjà utilisé par un autre utilisateur',
             });
             break;
 
           case 5:
             Toast.show({
-              type: 'error', // 'success' | 'error' | 'info'
+              type: 'error', 
               text1: 'Cet email est déjà utilisé par un autre utilisateur.',
             });
             break;
 
           default:
             Toast.show({
-              type: 'error', // 'success' | 'error' | 'info'
+              type: 'error',
               text1: 'Une erreur est survenue lors de l\'inscription.',
             });
         }
@@ -53,7 +53,7 @@ const RegisterPage = () => {
 
       if (!confirmToken) {
         Toast.show({
-          type: 'error', // 'success' | 'error' | 'info'
+          type: 'error',
           text1: 'Erreur lors de la récupération du token de confirmation.',
         });
         return;
@@ -66,13 +66,13 @@ const RegisterPage = () => {
       });
 
       Toast.show({
-        type: 'success', // 'success' | 'error' | 'info'
+        type: 'success', 
         text1: 'Votre compte a été créé. Vérifiez votre boîte mail pour confirmer votre compte.',
       });
       router.replace('/screens/LoginScreen/LoginScreen');
     } catch (error) {
       Toast.show({
-        type: 'error', // 'success' | 'error' | 'info'
+        type: 'error', 
         text1: 'Une erreur inattendue est survenue lors de l\'inscription.',
       });
     }

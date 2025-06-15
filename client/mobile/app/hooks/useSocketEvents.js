@@ -1,4 +1,4 @@
-/* eslint-disable react-hooks/exhaustive-deps */
+
 import { useEffect } from 'react';
 import { readWorkspaceMember } from "../../services/WorkspaceMembers";
 import { readChannelMember } from "../../services/ChannelMembers";
@@ -96,7 +96,6 @@ const useSocketEvents = ({
       setJoinedUsername(username);
       updatePopupState("joinedNotification", true);
 
-      // si on est dans ce workspace → maj liste des membres
       if (selectedWorkspace.id === workspace_id) {
         try {
           const res = await readWorkspaceMember({ workspace_id });
@@ -139,7 +138,7 @@ const useSocketEvents = ({
           return member;
         })
       );
-      socket.emit("getWorkspaceMembers", { workspace_id }); // pour refresh les droits du membre upgradé/downgradé
+      socket.emit("getWorkspaceMembers", { workspace_id }); 
 
     };
 
@@ -204,7 +203,7 @@ const useSocketEvents = ({
     if (selectedWorkspace?.id) {
       socket.emit("joinWorkspace", { workspace_id: selectedWorkspace.id });
     }
-  }, [selectedWorkspace?.id]); // autojoin du workspace quon selectionne
+  }, [selectedWorkspace?.id]); 
 
   useEffect(() => {
     if (selectedChannel?.id && selectedWorkspace?.id) {
@@ -284,7 +283,6 @@ const useSocketEvents = ({
   }, [socket, pushNotification]);
 
 
-  // affiche le nouveau chan public en live pour les autres membres (pas le createur)
   useEffect(() => {
     if (!selectedWorkspace.id) return;
 
@@ -320,10 +318,8 @@ const useSocketEvents = ({
   }, []);
 
 
-
-
   useEffect(() => {
-    // maj liste des users connectés
+    
     socket.on("connectedUsers", setConnectedUsers);
     return () => socket.off("connectedUsers");
   }, [socket]);
@@ -333,7 +329,7 @@ const useSocketEvents = ({
   useEffect(() => {
     const handleWorkspaceCreated = (newWorkspace) => {
       if (newWorkspace?.id) {
-        socket.emit("joinWorkspace", { workspace_id: newWorkspace.id }); // auto join du nouveau workspace qu'on vient de creer
+        socket.emit("joinWorkspace", { workspace_id: newWorkspace.id }); 
       }
     };
     socket.on("workspaceCreated", handleWorkspaceCreated);
