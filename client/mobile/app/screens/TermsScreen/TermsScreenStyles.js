@@ -22,7 +22,7 @@ export default StyleSheet.create({
     elevation: 4,
   },
   light: {
-    backgroundColor: '#f77066',
+    backgroundColor: '#FEFCEB',
   },
   dark: {
     backgroundColor: '#4d4d4d',
