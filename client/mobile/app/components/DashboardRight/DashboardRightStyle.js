@@ -71,6 +71,16 @@ export default StyleSheet.create({
     borderRadius: 8,
     marginTop: 4,
   },
+  attachmentVideo: {
+    backgroundColor: '#f0f0f0',
+    padding: 8,
+    borderRadius: 8,
+    marginTop: 4,
+  },
+  attachmentText: {
+    color: '#007AFF',
+    marginTop: 4,
+  },
   reactionsContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
@@ -117,21 +127,49 @@ export default StyleSheet.create({
     backgroundColor: '#f5f5f5',
   },
   emojiButton: {
-    padding: 4,
+    padding: 8,
+    margin: 2,
+    borderRadius: 4,
   },
   sendButton: {
     padding: 4,
   },
+  emojiReactContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    backgroundColor: '#fff',
+    borderRadius: 8,
+    padding: 8,
+    marginTop: 4,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+  },
   emojiPickerContainer: {
-    height: 250,
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: '#fff',
     borderTopWidth: 1,
     borderTopColor: '#ddd',
+    zIndex: 1000,
   },
   emojiPickerHeader: {
-    alignItems: 'center',
-    padding: 4,
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    padding: 8,
     borderBottomWidth: 1,
-    borderBottomColor: '#ddd',
+    borderBottomColor: '#eee',
+  },
+  emojiSelectorContainer: {
+    height: 250,
+    backgroundColor: '#fff',
   },
 
   // Styles from HeaderButtons.js
@@ -169,6 +207,12 @@ export default StyleSheet.create({
     fontSize: 16,
     fontWeight: '500',
     textAlign: 'center',
+  },
+  myRoleLabel: {
+    fontSize: 12,
+    color: '#666',
+    textAlign: 'center',
+    marginTop: 4,
   },
   hashIcon: {
     marginRight: 8,
@@ -271,5 +315,42 @@ export default StyleSheet.create({
     fontWeight: '500',
     textAlign: 'center',
     opacity: 0.8,
+  },
+  chatContainer: {
+    flex: 1,
+    padding: 16,
+  },
+  messageSearchHint: {
+    fontSize: 12,
+    color: '#666',
+    marginBottom: 8,
+  },
+  bold: {
+    fontWeight: 'bold',
+  },
+  messageSearchInput: {
+    backgroundColor: '#f5f5f5',
+    padding: 8,
+    borderRadius: 4,
+    marginBottom: 16,
+  },
+  chatMessages: {
+    flex: 1,
+    marginTop: 8,
+  },
+  chatMessagesContent: {
+    paddingBottom: 16,
+    paddingTop: 8,
+  },
+  noMessagesText: {
+    textAlign: 'center',
+    color: '#666',
+    marginTop: 16,
+  },
+  noChannelText: {
+    textAlign: 'center',
+    color: '#666',
+    marginTop: 16,
+    padding: 16,
   },
 });

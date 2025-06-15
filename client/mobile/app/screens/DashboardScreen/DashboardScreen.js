@@ -299,8 +299,6 @@ const DashboardPage = () => {
   const hideAllPopup = () => {
     setGuiVisibility(prev => ({
       ...prev,
-      userList: false,
-      discoverWorkspaces: false,
     }));
   };
 
@@ -387,24 +385,10 @@ const DashboardPage = () => {
     },
   });
 
-  const handleClickNotification = (index, notif) => {
-    markNotificationAsRead(index);
-
-    if (notif.type === "newPublicWorkspace") {
-      updateGuiState("discoverWorkspaces", true);
-      return;
-    }
-    const workspaceId = notif.workspaceId;
-    const channelId = notif.channelId;
-
-    switchToChannel(workspaceId, channelId);
-  };
-
   // Fonction pour tout fermer (popups, modals, clavier)
   const handlePressOutside = () => {
     hideAllPopup();
     hideAllModal();
-    // Si tu as une fonction hideAllModal, ajoute-la ici
     Keyboard.dismiss();
   };
 

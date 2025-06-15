@@ -9,6 +9,7 @@ const HeaderButtons = ({
   channelNotificationPrefs,
   toggleLeftPanel,
   theme,
+  myRoleLabel,
 }) => {
   const textColor = theme === 'dark' ? '#fffceb' : '#333';
 
@@ -41,6 +42,11 @@ const HeaderButtons = ({
         <Text style={[styles.channelName, { color: textColor }]}>
           {selectedChannel?.id ? selectedChannel.name : "Aucun canal sélectionné"}
         </Text>
+        {myRoleLabel && (
+          <Text style={[styles.myRoleLabel, { color: textColor }]}>
+            Mon rôle : {myRoleLabel}
+          </Text>
+        )}
       </View>
     </View>
   );

@@ -231,27 +231,26 @@ const useSocketEvents = ({
 
   useEffect(() => {
     const handleUpdateReactions = ({ message_id, reactions }) => {
-      setMessages((prevMessages) =>
-        prevMessages.map((msg) =>
-          msg.id === message_id ? { ...msg, reactions } : msg
-        )
-      );
+      setMessages(prev => prev.map(msg => 
+        msg.id === message_id ? { ...msg, reactions } : msg
+      ));
     };
 
     const handleReactionNotification = ({ message, message_id, emoji, workspace_id, channel_id }) => {
-      pushNotification({
+      const sameWorkspace = workspace_id === selectedWorkspace?.id;
+      const sameChannel = channel_id === selectedChannel?.id;
+      const isOwn = message.user_id === user.id;
+
+      if (!sameWorkspace || !sameChannel || isOwn) return;
+
+      const didNotify = pushNotification({
         type: "reaction",
-        message,
-        messageId: message_id,
-        emoji,
-        workspaceId: workspace_id,
+        message: `${message.username} a réagi avec ${emoji} à votre message`,
         channelId: channel_id,
-        onClick: () => {
-          setSelectedWorkspace(workspaces[workspace_id]);
-          setSelectedChannel(channels[channel_id]);
-        },
+        workspaceId: workspace_id,
       });
-      notificationSoundRef.current?.play().catch(console.warn);
+
+      if (didNotify) notificationSoundRef.current?.play().catch(console.warn);
     };
 
     socket.on("updateReactions", handleUpdateReactions);
@@ -261,7 +260,7 @@ const useSocketEvents = ({
       socket.off("updateReactions", handleUpdateReactions);
       socket.off("reactionNotification", handleReactionNotification);
     };
-  }, [socket, setMessages, pushNotification, notificationSoundRef]);
+  }, [selectedWorkspace?.id, selectedChannel?.id, user.id, pushNotification]);
 
 
 

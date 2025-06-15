@@ -74,10 +74,6 @@ const LoginPage = () => {
         return;
       }
 
-      if (data.result.password_reset_token !== null) {
-        await updateUser(data.result.id, { password_reset_token: null });
-      }
-
       const decodedToken = jwtDecode(data.token);
       await AsyncStorage.setItem("user", JSON.stringify({
         token: data.token,
